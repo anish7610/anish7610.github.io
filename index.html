@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <style>
+        /* General Styles */
+        body {
+          font-family: 'Arial', sans-serif;
+          margin: 0;
+          padding: 0;
+          background-color: #f9f9f9;
+          color: #333;
+          line-height: 1.6;
+        }
+        
+        header {
+          background-color: #2c3e50;
+          color: #fff;
+          padding: 40px 20px;
+          text-align: center;
+        }
+        
+        h1 {
+          margin: 0;
+          font-size: 2.5rem;
+        }
+        
+        h2 {
+          color: #2c3e50;
+          margin-top: 0;
+        }
+        
+        li {
+          color: #000000;
+        }
+        
+        .container {
+          max-width: 800px;
+          margin: 20px auto;
+          padding: 20px;
+          background-color: #fff;
+          box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+          border-radius: 8px;
+        }
+        
+        a {
+          color: #3498db;
+          text-decoration: none;
+        }
+        
+        a:hover {
+          text-decoration: underline;
+        }
+        
+        /* Expandable Sections */
+        .expandable {
+          margin-bottom: 20px;
+        }
+        
+        .expandable-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background-color: #ecf0f1;
+          padding: 15px;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+        
+        .expandable-header:hover {
+          background-color: #d5dbdb;
+        }
+        
+        .expandable-header h2 {
+          margin: 0;
+          font-size: 1.3rem;
+        }
+        
+        .expandable-header h3 {
+          margin: 0;
+          font-size: 1.3rem;
+          color: #2c3e50;
+        }
+        
+        .expandable-header .arrow {
+          font-size: 1.5rem;
+          transition: transform 0.3s ease;
+        }
+        
+        .expandable-content {
+          padding: 15px;
+          background-color: #f9f9f9;
+          border-radius: 0 0 8px 8px;
+          display: none;
+        }
+        
+        .expandable-content ul {
+          margin: 0;
+          padding-left: 20px;
+          color: #555;
+        }
+        
+        .expandable-content ul li {
+          margin-bottom: 5px;
+        }
+        
+        /* Open state for expandable sections */
+        .expandable.open .expandable-content {
+          display: block;
+        }
+        
+        .expandable.open .arrow {
+          transform: rotate(180deg);
+        }
+        
+        /* GitHub Projects Section */
+        .projects-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 20px;
+        }
+        
+        .project-card {
+          background-color: #ecf0f1;
+          padding: 15px;
+          border-radius: 8px;
+          flex: 1 1 calc(50% - 20px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s ease;
+        }
+        
+        .project-card:hover {
+          transform: translateY(-5px);
+        }
+        
+        .project-card h3 {
+          margin: 0 0 10px;
+          font-size: 1.2rem;
+        }
+        
+        .project-card p {
+          margin: 0;
+          color: #666;
+        }
+        
+        /* Grouped Projects */
+        .group-card {
+          background-color: #d5dbdb;
+          padding: 15px;
+          border-radius: 8px;
+          flex: 1 1 100%;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .group-card h3 {
+          margin: 0 0 10px;
+          font-size: 1.3rem;
+          color: #2c3e50;
+        }
+        
+        .group-card .sub-projects {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 10px;
+        }
+        
+        .group-card .sub-projects .project-card {
+          flex: 1 1 calc(50% - 10px);
+          background-color: #f4f4f4;
+        }
+        
+        /* Work History Section */
+        .work-history {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .job-card {
+          background-color: #ecf0f1;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s ease;
+        }
+        
+        .job-card:hover {
+          transform: translateY(-5px);
+        }
+        
+        .job-card h3 {
+          margin: 0 0 10px;
+          font-size: 1.3rem;
+          color: #2c3e50;
+        }
+        
+        .job-card p {
+          margin: 0 0 10px;
+          color: #666;
+        }
+        
+        .job-card ul {
+          margin: 0;
+          padding-left: 20px;
+          color: #555;
+        }
+        
+        .job-card ul li {
+          margin-bottom: 5px;
+        }
+        
+        /* Education Section */
+        .education-list {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        
+        .education-card {
+          background-color: #ecf0f1;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+          transition: transform 0.3s ease;
+        }
+        
+        .education-card:hover {
+          transform: translateY(-5px);
+        }
+        
+        .education-card h3 {
+          margin: 0 0 10px;
+          font-size: 1.3rem;
+          color: #2c3e50;
+        }
+        
+        .education-card p {
+          margin: 0;
+          color: #666;
+        }
+        
+        .education-card ul {
+          margin: 0;
+          padding-left: 20px;
+          color: #555;
+        }
+        
+        .education-card ul li {
+          margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+      <nav style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px; background: #2c3e50; min-height: 20px; padding: 10px 0;">
+        <a href="https://anish7600.github.io/projects" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">Projects</a>
+        <a href="https://deepwiki.com/anish7600" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">DeepWiki</a>
+        <a href="https://anish7600.github.io/technical-writeups" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">Technical Writeups</a>
+      </nav>
+    </header>
+    <div style="margin: 40px auto 0 auto; max-width: 800px; text-align: left; display: flex; align-items: center; gap: 16px;">
+    </div>
+    <div class="container">
+        <!-- Work History Section -->
+        <div class="expandable" id="work-history">
+            <div class="expandable-header" onclick="toggleExpandable(this)">
+                <h2>Work History</h2> <span class="arrow">▼</span>
+            </div>
+            <div class="expandable-content">
+                <div class="work-history">
+                    <div class="job-card">
+                      <h3>Quality Assurance Engineer - Quanata</h3>
+                      <p>San Francisco, CA | July 2022 - June 2023</p>
+                      <h4>Key Contributions And Responsibilities:</h4>
+                      <ul>
+                        <li>Executed comprehensive automated and manual testing procedures to ensure software quality.</li>
+                        <li>Validated backend APIs utilizing Pytest for robust functionality testing.</li>
+                        <li>Performed manual verification of GraphQL endpoints to ensure data integrity.</li>
+                        <li>Managed and organized test cases using TestRail for streamlined testing workflows.</li>
+                        <li>Designed and implemented detailed test cases to cover diverse scenarios.</li>
+                        <li>Investigated CI failures and conducted log analysis to identify root causes.</li>
+                        <li>Conducted exploratory testing to uncover potential issues and edge cases.</li>
+                        <li>Applied shift-left testing methodologies to enhance early defect detection.</li>
+                        <li>Identified and reported software defects with detailed documentation.</li>
+                        <li>Collaborated with cross-functional teams to ensure alignment on testing objectives.</li>
+                      </ul>
+                    </div>
+                    <div class="job-card">
+                      <h3>Software Developer in Test - Amount</h3>
+                      <p>Chicago, IL | August 2021 - July 2022</p>
+                      <h4>Key Contributions And Responsibilities:</h4>
+                      <ul>
+                        <li>Developed automated test scripts using TestCafe in JavaScript to ensure application reliability.</li>
+                        <li>Implemented behavior-driven development practices with Cucumber for enhanced collaboration.</li>
+                        <li>Conducted API testing using Postman and Newman to validate endpoint functionality.</li>
+                        <li>Optimized and executed parallel tests to improve testing efficiency.</li>
+                        <li>Tracked and managed software defects using JIRA for effective issue resolution.</li>
+                        <li>Created and maintained comprehensive test documentation and reports.</li>
+                        <li>Developed a proof of concept for end-to-end testing using Cypress in JavaScript.</li>
+                      </ul>
+                    </div>
+                    <div class="job-card">
+                      <h3>Automation Engineer - VMware</h3>
+                      <p>Sandy Springs, GA | July 2019 - July 2020</p>
+                      <h4>Key Contributions And Responsibilities:</h4>
+                      <ul>
+                        <li>Conducted end-to-end testing of VMware Workspace ONE UEM and Windows Tunnel Client.</li>
+                        <li>Performed regression testing for Mobile Email Management (MEM) features.</li>
+                        <li>Designed and maintained test automation frameworks using Ruby for scalable testing.</li>
+                        <li>Contributed to the Page Object Model for efficient test automation.</li>
+                        <li>Automated desktop applications using Appium for enhanced testing coverage.</li>
+                        <li>Performed web application testing using Watir in Ruby.</li>
+                        <li>Automated Windows applications using WinAppDriver for streamlined testing processes.</li>
+                        <li>Conducted smoke and sanity tests on the Windows VPN Tunnel Client MSI Installer.</li>
+                        <li>Managed test cases using HP ALM for organized test management.</li>
+                        <li>Provided customer support, including issue resolution and log analysis.</li>
+                        <li>Developed and maintained automation scripts using PowerShell for system configuration.</li>
+                        <li>Reviewed, refactored, and maintained automation code to ensure quality and efficiency.</li>
+                      </ul>
+                    </div>
+                    <div class="job-card">
+                      <h3>Software Engineer in Test - NetApp</h3>
+                      <p>Boulder, CO | June 2017 - May 2019</p>
+                      <h4>Key Contributions And Responsibilities:</h4>
+                      <ul>
+                        <li>Tested network APIs using Python and Bash to ensure robust functionality.</li>
+                        <li>Automated test environments using virtual machines and containers for efficient testing workflows.</li>
+                        <li>Developed detailed test plans and strategies to ensure comprehensive coverage.</li>
+                        <li>Worked extensively with Linux systems for software testing and configuration.</li>
+                        <li>Configured Arista network switches to support testing environments.</li>
+                        <li>Managed build processes to ensure seamless software integration.</li>
+                        <li>Integrated tests into CI/CD pipelines for continuous delivery and quality assurance.</li>
+                        <li>Implemented continuous integration practices using Jenkins for streamlined development workflows.</li>
+                        <li>Participated in the Scaled Agile Framework to align testing with organizational goals.</li>
+                        <li>Provided training and mentorship to team members to enhance team capabilities.</li>
+                      </ul>
+                    </div>
+                    <div class="job-card">
+                      <h3>Engineering Intern - Webroot</h3>
+                      <p>Broomfiled, CO | May 2016 - Jan 2017</p>
+                      <h4>Key Contributions And Responsibilities</h4>
+                      <ul>
+                          <li>Assisted in the development and debugging of software applications under the guidance of senior developers.</li>
+                          <li>Participated in daily stand-ups, sprint planning, and code reviews within an Agile development team.</li>
+                          <li>Practiced clean code principles and Test-Driven Development to ensure robust and maintainable code.</li>
+                      </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Education Section -->
+        <div class="expandable" id="education">
+            <div class="expandable-header" onclick="toggleExpandable(this)">
+                <h2>Education</h2> <span class="arrow">▼</span>
+            </div>
+            <div class="expandable-content">
+                <div class="education-list">
+                    <div class="education-card">
+                        <p style="color: #000000">Master of Science in Interdisciplinary Telecommunication Program (ITP) - Network Security</p>
+                        <p style="color: #000000"><strong>University of Colorado, Boulder</strong> | Graduated: May 2017</p>
+                        <h4>Courses Taken:</h4>
+                        <ul>
+                            <li>Data Communications</li>
+                            <li>Fundamentals of Network Programming</li>
+                            <li>Applied Network Security</li>
+                            <li>Unix System Administration</li>
+                            <li>Network Security Lab</li>
+                            <li>Large Scale Network Analysis (Cisco ASA)</li>
+                            <li>Secure Web Programming (PHP/MySQL)</li>
+                            <li>Secure Embedded Systems (Intel Edison)</li>
+                        </ul>
+                    </div>
+                    <div class="education-card">
+                        <p style="color: #000000">Bachelor of Electronics & Telecommunication Engineering</p>
+                        <p style="color: #000000"><strong>Dwarkadas J. Sanghvi College of Engineering</strong> | Graduated: May 2015</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <!-- Certifications Section -->
+        <div class="expandable" id="certifications">
+            <div class="expandable-header" onclick="toggleExpandable(this)">
+                <h2>Certifications</h2> <span class="arrow">▼</span>
+            </div>
+            <div class="expandable-content">
+                <div class="education-card">
+                    <ul>
+                        <li><a href="https://www.credly.com/badges/dab1c854-081f-4831-84a8-b33c1c1ce1c8/public_url" target="_blank">AWS Certified DevOps Engineer – Professional</a></li>
+                        <li><a href="https://www.credly.com/badges/2153d465-57f8-484a-923a-f722300c8de6/public_url" target="_blank">AWS Certified SysOps Administrator – Associate</a></li>
+                        <li><a href="https://www.credly.com/badges/2e6af729-161b-427c-93f9-9fa284a5ec9e/public_url" target="_blank">AWS Certified Solutions Architect – Associate</a></li>
+                        <li><a href="https://verified.elearnsecurity.com/certificates/5d33bf46-0142-4097-8191-0dbd84f9fa6b" target="_blank">eLearnSecurity Junior Penetration Tester (eJPT)</a></li>
+                        <li><a href="https://www.credly.com/badges/38ba054f-3d6b-4461-895a-f88b47e5d405" target="_blank">Splunk Core Certified User</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // JavaScript to handle expand/collapse functionality
+        function toggleExpandable(header) {
+          const expandable = header.parentElement;
+          expandable.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
