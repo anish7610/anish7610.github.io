@@ -10,6 +10,8 @@ title: Projects
 
 ___A lot of projects are a result of casual coding. Literally, lost track of it.___
 
+**Definition:** Casual coding refers to using coding for non-professional, often personal, projects or for learning purposes. It encompasses a wide range of activities, from simple scripting to more complex projects, and is often characterized by a relaxed approach to learning and development. This contrasts with the formal and often rigorous practices of professional software development.
+
 | **Project**                                       | **Description**                                                                                                                                                                                                                                                                                                                                                                                 |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [vSwitch](https://github.com/anish7600/vswitch) | A virtual switch implementation for efficient network management. |
