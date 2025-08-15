@@ -8,6 +8,8 @@ title: Technical Writeups
 
 ## Technical Writeups
 
+___These are AI-generated writeups that serve to provide a quick refresher on a broad range of topics for references instead of going through all the tutorial sites all over again.___
+
 ### 🔐 **Security and Networking**
 
 ---
