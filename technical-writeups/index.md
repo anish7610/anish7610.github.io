@@ -8,7 +8,7 @@ title: Technical Writeups
 
 ## Technical Writeups
 
-___These are AI-generated writeups that serve to provide a quick refresher on a broad range of topics for references instead of going through all the tutorial sites all over again.___
+___These AI-generated write-ups offer concise overviews on various topics, allowing you to quickly refresh your knowledge and dig deeper into the rabbit hole at your own leisure.___
 
 ### 🔐 **Security and Networking**
 
