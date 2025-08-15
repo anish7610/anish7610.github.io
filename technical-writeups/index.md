@@ -84,7 +84,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [Kernel Bypass Networking: DPDK and Netmap](https://anish7600.github.io/technical-writeups/kernel-bypass-networking-dpdk-netmap)
 - [Custom init System with PID 1 and seccomp Filtering](https://anish7600.github.io/technical-writeups/custom-init-pid1-seccomp-filtering)
 - [Unix Domain Sockets](https://anish7600.github.io/technical-writeups/unix-domain-sockets)
-
+- [Linux Man Pages](https://code.tools/)
 
 ### 🔧 **Software Development**
 
