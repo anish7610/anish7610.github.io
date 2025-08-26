@@ -1,14 +1,12 @@
 ---
 layout: default 
-title: Technical Writeups
+title: Tech Writeups
 ---
 
 <a href="https://anish7600.github.io/" style="text-decoration: none;">← Back to Home</a>
 
 
-## Technical Writeups
-
-___These AI-generated write-ups offer concise overviews on various topics, allowing you to quickly refresh your knowledge and dig deeper into the rabbit hole at your own leisure.___
+## Tech Writeups
 
 ###  **Security and Networking**
 
