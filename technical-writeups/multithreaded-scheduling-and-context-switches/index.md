@@ -12,7 +12,7 @@ Modern operating systems handle multiple processes and threads by interleaving t
 
 ---
 
-## 🔁 Overview of Multi-threaded Process Scheduling
+##  Overview of Multi-threaded Process Scheduling
 
 A **multi-threaded process** consists of multiple threads of execution within the same process space. Threads share memory but have separate registers and stacks.
 
@@ -33,7 +33,7 @@ Each thread is treated as a separate "task" by the Linux scheduler, identified b
 
 ---
 
-## 🔄 Context Switching: What Happens?
+##  Context Switching: What Happens?
 
 **Context Switch** is the process where the CPU switches from one task (process/thread) to another. This involves:
 
@@ -49,7 +49,7 @@ Context switching is **CPU-intensive** and too many context switches can lead to
 
 ---
 
-## 🧪 Tools to Observe Thread Scheduling and Context Switches
+##  Tools to Observe Thread Scheduling and Context Switches
 
 ### 1. `top` or `htop`
 
@@ -93,16 +93,16 @@ vmstat 1
 
 ---
 
-## 🧵 Multi-threaded Programming Impact
+##  Multi-threaded Programming Impact
 
 * Threads that block frequently (I/O-bound) may result in many **voluntary context switches**.
 * CPU-bound threads may face **involuntary context switches** due to time-sharing.
 
-🔍 High thread count apps (like Nginx, JVM apps) must balance between concurrency and switch overhead.
+ High thread count apps (like Nginx, JVM apps) must balance between concurrency and switch overhead.
 
 ---
 
-## 🔧 Tuning & Mitigation
+##  Tuning & Mitigation
 
 * **Thread Affinity (CPU pinning):** Bind threads to specific cores using `taskset` or `pthread_setaffinity_np`.
 * **Reduce Thread Count:** Avoid oversubscribing cores.
@@ -111,7 +111,7 @@ vmstat 1
 
 ---
 
-## 📊 Example
+##  Example
 
 ```c
 // multithreaded.c
@@ -144,7 +144,7 @@ You’ll observe high context switch counts due to constant thread competition.
 
 ---
 
-## ✅ Summary
+##  Summary
 
 | Metric             | Tool                |
 | ------------------ | ------------------- |

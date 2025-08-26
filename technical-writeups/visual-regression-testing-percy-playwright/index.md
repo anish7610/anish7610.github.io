@@ -14,7 +14,7 @@ Two of the most popular tools in this domain are **Percy** (by BrowserStack) and
 
 ---
 
-### 🔍 What Is Visual Regression Testing?
+###  What Is Visual Regression Testing?
 
 Visual regression testing takes screenshots of web pages or components and compares them pixel-by-pixel (or via smarter algorithms) against a previously approved baseline.
 
@@ -29,14 +29,14 @@ Typical use cases:
 
 ## 🟢 Option 1: Visual Testing with **Percy**
 
-### ✅ Pros:
+###  Pros:
 
 * Works with multiple test frameworks (Selenium, Cypress, Playwright)
 * Handles parallelization and responsive testing
 * Offers web dashboard for reviewing diffs
 * Integrates well with CI/CD (GitHub Actions, GitLab, Jenkins)
 
-### 🧪 Example: Percy with Playwright
+###  Example: Percy with Playwright
 
 **Install Percy CLI and SDK:**
 
@@ -71,19 +71,19 @@ Percy will upload screenshots to your Percy dashboard, where you can **review an
 
 Playwright has native support for visual diffs using `expect(page).toHaveScreenshot()`.
 
-### ✅ Pros:
+###  Pros:
 
 * Fully open-source
 * No external dependencies
 * Fast and local
 * Can be integrated into CI easily
 
-### ⚠️ Limitations:
+### ️ Limitations:
 
 * No visual UI for snapshot approval (unless you build your own)
 * Lacks Percy’s multi-browser/device parallelism and history
 
-### 🧪 Example: Playwright Native Screenshot Comparison
+###  Example: Playwright Native Screenshot Comparison
 
 ```javascript
 // tests/visual.spec.js
@@ -107,7 +107,7 @@ To test specific components.
 
 ---
 
-## 🧩 CI/CD Integration
+##  CI/CD Integration
 
 Both Percy and Playwright can run in CI:
 
@@ -116,7 +116,7 @@ Both Percy and Playwright can run in CI:
 
 ---
 
-### ⚙ Best Practices
+###  Best Practices
 
 * Use **stable selectors and consistent data** to avoid false positives.
 * **Mask dynamic content** like timestamps or ads using CSS or cropping.
@@ -125,7 +125,7 @@ Both Percy and Playwright can run in CI:
 
 ---
 
-### 📌 Summary
+###  Summary
 
 | Tool                | Best For                                    | Notes                                       |
 | ------------------- | ------------------------------------------- | ------------------------------------------- |

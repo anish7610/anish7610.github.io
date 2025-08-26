@@ -10,7 +10,7 @@ title: ci-cd-testrail-jira-webhooks
 
 Modern DevOps pipelines demand seamless integration between test management tools like **TestRail**, issue tracking systems like **JIRA**, and automation pipelines (CI/CD) like Jenkins, GitLab CI, GitHub Actions, etc. Using **webhooks** and APIs, we can create an automated feedback loop from code commits to defect tracking and test result reporting.
 
-### 🔧 Tools Involved
+###  Tools Involved
 
 * **TestRail**: Test case and test run management
 * **JIRA**: Issue and project tracking
@@ -19,7 +19,7 @@ Modern DevOps pipelines demand seamless integration between test management tool
 
 ---
 
-### ⚙️ Typical Workflow
+### ️ Typical Workflow
 
 1. **Code Commit & Push**
 
@@ -50,9 +50,9 @@ Modern DevOps pipelines demand seamless integration between test management tool
 
 ---
 
-### 🔌 Webhook and API Setup
+###  Webhook and API Setup
 
-#### 🧪 TestRail API Integration (Python Snippet)
+####  TestRail API Integration (Python Snippet)
 
 ```python
 import requests
@@ -74,7 +74,7 @@ def add_test_run(project_id, suite_id, name):
     return response.json()
 ```
 
-#### 🐞 JIRA Webhook Example
+####  JIRA Webhook Example
 
 In **JIRA**:
 
@@ -93,7 +93,7 @@ CI/CD pipeline can listen for these updates and respond accordingly.
 
 ---
 
-### 🧠 Best Practices
+###  Best Practices
 
 * **Tag test cases** with JIRA IDs for easier traceability (e.g., `C123 -> JIRA-456`)
 * Use **TestRail’s case\_id** mapping to link automated tests with test cases
@@ -103,7 +103,7 @@ CI/CD pipeline can listen for these updates and respond accordingly.
 
 ---
 
-### ✅ Benefits of Integration
+###  Benefits of Integration
 
 * Unified visibility into test and defect status
 * Faster triage and RCA of test failures
@@ -112,7 +112,7 @@ CI/CD pipeline can listen for these updates and respond accordingly.
 
 ---
 
-### 📦 CI Example: GitLab `.gitlab-ci.yml` Snippet
+###  CI Example: GitLab `.gitlab-ci.yml` Snippet
 
 ```yaml
 stages:

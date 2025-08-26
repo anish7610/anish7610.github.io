@@ -6,9 +6,9 @@ title: VPN
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🔐 Technical Writeup: VPN Protocols (IPSec, OpenVPN, WireGuard)
+#  Technical Writeup: VPN Protocols (IPSec, OpenVPN, WireGuard)
 
-## 📘 Introduction
+##  Introduction
 
 A **Virtual Private Network (VPN)** extends a private network across a public one, allowing users to securely send and receive data as if their devices were directly connected to the private network. VPN protocols define the standards and rules used to establish secure connections and protect data in transit.
 
@@ -22,20 +22,20 @@ Three of the most widely used VPN protocols are:
 
 ## 1️⃣ **IPSec (Internet Protocol Security)**
 
-### 🔧 Overview:
+###  Overview:
 
 * **Type**: Network-layer protocol suite
 * **Encryption**: AES, 3DES, Blowfish, etc.
 * **Use case**: Site-to-site or remote-access VPNs
 * **RFCs**: 2401 (now obsoleted by newer RFCs like 4301)
 
-### 🔐 Key Features:
+###  Key Features:
 
 * Operates at **Layer 3** of the OSI model
 * Encrypts and authenticates IP packets
 * Can run in **Tunnel Mode** (entire packet encrypted) or **Transport Mode** (only payload encrypted)
 
-### 🔁 Phases:
+###  Phases:
 
 1. **IKE Phase 1 (Internet Key Exchange)**:
 
@@ -45,17 +45,17 @@ Three of the most widely used VPN protocols are:
 
    * Sets up the actual IPSec tunnel (IPSec SA)
 
-### 📦 Components:
+###  Components:
 
 * **AH (Authentication Header)**: Ensures integrity and origin authenticity (no encryption)
 * **ESP (Encapsulating Security Payload)**: Ensures confidentiality, integrity, and authenticity
 
-### ✅ Pros:
+###  Pros:
 
 * Widely supported and standardized
 * Strong security with proper configuration
 
-### ❌ Cons:
+###  Cons:
 
 * Complex configuration
 * NAT traversal issues (fixed with NAT-T)
@@ -64,36 +64,36 @@ Three of the most widely used VPN protocols are:
 
 ## 2️⃣ **OpenVPN**
 
-### 🔧 Overview:
+###  Overview:
 
 * **Type**: Application-layer protocol
 * **Encryption**: AES-256, ChaCha20, etc.
 * **Use case**: Remote-access VPNs, cross-platform VPN clients
 
-### 📡 Transport:
+###  Transport:
 
 * Uses **SSL/TLS** for key exchange
 * Runs over **UDP** (preferred) or **TCP**
 * Can use **port 443** to bypass firewalls
 
-### 🔐 Security:
+###  Security:
 
 * Authenticated with X.509 certificates or pre-shared keys
 * Supports Perfect Forward Secrecy (PFS)
 * Optional **TLS Auth (HMAC)** for additional security
 
-### 🔄 Tunnel Types:
+###  Tunnel Types:
 
 * **TUN** (layer 3 IP tunneling)
 * **TAP** (layer 2 Ethernet bridging)
 
-### ✅ Pros:
+###  Pros:
 
 * Highly configurable and robust
 * Open-source with large community support
 * Works well in restrictive network environments
 
-### ❌ Cons:
+###  Cons:
 
 * Slightly slower than WireGuard
 * More overhead and configuration complexity
@@ -102,32 +102,32 @@ Three of the most widely used VPN protocols are:
 
 ## 3️⃣ **WireGuard**
 
-### 🔧 Overview:
+###  Overview:
 
 * **Type**: Layer 3 VPN protocol
 * **Encryption**: ChaCha20-Poly1305, Curve25519
 * **Use case**: Lightweight, fast VPNs with modern cryptography
 * **Kernel Integration**: Built into Linux kernel since version 5.6
 
-### 🔐 Security Model:
+###  Security Model:
 
 * Uses state-of-the-art cryptography (no cipher negotiation)
 * Minimal attack surface due to smaller codebase (\~4,000 LOC vs \~100,000 in OpenVPN/IPSec)
 * Keys: Static **public/private key pairs**
 
-### ⚙️ Operation:
+### ️ Operation:
 
 * Stateless and connectionless (no session negotiation)
 * Relies on **UDP only**
 * Uses **roaming** (seamless IP address change without tunnel drop)
 
-### ✅ Pros:
+###  Pros:
 
 * Blazing fast performance (due to kernel-level support and minimal overhead)
 * Simple configuration
 * High security with modern algorithms
 
-### ❌ Cons:
+###  Cons:
 
 * Newer protocol (not yet widely adopted in enterprise)
 * Lacks some features like dynamic IP allocation, username/password auth
@@ -135,7 +135,7 @@ Three of the most widely used VPN protocols are:
 
 ---
 
-## 📊 Comparison Table
+##  Comparison Table
 
 | Feature        | IPSec        | OpenVPN          | WireGuard         |
 | -------------- | ------------ | ---------------- | ----------------- |
@@ -150,7 +150,7 @@ Three of the most widely used VPN protocols are:
 
 ---
 
-## 🏁 Conclusion
+##  Conclusion
 
 Each VPN protocol has its strengths and best-use scenarios:
 

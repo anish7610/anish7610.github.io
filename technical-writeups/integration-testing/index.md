@@ -6,13 +6,13 @@ title: integration-testing
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🧪 Integration Testing with Docker Compose
+#  Integration Testing with Docker Compose
 
-## 📘 Overview
+##  Overview
 
 **Integration testing** verifies that multiple components or services in a system work together as expected. When dealing with containerized applications—especially microservices—each service often runs in isolation using Docker. **Docker Compose** makes it easy to spin up all dependent services for integration testing in a consistent and reproducible environment.
 
-## 🧱 Why Use Docker Compose for Integration Testing?
+##  Why Use Docker Compose for Integration Testing?
 
 Docker Compose allows defining multi-container applications in a single YAML file. For integration testing, it provides:
 
@@ -23,7 +23,7 @@ Docker Compose allows defining multi-container applications in a single YAML fil
 
 ---
 
-## 🛠️ Basic Setup
+## ️ Basic Setup
 
 ### 1. `docker-compose.yml` Example
 
@@ -54,7 +54,7 @@ This sets up a web service dependent on PostgreSQL and Redis, useful for backend
 
 ---
 
-## 🔬 Integration Test Workflow
+##  Integration Test Workflow
 
 ### Step-by-step Flow:
 
@@ -76,7 +76,7 @@ This sets up a web service dependent on PostgreSQL and Redis, useful for backend
 
 ---
 
-## 🧪 Sample Test (Using Pytest)
+##  Sample Test (Using Pytest)
 
 ```python
 import psycopg2
@@ -103,7 +103,7 @@ def test_redis_connection():
 
 ---
 
-## 🚀 Running Tests in CI (e.g., GitHub Actions)
+##  Running Tests in CI (e.g., GitHub Actions)
 
 ```yaml
 jobs:
@@ -140,7 +140,7 @@ docker-compose down -v
 
 ---
 
-## ✅ Best Practices
+##  Best Practices
 
 * Use **health checks** in your `docker-compose.yml` to ensure services are ready.
 * Tag tests as `integration` so they can be excluded during unit test runs.
@@ -150,7 +150,7 @@ docker-compose down -v
 
 ---
 
-## 🔄 Tear Down and Cleanup
+##  Tear Down and Cleanup
 
 Always shut down containers and clean up resources:
 
@@ -162,7 +162,7 @@ Use a trap or teardown fixture in test runners to automate this.
 
 ---
 
-## 📦 Advanced Topics
+##  Advanced Topics
 
 * Use **seed data** containers (e.g., init scripts for PostgreSQL).
 * Mock external APIs using containers like `wiremock`.
@@ -171,7 +171,7 @@ Use a trap or teardown fixture in test runners to automate this.
 
 ---
 
-## 📌 Summary
+##  Summary
 
 | Feature        | Benefit                                |
 | -------------- | -------------------------------------- |

@@ -12,7 +12,7 @@ Multithreading is essential for parallelism and responsiveness. Threads can be i
 
 ---
 
-### 🔹 1. **Overview: User vs Kernel Threads**
+###  1. **Overview: User vs Kernel Threads**
 
 | Aspect           | User-space Threads (Green Threads)                | Kernel-space Threads (Native Threads) |
 | ---------------- | ------------------------------------------------- | ------------------------------------- |
@@ -24,15 +24,15 @@ Multithreading is essential for parallelism and responsiveness. Threads can be i
 
 ---
 
-### 🔹 2. **User-space Threads: Advantages and Disadvantages**
+###  2. **User-space Threads: Advantages and Disadvantages**
 
-#### ✅ Advantages:
+####  Advantages:
 
 * **Fast context switching**: No kernel mode switch → low overhead.
 * **Custom scheduling**: Can use cooperative or application-specific strategies.
 * **Lightweight**: No need to allocate kernel data structures per thread.
 
-#### ❌ Disadvantages:
+####  Disadvantages:
 
 * **Blocking system calls block all threads** unless wrapped or multiplexed (e.g., using `select`/`epoll`).
 * **No parallelism on multicore** unless multiplexed on kernel threads (e.g., M\:N model).
@@ -40,22 +40,22 @@ Multithreading is essential for parallelism and responsiveness. Threads can be i
 
 ---
 
-### 🔹 3. **Kernel-space Threads: Advantages and Disadvantages**
+###  3. **Kernel-space Threads: Advantages and Disadvantages**
 
-#### ✅ Advantages:
+####  Advantages:
 
 * **True parallelism**: Threads can run concurrently on multiple cores.
 * **Better system call handling**: Blocking I/O affects only the calling thread.
 * **Leverages OS scheduler**: More robust with time-sharing, fairness, priority scheduling.
 
-#### ❌ Disadvantages:
+####  Disadvantages:
 
 * **Higher context switch overhead**: Kernel transitions are expensive.
 * **Heavyweight**: OS must manage and maintain thread metadata.
 
 ---
 
-### 🔹 4. **Hybrid Models (M\:N Threading)**
+###  4. **Hybrid Models (M\:N Threading)**
 
 Used by:
 
@@ -69,7 +69,7 @@ Used by:
 
 ---
 
-### 🔹 5. **Performance Implications**
+###  5. **Performance Implications**
 
 | Scenario                          | Winner                   | Why?                                     |
 | --------------------------------- | ------------------------ | ---------------------------------------- |
@@ -81,7 +81,7 @@ Used by:
 
 ---
 
-### 🔹 6. **Real-world Examples**
+###  6. **Real-world Examples**
 
 * **Go**: M\:N goroutines with internal scheduler.
 * **Python (CPython)**: OS threads but limited by Global Interpreter Lock (GIL).
@@ -90,7 +90,7 @@ Used by:
 
 ---
 
-### 🔹 7. **Conclusion**
+###  7. **Conclusion**
 
 The choice between user-space and kernel-space threads hinges on the workload:
 

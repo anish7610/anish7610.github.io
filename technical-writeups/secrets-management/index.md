@@ -14,7 +14,7 @@ This writeup explores the **principles of secrets management** and compares **Ha
 
 ---
 
-## 🔐 Why Secrets Management is Critical
+##  Why Secrets Management is Critical
 
 Without proper management, secrets may:
 
@@ -33,7 +33,7 @@ A robust secrets management system enforces:
 
 ---
 
-## 🔧 HashiCorp Vault
+##  HashiCorp Vault
 
 **Vault** is a popular open-source tool designed to manage secrets and protect sensitive data.
 
@@ -70,7 +70,7 @@ vault kv get secret/db
 
 ---
 
-## ☁️ AWS Secrets Manager
+## ️ AWS Secrets Manager
 
 **AWS Secrets Manager** is a fully managed secrets storage service designed for use within the AWS ecosystem.
 
@@ -95,7 +95,7 @@ aws secretsmanager get-secret-value --secret-id my-db-pass
 
 ---
 
-## 🔍 Comparison: Vault vs AWS Secrets Manager
+##  Comparison: Vault vs AWS Secrets Manager
 
 | Feature         | HashiCorp Vault                      | AWS Secrets Manager                       |
 | --------------- | ------------------------------------ | ----------------------------------------- |
@@ -108,7 +108,7 @@ aws secretsmanager get-secret-value --secret-id my-db-pass
 
 ---
 
-## ✅ Best Practices
+##  Best Practices
 
 * Never commit secrets to version control.
 * Use **environment-specific secrets** (dev/stage/prod).
@@ -118,6 +118,6 @@ aws secretsmanager get-secret-value --secret-id my-db-pass
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 Secrets management is a foundational pillar in DevOps and cloud security. Tools like **Vault** provide flexibility and strong security controls for multi-cloud environments, while **AWS Secrets Manager** offers ease of use for AWS-native systems. Choosing the right solution depends on your architecture, team skillsets, and compliance needs.

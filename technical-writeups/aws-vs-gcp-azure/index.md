@@ -10,7 +10,7 @@ title: aws-vs-gcp-azure
 
 ---
 
-### 🌐 Introduction
+###  Introduction
 
 The three major cloud providers—**Amazon Web Services (AWS)**, **Microsoft Azure**, and **Google Cloud Platform (GCP)**—offer robust, scalable cloud computing services. Though similar in foundational services (compute, storage, networking), they differ in implementation, ecosystem, pricing, and target audience.
 
@@ -18,7 +18,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### ⚙️ 1. **Compute Services**
+### ️ 1. **Compute Services**
 
 | Feature            | AWS                         | Azure                          | GCP                            |
 | ------------------ | --------------------------- | ------------------------------ | ------------------------------ |
@@ -31,7 +31,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 🗄️ 2. **Storage Services**
+### ️ 2. **Storage Services**
 
 | Feature               | AWS     | Azure           | GCP              |
 | --------------------- | ------- | --------------- | ---------------- |
@@ -44,7 +44,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 🌐 3. **Networking Services**
+###  3. **Networking Services**
 
 | Feature         | AWS                    | Azure                        | GCP                  |
 | --------------- | ---------------------- | ---------------------------- | -------------------- |
@@ -57,7 +57,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 🔒 4. **Identity & Access Management**
+###  4. **Identity & Access Management**
 
 | Feature           | AWS       | Azure                        | GCP               |
 | ----------------- | --------- | ---------------------------- | ----------------- |
@@ -69,7 +69,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 📊 5. **Databases**
+###  5. **Databases**
 
 | Type             | AWS                           | Azure              | GCP                  |
 | ---------------- | ----------------------------- | ------------------ | -------------------- |
@@ -81,7 +81,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 🤖 6. **AI/ML Services**
+###  6. **AI/ML Services**
 
 | Feature         | AWS                   | Azure                      | GCP                             |
 | --------------- | --------------------- | -------------------------- | ------------------------------- |
@@ -93,7 +93,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 🛠️ 7. **DevOps & CI/CD Tools**
+### ️ 7. **DevOps & CI/CD Tools**
 
 | Feature                | AWS                     | Azure                        | GCP                           |
 | ---------------------- | ----------------------- | ---------------------------- | ----------------------------- |
@@ -103,7 +103,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 💰 8. **Pricing Model**
+###  8. **Pricing Model**
 
 * **AWS**: Pay-as-you-go + Reserved + Spot Instances
 * **Azure**: Pay-as-you-go + Reserved + Hybrid Benefits
@@ -113,7 +113,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 🔁 Summary Table
+###  Summary Table
 
 | Category                | AWS           | Azure          | GCP            |
 | ----------------------- | ------------- | -------------- | -------------- |
@@ -127,7 +127,7 @@ This writeup compares their **core services** across critical categories:
 
 ---
 
-### 📌 Conclusion
+###  Conclusion
 
 * **AWS** is the most mature and has the largest ecosystem.
 * **Azure** integrates deeply with Windows environments and Active Directory.

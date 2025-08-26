@@ -10,7 +10,7 @@ title: Technical Writeups
 
 ___These AI-generated write-ups offer concise overviews on various topics, allowing you to quickly refresh your knowledge and dig deeper into the rabbit hole at your own leisure.___
 
-### 🔐 **Security and Networking**
+###  **Security and Networking**
 
 ---
 
@@ -39,7 +39,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [TCP Fragmentation](https://anish7600.github.io/technical-writeups/tcp-fragmentation)
 
 
-### 🧪 **Testing and QA**
+###  **Testing and QA**
 
 ---
 
@@ -61,7 +61,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [Synthetic Monitoring and Canary Tests in Production](https://anish7600.github.io/technical-writeups/synthetic-monitoring-canary-tests)
 
 
-### 💾 **Operating Systems and Kernel**
+###  **Operating Systems and Kernel**
 
 ---
 
@@ -86,7 +86,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [Unix Domain Sockets](https://anish7600.github.io/technical-writeups/unix-domain-sockets)
 - [Linux Man Pages](https://code.tools/)
 
-### 🔧 **Software Development**
+###  **Software Development**
 
 ---
 
@@ -100,7 +100,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [Git Internals](https://anish7600.github.io/technical-writeups/git-internals)
 
 
-### ☁️ Cloud and DevOps
+### ️ Cloud and DevOps
 
 ---
 
@@ -114,7 +114,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [Secrets Management](https://anish7600.github.io/technical-writeups/secrets-management)
 
 
-### ⚙️ **Systems and Embedded**
+### ️ **Systems and Embedded**
 
 ---
 
@@ -125,7 +125,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [Firmware Over The Air](https://anish7600.github.io/technical-writeups/firmware-over-the-air)
 
 
-### 🖥️ Frontend and UI/UX
+### ️ Frontend and UI/UX
 
 ---
 
@@ -137,7 +137,7 @@ ___These AI-generated write-ups offer concise overviews on various topics, allow
 - [WCAG](https://anish7600.github.io/technical-writeups/wcag)
 
 
-### 🧠 Machine Learning and Data Engineering
+###  Machine Learning and Data Engineering
 
 ---
 

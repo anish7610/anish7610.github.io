@@ -12,7 +12,7 @@ Modern multi-CPU systems increasingly rely on **NUMA architectures** to scale me
 
 ---
 
-### 🔹 1. What is NUMA?
+###  1. What is NUMA?
 
 **NUMA (Non-Uniform Memory Access)** is a memory architecture where:
 
@@ -35,7 +35,7 @@ Access to **local memory** is faster than to **remote memory**.
 
 ---
 
-### 🔹 2. NUMA Implications on Performance
+###  2. NUMA Implications on Performance
 
 * **Local memory access**: Low latency, high throughput.
 * **Remote memory access**: High latency, potential bottlenecks.
@@ -49,7 +49,7 @@ Poor NUMA locality leads to:
 
 ---
 
-### 🔹 3. What is Memory Pinning?
+###  3. What is Memory Pinning?
 
 **Memory Pinning** (also called memory binding or affinity) is the act of:
 
@@ -63,7 +63,7 @@ Pinned memory:
 
 ---
 
-### 🔹 4. Tools for NUMA Awareness
+###  4. Tools for NUMA Awareness
 
 | Tool       | Purpose                                     |
 | ---------- | ------------------------------------------- |
@@ -82,7 +82,7 @@ numactl --cpunodebind=0 --membind=0 ./my_app
 
 ---
 
-### 🔹 5. Programming with libnuma (C API)
+###  5. Programming with libnuma (C API)
 
 ```c
 #include <numa.h>
@@ -98,7 +98,7 @@ This ensures memory allocations go to NUMA node 0.
 
 ---
 
-### 🔹 6. NUMA and Multi-threading
+###  6. NUMA and Multi-threading
 
 In multithreaded applications (e.g., using `pthread`, OpenMP):
 
@@ -112,7 +112,7 @@ In multithreaded applications (e.g., using `pthread`, OpenMP):
 
 ---
 
-### 🔹 7. NUMA in High-Performance Computing (HPC) and Databases
+###  7. NUMA in High-Performance Computing (HPC) and Databases
 
 **HPC systems, databases, and low-latency applications** like:
 
@@ -129,7 +129,7 @@ Memory pinning also matters in:
 
 ---
 
-### 🔹 8. Performance Tips
+###  8. Performance Tips
 
 | Tip                                      | Benefit                                |
 | ---------------------------------------- | -------------------------------------- |
@@ -140,7 +140,7 @@ Memory pinning also matters in:
 
 ---
 
-### 🔹 9. Conclusion
+###  9. Conclusion
 
 NUMA and memory pinning are critical for performance on modern multicore/multisocket systems. Developers writing low-latency, high-throughput applications must:
 

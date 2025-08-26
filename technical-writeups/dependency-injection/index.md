@@ -12,7 +12,7 @@ title: dependency-injection
 
 ---
 
-## 🔧 What is Dependency Injection?
+##  What is Dependency Injection?
 
 In traditional programming, a class often creates and manages its dependencies:
 
@@ -46,7 +46,7 @@ Now, `Client` is decoupled from the `Service` implementation.
 
 ---
 
-## 🛠️ Types of Dependency Injection
+## ️ Types of Dependency Injection
 
 1. **Constructor Injection**
    Dependencies are passed via the class constructor.
@@ -70,7 +70,7 @@ Now, `Client` is decoupled from the `Service` implementation.
 
 ---
 
-## 🌍 Real-Life Examples
+##  Real-Life Examples
 
 ### 1. **Web Applications (Flask)**
 
@@ -136,7 +136,7 @@ function Dashboard() {
 
 ---
 
-## ✅ Benefits of DI
+##  Benefits of DI
 
 * Loose coupling
 * Easier unit testing
@@ -145,7 +145,7 @@ function Dashboard() {
 
 ---
 
-## ⚠️ Caveats
+## ️ Caveats
 
 * Can introduce complexity
 * Overhead of managing containers/injectors
@@ -153,7 +153,7 @@ function Dashboard() {
 
 ---
 
-## 🧰 Python Libraries for DI
+##  Python Libraries for DI
 
 * [`dependency-injector`](https://python-dependency-injector.ets-labs.org/)
 * [`inject`](https://github.com/ivankorobkov/python-inject)
@@ -177,7 +177,7 @@ service.process()
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 Dependency Injection fosters flexibility and testability in modern codebases. While not always necessary in simple scripts, it becomes indispensable in large-scale applications and microservices where decoupling is key.
 

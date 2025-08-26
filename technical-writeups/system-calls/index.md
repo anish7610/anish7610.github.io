@@ -6,21 +6,21 @@ title: system-calls
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🧩 System Calls in Linux and How They Work
+#  System Calls in Linux and How They Work
 
 In Linux (and Unix-like systems), **system calls** are the **primary interface between user-space applications and the kernel**. When a program wants to perform a privileged operation—like reading a file, allocating memory, or creating a process—it uses a system call.
 
 ---
 
-## 🧠 What is a System Call?
+##  What is a System Call?
 
 A **system call** (or syscall) is a **controlled entry point into the operating system kernel**. It allows user applications to request services from the kernel securely.
 
-> 🧾 For example, calling `read()` in C doesn't directly access hardware—it triggers a system call to the kernel to read from a file descriptor.
+>  For example, calling `read()` in C doesn't directly access hardware—it triggers a system call to the kernel to read from a file descriptor.
 
 ---
 
-## 🔗 User Space vs Kernel Space
+##  User Space vs Kernel Space
 
 * **User Space**: Where applications like editors, browsers, and your shell run.
 * **Kernel Space**: Privileged mode with direct access to hardware and core system resources.
@@ -29,7 +29,7 @@ System calls act as the **gateway between these two spaces**. Direct access is n
 
 ---
 
-## 🔧 How a System Call Works (Simplified Flow)
+##  How a System Call Works (Simplified Flow)
 
 ```c
 // C code:
@@ -56,7 +56,7 @@ write(1, "Hello\n", 6);
 
 ---
 
-## 🧮 Registers Used in x86-64 Syscalls
+##  Registers Used in x86-64 Syscalls
 
 | Purpose        | Register |
 | -------------- | -------- |
@@ -71,7 +71,7 @@ write(1, "Hello\n", 6);
 
 ---
 
-## 🧰 Common Linux System Calls
+##  Common Linux System Calls
 
 | Syscall    | Description                                   |
 | ---------- | --------------------------------------------- |
@@ -86,13 +86,13 @@ write(1, "Hello\n", 6);
 | `ioctl()`  | Device-specific input/output operations       |
 | `clone()`  | Low-level thread creation (used in `pthread`) |
 
-> 🔍 To see all system calls:
+>  To see all system calls:
 > `man 2 syscalls`
 > `ausyscall --dump` (if `auditd` tools are installed)
 
 ---
 
-## 🧪 Example: Raw syscall in Assembly (x86-64)
+##  Example: Raw syscall in Assembly (x86-64)
 
 ```asm
 section .data
@@ -122,9 +122,9 @@ nasm -f elf64 hello.asm && ld -o hello hello.o && ./hello
 
 ---
 
-## 📊 Viewing System Calls in Action
+##  Viewing System Calls in Action
 
-### 🔍 `strace` – Trace System Calls
+###  `strace` – Trace System Calls
 
 ```bash
 strace ls
@@ -138,7 +138,7 @@ read(3, ...
 write(1, "file.txt\n", 9) = 9
 ```
 
-### 🔍 `perf` – Performance analysis of syscalls
+###  `perf` – Performance analysis of syscalls
 
 ```bash
 perf stat -e syscalls:sys_enter_* ls
@@ -146,7 +146,7 @@ perf stat -e syscalls:sys_enter_* ls
 
 ---
 
-## 🔐 System Call Filtering: seccomp
+##  System Call Filtering: seccomp
 
 Linux provides **seccomp** (Secure Computing Mode) to restrict the system calls a process can make.
 
@@ -160,7 +160,7 @@ Used in:
 
 ---
 
-## 🔚 Summary
+##  Summary
 
 | Feature             | Description                             |
 | ------------------- | --------------------------------------- |
@@ -172,7 +172,7 @@ Used in:
 
 ---
 
-## 🧠 Bonus: System Call vs Function Call
+##  Bonus: System Call vs Function Call
 
 | Feature        | Function Call      | System Call                |
 | -------------- | ------------------ | -------------------------- |

@@ -10,7 +10,7 @@ title: linux-process-lifecycle
 
 ---
 
-### 🔧 Introduction
+###  Introduction
 
 The Linux process lifecycle revolves around the creation, execution, and termination of processes. The core system calls that manage this lifecycle are:
 
@@ -22,7 +22,7 @@ Together, these implement the **parent-child process** model used by shells, dae
 
 ---
 
-### 🧬 1. `fork()` — Cloning a Process
+###  1. `fork()` — Cloning a Process
 
 #### Purpose:
 
@@ -52,7 +52,7 @@ if (pid == 0) {
 
 ---
 
-### 🚀 2. `exec()` — Replacing the Process Image
+###  2. `exec()` — Replacing the Process Image
 
 #### Purpose:
 
@@ -102,7 +102,7 @@ pid_t pid = waitpid(child_pid, &status, 0);  // wait for a specific child
 
 ---
 
-### 🧠 Process Lifecycle Summary
+###  Process Lifecycle Summary
 
 ```txt
 +-------------------+         fork()         +--------------------+
@@ -123,14 +123,14 @@ pid_t pid = waitpid(child_pid, &status, 0);  // wait for a specific child
 
 ---
 
-### ⚰️ Zombie and Orphan Processes
+### ️ Zombie and Orphan Processes
 
 * **Zombie**: A child that has exited but has not been waited on; still occupies an entry in the process table.
 * **Orphan**: A child whose parent exited before it; reparented to `init` (`PID 1`) which will reap it.
 
 ---
 
-### 🛠 Example: A Simple Shell
+###  Example: A Simple Shell
 
 ```c
 int main() {
@@ -148,7 +148,7 @@ int main() {
 
 ---
 
-### 🔍 Tools to Observe This Lifecycle
+###  Tools to Observe This Lifecycle
 
 * `strace ./a.out` — trace system calls like `fork`, `execve`, `wait`
 * `ps -ef` — view process hierarchy
@@ -156,7 +156,7 @@ int main() {
 
 ---
 
-### ✅ Conclusion
+###  Conclusion
 
 Understanding `fork()`, `exec()`, and `wait()` is crucial for:
 

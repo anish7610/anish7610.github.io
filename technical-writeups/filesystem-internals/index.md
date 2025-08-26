@@ -6,7 +6,7 @@ title: file-system-internals
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🗂 Technical Writeup: File System Internals – ext4 vs NTFS vs ZFS
+#  Technical Writeup: File System Internals – ext4 vs NTFS vs ZFS
 
 A **file system** organizes how data is stored and retrieved on storage media. While all file systems aim to manage files and directories, their internal architecture and feature sets can differ significantly.
 
@@ -18,15 +18,15 @@ In this writeup, we explore the internals of three major file systems:
 
 ---
 
-## 🧱 1. ext4 (Fourth Extended File System)
+##  1. ext4 (Fourth Extended File System)
 
-### 📌 Overview:
+###  Overview:
 
 * Introduced in Linux 2.6.28
 * Backward-compatible with ext3 and ext2
 * Optimized for large storage and performance
 
-### 📂 Internal Structures:
+###  Internal Structures:
 
 | Component       | Description                                                   |
 | --------------- | ------------------------------------------------------------- |
@@ -36,28 +36,28 @@ In this writeup, we explore the internals of three major file systems:
 | Data Blocks     | Contain file content                                          |
 | Directory Files | Special files mapping names to inode numbers                  |
 
-### ✨ Key Features:
+###  Key Features:
 
 * **Journaling**: Uses a journal to record metadata updates before committing
 * **Extent-based Allocation**: Improves performance for large files
 * **Delayed Allocation**: Buffers writes to optimize disk layout
 * **64-bit Storage**: Supports filesystems up to 1 exabyte
 
-### ⚠️ Limitations:
+### ️ Limitations:
 
 * Limited checksumming (only journal CRC)
 * External volume management needed (LVM, RAID)
 
 ---
 
-## 🧾 2. NTFS (New Technology File System)
+##  2. NTFS (New Technology File System)
 
-### 📌 Overview:
+###  Overview:
 
 * Default file system for Windows since Windows XP
 * Designed for security, recoverability, and scalability
 
-### 📂 Internal Structures:
+###  Internal Structures:
 
 | Component               | Description                                              |
 | ----------------------- | -------------------------------------------------------- |
@@ -66,7 +66,7 @@ In this writeup, we explore the internals of three major file systems:
 | Attribute-Based         | Data and metadata stored as named attributes             |
 | Journaling              | Transactional logging for recoverability                 |
 
-### ✨ Key Features:
+###  Key Features:
 
 * **NTFS Journaling**: Logs changes to the MFT and critical metadata
 * **Access Control Lists (ACLs)**: Fine-grained permissions
@@ -74,22 +74,22 @@ In this writeup, we explore the internals of three major file systems:
 * **Alternate Data Streams (ADS)**: Allows multiple data forks per file
 * **Sparse Files, Reparse Points, Hard Links**: Advanced features for performance and compatibility
 
-### ⚠️ Limitations:
+### ️ Limitations:
 
 * No native snapshot support
 * Windows-only support (read-only in Linux without extra drivers)
 
 ---
 
-## 🧬 3. ZFS (Zettabyte File System)
+##  3. ZFS (Zettabyte File System)
 
-### 📌 Overview:
+###  Overview:
 
 * Originally developed by Sun Microsystems
 * Combines a file system and volume manager
 * Highly robust with self-healing capabilities
 
-### 📂 Internal Structures:
+###  Internal Structures:
 
 | Component            | Description                                       |
 | -------------------- | ------------------------------------------------- |
@@ -99,7 +99,7 @@ In this writeup, we explore the internals of three major file systems:
 | Uberblock            | Root of all metadata, stored redundantly          |
 | Copy-on-Write (CoW)  | New data written elsewhere; metadata updated last |
 
-### ✨ Key Features:
+###  Key Features:
 
 * **Transactional Copy-on-Write (CoW)**: Always-consistent state
 * **Checksumming**: Every block has a checksum to detect corruption
@@ -108,14 +108,14 @@ In this writeup, we explore the internals of three major file systems:
 * **Scrubbing**: Periodic verification of data integrity
 * **Built-in RAID-Z**: Software RAID with no “write hole”
 
-### ⚠️ Limitations:
+### ️ Limitations:
 
 * Higher memory usage (recommendation: 1 GB RAM per 1 TB storage)
 * Complex setup; not ideal for embedded/low-resource systems
 
 ---
 
-## ⚖️ Comparison Table
+## ️ Comparison Table
 
 | Feature                     | ext4           | NTFS                  | ZFS                        |
 | --------------------------- | -------------- | --------------------- | -------------------------- |
@@ -131,7 +131,7 @@ In this writeup, we explore the internals of three major file systems:
 
 ---
 
-## 📁 Real-World Use Cases
+##  Real-World Use Cases
 
 | Scenario                              | Recommended File System |
 | ------------------------------------- | ----------------------- |
@@ -143,7 +143,7 @@ In this writeup, we explore the internals of three major file systems:
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 * **ext4** is reliable, fast, and easy to manage, ideal for general Linux workloads.
 * **NTFS** is tightly integrated with Windows, supporting ACLs and journaling.

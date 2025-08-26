@@ -6,7 +6,7 @@ title: Firewall
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🔥 Firewall Architectures: A Technical Overview
+#  Firewall Architectures: A Technical Overview
 
 Firewalls form the cornerstone of any organization’s network security. Their evolution spans from simple packet-filtering devices to intelligent systems that perform deep inspection and integrate with broader security frameworks.
 
@@ -18,9 +18,9 @@ This writeup explores the **core types of firewall architectures**:
 
 ---
 
-## 1. 🔁 Stateless vs Stateful Firewalls
+## 1.  Stateless vs Stateful Firewalls
 
-### 🔹 Stateless Firewalls (Packet Filtering Firewalls)
+###  Stateless Firewalls (Packet Filtering Firewalls)
 
 **Definition:**
 Stateless firewalls evaluate each packet independently without regard to the context of the traffic flow.
@@ -51,7 +51,7 @@ Allow TCP traffic from 192.168.1.10:1024 → 172.16.0.1:80
 
 ---
 
-### 🔸 Stateful Firewalls
+###  Stateful Firewalls
 
 **Definition:**
 Stateful firewalls monitor the full state of active connections and make decisions based on the **context** of traffic.
@@ -83,12 +83,12 @@ If a client sends a SYN to a server, the firewall remembers the session and allo
 
 ---
 
-## 2. 🔐 Unified Threat Management (UTM)
+## 2.  Unified Threat Management (UTM)
 
 **Definition:**
 UTM is an **all-in-one** security solution that integrates multiple security functions into a **single appliance**.
 
-### 🌐 Features:
+###  Features:
 
 * **Firewall (stateful/stateless)**
 * **Intrusion Detection/Prevention (IDS/IPS)**
@@ -97,13 +97,13 @@ UTM is an **all-in-one** security solution that integrates multiple security fun
 * **VPN support**
 * **Data Loss Prevention (DLP)**
 
-### 📊 Advantages:
+###  Advantages:
 
 * Centralized management.
 * Simplifies deployment and policy enforcement.
 * Cost-effective for small to mid-sized organizations.
 
-### ⚠️ Limitations:
+### ️ Limitations:
 
 * Single point of failure.
 * May underperform in high-traffic enterprise networks.
@@ -116,12 +116,12 @@ UTM is an **all-in-one** security solution that integrates multiple security fun
 
 ---
 
-## 3. 🧠 Next-Generation Firewalls (NGFW)
+## 3.  Next-Generation Firewalls (NGFW)
 
 **Definition:**
 NGFWs combine traditional firewall functions with **deep packet inspection**, **application-level awareness**, and **threat intelligence integration**.
 
-### 📌 Core Capabilities:
+###  Core Capabilities:
 
 * Deep Packet Inspection (DPI) to look beyond ports/protocols.
 * **Application awareness and control** (e.g., block Dropbox, allow Google Drive).
@@ -130,19 +130,19 @@ NGFWs combine traditional firewall functions with **deep packet inspection**, **
 * **SSL/TLS decryption** and inspection.
 * Built-in **IPS/IDS**.
 
-### 🔧 Architecture:
+###  Architecture:
 
 * Operates at **Layers 3–7**.
 * Uses behavioral analytics and threat intelligence feeds.
 * Can enforce granular policies by user, group, or application.
 
-### ✅ Benefits:
+###  Benefits:
 
 * Enhanced visibility and control.
 * Detects sophisticated threats (e.g., zero-days, encrypted malware).
 * Integrated logging and analytics dashboards.
 
-### ⚠️ Drawbacks:
+### ️ Drawbacks:
 
 * More expensive than traditional firewalls.
 * Requires skilled personnel to configure and maintain.
@@ -156,7 +156,7 @@ NGFWs combine traditional firewall functions with **deep packet inspection**, **
 
 ---
 
-## 🧩 Comparison Summary
+##  Comparison Summary
 
 | Feature                   | Stateless FW    | Stateful FW          | UTM      | NGFW                           |
 | ------------------------- | --------------- | -------------------- | -------- | ------------------------------ |
@@ -169,7 +169,7 @@ NGFWs combine traditional firewall functions with **deep packet inspection**, **
 
 ---
 
-## 🧠 Conclusion
+##  Conclusion
 
 Firewall technologies have matured from **simple packet filters** to **context-aware, intelligent defense systems** that play a central role in modern cybersecurity strategies.
 

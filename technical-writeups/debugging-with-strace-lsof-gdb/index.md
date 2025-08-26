@@ -12,11 +12,11 @@ When programs fail silently or behave unexpectedly at the system level—such as
 
 ---
 
-## 🔍 1. `strace`: Trace System Calls and Signals
+##  1. `strace`: Trace System Calls and Signals
 
 `strace` intercepts and logs **system calls** and **signals** made by a process. It's useful for tracking failures related to file access, permissions, segmentation faults, and more.
 
-### 🧪 Use Case: Program Fails to Open a File
+###  Use Case: Program Fails to Open a File
 
 ```bash
 strace ./my_program
@@ -28,11 +28,11 @@ Example output:
 open("config.json", O_RDONLY) = -1 ENOENT (No such file or directory)
 ```
 
-🔧 Fix:
+ Fix:
 
 > The file `config.json` is missing or mislocated.
 
-### 🧪 Use Case: Tracing a Running Process
+###  Use Case: Tracing a Running Process
 
 ```bash
 strace -p <pid>
@@ -40,7 +40,7 @@ strace -p <pid>
 
 > Use this to attach to a hung or live-running process and watch system calls in real-time.
 
-### 🎯 Filter Specific Calls (e.g., file operations):
+###  Filter Specific Calls (e.g., file operations):
 
 ```bash
 strace -e open,read,write ./my_program
@@ -48,11 +48,11 @@ strace -e open,read,write ./my_program
 
 ---
 
-## 🔗 2. `lsof`: List Open Files
+##  2. `lsof`: List Open Files
 
 Every file, socket, pipe, and device in Unix is a file descriptor. `lsof` shows which files a process has open.
 
-### 🧪 Use Case: Check if a File or Port is in Use
+###  Use Case: Check if a File or Port is in Use
 
 ```bash
 lsof /path/to/file
@@ -64,7 +64,7 @@ lsof -i :8080
 
 Shows which process is using port 8080.
 
-### 🧪 Use Case: See What Files a Process Has Open
+###  Use Case: See What Files a Process Has Open
 
 ```bash
 lsof -p <pid>
@@ -74,11 +74,11 @@ Helpful for debugging leaks, unclosed descriptors, or resource locks.
 
 ---
 
-## 🧠 3. `gdb`: GNU Debugger
+##  3. `gdb`: GNU Debugger
 
 `gdb` is a powerful source-level debugger for compiled programs. It allows inspecting memory, variables, call stacks, and performing line-by-line execution.
 
-### 🧪 Use Case: Debug a Crash (Segmentation Fault)
+###  Use Case: Debug a Crash (Segmentation Fault)
 
 1. Compile with debug symbols:
 
@@ -105,7 +105,7 @@ Helpful for debugging leaks, unclosed descriptors, or resource locks.
    (gdb) info locals
    ```
 
-### 🧪 Use Case: Attach to a Running Process
+###  Use Case: Attach to a Running Process
 
 ```bash
 gdb -p <pid>
@@ -115,7 +115,7 @@ Inspect live memory, break on functions, or debug stuck processes.
 
 ---
 
-## 🛠 Combine Tools for Power Debugging
+##  Combine Tools for Power Debugging
 
 | Problem                           | Tool(s)         | Example Command                        |
 | --------------------------------- | --------------- | -------------------------------------- |
@@ -127,7 +127,7 @@ Inspect live memory, break on functions, or debug stuck processes.
 
 ---
 
-## 🧩 Bonus: Integrating with Core Dumps
+##  Bonus: Integrating with Core Dumps
 
 1. Enable core dumps:
 
@@ -149,7 +149,7 @@ Inspect live memory, break on functions, or debug stuck processes.
 
 ---
 
-## 📚 Summary
+##  Summary
 
 | Tool     | Best For                              | One-Liner Example |
 | -------- | ------------------------------------- | ----------------- |

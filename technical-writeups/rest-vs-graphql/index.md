@@ -12,7 +12,7 @@ In modern web and mobile application development, APIs are essential for client-
 
 ---
 
-### 🧩 What is REST?
+###  What is REST?
 
 **REST (Representational State Transfer)** is an architectural style for distributed systems, typically using HTTP methods like GET, POST, PUT, DELETE to perform operations on resources identified by URLs.
 
@@ -26,7 +26,7 @@ In modern web and mobile application development, APIs are essential for client-
 
 ---
 
-### 🔗 What is GraphQL?
+###  What is GraphQL?
 
 **GraphQL** is a query language for APIs and a runtime for executing those queries, developed by Facebook. Unlike REST, the client specifies exactly what data it needs.
 
@@ -40,7 +40,7 @@ In modern web and mobile application development, APIs are essential for client-
 
 ---
 
-### 🔍 Key Differences
+###  Key Differences
 
 | Feature            | REST                              | GraphQL                                |
 | ------------------ | --------------------------------- | -------------------------------------- |
@@ -54,7 +54,7 @@ In modern web and mobile application development, APIs are essential for client-
 
 ---
 
-### 🧠 When to Use REST
+###  When to Use REST
 
 Use REST when:
 
@@ -66,7 +66,7 @@ Use REST when:
 
 ---
 
-### 🤖 When to Use GraphQL
+###  When to Use GraphQL
 
 Use GraphQL when:
 
@@ -78,7 +78,7 @@ Use GraphQL when:
 
 ---
 
-### ⚖️ Summary
+### ️ Summary
 
 | Use Case                               | Best Fit |
 | -------------------------------------- | -------- |
@@ -90,6 +90,6 @@ Use GraphQL when:
 
 ---
 
-### 🔚 Conclusion
+###  Conclusion
 
 REST and GraphQL serve different needs. REST shines in simplicity, standardization, and compatibility. GraphQL excels in flexibility and efficiency, especially for modern frontend-driven development. Choosing the right one depends on your application’s requirements, data complexity, and development velocity.

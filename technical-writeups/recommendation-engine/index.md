@@ -12,7 +12,7 @@ Recommendation systems are ubiquitous in the digital world, powering everything 
 
 ---
 
-## 🔍 What is Collaborative Filtering?
+##  What is Collaborative Filtering?
 
 Collaborative Filtering (CF) is a technique that makes automatic predictions about a user's interests by collecting preferences from many users. It operates under the assumption that **if User A has similar preferences to User B in the past, A is more likely to prefer items that B likes in the future.**
 
@@ -20,7 +20,7 @@ CF does not require domain knowledge or item metadata—it relies purely on user
 
 ---
 
-## 🧠 Types of Collaborative Filtering
+##  Types of Collaborative Filtering
 
 ### 1. **User-Based Collaborative Filtering**
 
@@ -38,7 +38,7 @@ CF does not require domain knowledge or item metadata—it relies purely on user
 
 ---
 
-## 🧮 How Does It Work?
+##  How Does It Work?
 
 ### Step 1: **Create the User-Item Matrix**
 
@@ -69,7 +69,7 @@ Sort predicted ratings and recommend the highest-scoring unseen items.
 
 ---
 
-## 🛠️ Matrix Factorization (Advanced Collaborative Filtering)
+## ️ Matrix Factorization (Advanced Collaborative Filtering)
 
 Traditional CF can struggle with sparse data. Matrix factorization techniques like **Singular Value Decomposition (SVD)** or **Alternating Least Squares (ALS)** are used to decompose the user-item matrix into lower-dimensional representations.
 
@@ -90,7 +90,7 @@ These latent features capture user preferences and item characteristics.
 
 ---
 
-## 📦 Tools & Libraries
+##  Tools & Libraries
 
 * **Surprise (Python)** – Scikit-learn-like framework for building CF models.
 * **Implicit** – Library for ALS-based recommendation engines using implicit feedback.
@@ -99,7 +99,7 @@ These latent features capture user preferences and item characteristics.
 
 ---
 
-## ⚠️ Challenges
+## ️ Challenges
 
 * **Cold Start**: New users/items with no history.
 * **Scalability**: CF becomes slow with large matrices.
@@ -108,7 +108,7 @@ These latent features capture user preferences and item characteristics.
 
 ---
 
-## 📈 Real-World Applications
+##  Real-World Applications
 
 * **E-commerce**: Product recommendations (Amazon)
 * **Streaming Services**: Content recommendations (Netflix, Spotify)
@@ -116,6 +116,6 @@ These latent features capture user preferences and item characteristics.
 
 ---
 
-## ✅ Conclusion
+##  Conclusion
 
 Collaborative Filtering is a powerful and widely-used approach to build recommendation engines. Whether through user similarity or matrix factorization, it enables personalized experiences without needing detailed item descriptions. For large-scale applications, combining CF with content-based filtering (Hybrid models) yields even better results.

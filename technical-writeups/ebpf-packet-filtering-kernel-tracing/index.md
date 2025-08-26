@@ -12,14 +12,14 @@ eBPF (Extended Berkeley Packet Filter) is a revolutionary technology in the Linu
 
 ---
 
-### 🌐 Origins and Evolution of BPF
+###  Origins and Evolution of BPF
 
 * **Classic BPF (cBPF):** Introduced for efficient packet filtering in tools like `tcpdump`, providing a low-level in-kernel VM to evaluate packet headers.
 * **Extended BPF (eBPF):** Introduced in Linux 3.15+ with a more expressive instruction set, ability to hook into various kernel subsystems (e.g., network stack, syscalls), and support for safe memory access and JIT compilation.
 
 ---
 
-### 🔍 Use Cases of eBPF
+###  Use Cases of eBPF
 
 | Category                    | Example Use Cases                                                      |
 | --------------------------- | ---------------------------------------------------------------------- |
@@ -31,7 +31,7 @@ eBPF (Extended Berkeley Packet Filter) is a revolutionary technology in the Linu
 
 ---
 
-### 🔐 eBPF for Packet Filtering
+###  eBPF for Packet Filtering
 
 #### Mechanisms:
 
@@ -70,7 +70,7 @@ int xdp_drop_icmp(struct xdp_md *ctx) {
 
 ---
 
-### 🔎 eBPF for Kernel Tracing
+###  eBPF for Kernel Tracing
 
 eBPF can attach probes to various kernel or user-space events:
 
@@ -93,7 +93,7 @@ bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf("%s opened %s\n", com
 
 ---
 
-### ✅ Safety and Verification
+###  Safety and Verification
 
 * eBPF programs are **verified** before execution to ensure:
 
@@ -104,7 +104,7 @@ bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf("%s opened %s\n", com
 
 ---
 
-### 📦 Real-World Applications
+###  Real-World Applications
 
 * **Cilium:** Kubernetes CNI plugin that uses eBPF for load balancing, network policy enforcement, and observability.
 * **Falco:** Runtime security tool using eBPF to detect suspicious syscalls.
@@ -112,7 +112,7 @@ bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf("%s opened %s\n", com
 
 ---
 
-### 🚀 Advantages of eBPF
+###  Advantages of eBPF
 
 * No kernel changes needed to add tracing/logging.
 * Efficient and safe (runs in a VM with strict safety checks).
@@ -121,7 +121,7 @@ bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf("%s opened %s\n", com
 
 ---
 
-### 🔧 Development Toolchain
+###  Development Toolchain
 
 * **LLVM/Clang:** For compiling C code into eBPF bytecode.
 * **libbpf:** C API to load and interact with eBPF programs.
@@ -130,7 +130,7 @@ bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf("%s opened %s\n", com
 
 ---
 
-### 🧠 Summary
+###  Summary
 
 | Feature              | Description                                             |
 | -------------------- | ------------------------------------------------------- |

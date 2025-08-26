@@ -6,9 +6,9 @@ title: microservices-testing
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🔍 Testing in Microservices with Contract Testing
+#  Testing in Microservices with Contract Testing
 
-## 🧩 Introduction
+##  Introduction
 
 Microservices architecture splits an application into small, loosely coupled services that communicate over APIs. While this enables scalability and flexibility, **testing** becomes more complex due to independent deployments, service versioning, and inter-service communication.
 
@@ -16,13 +16,13 @@ Microservices architecture splits an application into small, loosely coupled ser
 
 ---
 
-## 📜 What is Contract Testing?
+##  What is Contract Testing?
 
 **Contract Testing** is a testing strategy that verifies that services (typically API consumers and providers) agree on the **format and content of requests and responses**—their "contract."
 
 It avoids the overhead of spinning up real services or environments by simulating interactions.
 
-### 🔄 Roles in Contract Testing:
+###  Roles in Contract Testing:
 
 * **Consumer**: Service making the API call.
 * **Provider**: Service receiving the API call.
@@ -30,7 +30,7 @@ It avoids the overhead of spinning up real services or environments by simulatin
 
 ---
 
-## 🛠️ Why Contract Testing in Microservices?
+## ️ Why Contract Testing in Microservices?
 
 | Challenge in Microservices  | How Contract Testing Helps                       |
 | --------------------------- | ------------------------------------------------ |
@@ -41,7 +41,7 @@ It avoids the overhead of spinning up real services or environments by simulatin
 
 ---
 
-## 🔧 How Contract Testing Works
+##  How Contract Testing Works
 
 ### 1. **Consumer Creates a Contract**
 
@@ -57,7 +57,7 @@ The provider uses the contract to verify it can fulfill the requests defined by 
 
 ---
 
-## 🚀 Example with Pact (Python + Flask)
+##  Example with Pact (Python + Flask)
 
 ### Consumer Test
 
@@ -87,7 +87,7 @@ The `auth-service` runs verification tests using this contract to ensure it can 
 
 ---
 
-## 🏛 Contract Broker
+##  Contract Broker
 
 A **contract broker** stores and shares contracts between services. It supports:
 
@@ -99,7 +99,7 @@ Popular option: [Pact Broker](https://pact.io/pact_broker)
 
 ---
 
-## 🔄 Workflow in CI/CD
+##  Workflow in CI/CD
 
 1. Consumer commits a contract → pushes to broker.
 2. Provider fetches and verifies contract.
@@ -107,16 +107,16 @@ Popular option: [Pact Broker](https://pact.io/pact_broker)
 
 ---
 
-## ✅ Benefits of Contract Testing
+##  Benefits of Contract Testing
 
-* 🚀 **Faster Feedback**: Avoids costly E2E tests.
-* 🔒 **Reliable Deployments**: Fewer integration failures.
-* 🔄 **Supports CI/CD**: Shift-left testing of API compatibility.
-* 🔍 **Clear Ownership**: Each team owns their API boundaries.
+*  **Faster Feedback**: Avoids costly E2E tests.
+*  **Reliable Deployments**: Fewer integration failures.
+*  **Supports CI/CD**: Shift-left testing of API compatibility.
+*  **Clear Ownership**: Each team owns their API boundaries.
 
 ---
 
-## ⚠️ Limitations
+## ️ Limitations
 
 | Limitation                         | Workaround or Consideration                  |
 | ---------------------------------- | -------------------------------------------- |
@@ -126,7 +126,7 @@ Popular option: [Pact Broker](https://pact.io/pact_broker)
 
 ---
 
-## 🧪 Where Does It Fit in Test Strategy?
+##  Where Does It Fit in Test Strategy?
 
 | Test Type          | Scope                   | Purpose                       |
 | ------------------ | ----------------------- | ----------------------------- |
@@ -139,7 +139,7 @@ Use **contract tests as a bridge** between unit and integration tests.
 
 ---
 
-## 🧱 Tools for Contract Testing
+##  Tools for Contract Testing
 
 | Tool                      | Language Support     | Notes                               |
 | ------------------------- | -------------------- | ----------------------------------- |
@@ -150,17 +150,17 @@ Use **contract tests as a bridge** between unit and integration tests.
 
 ---
 
-## 📌 Summary
+##  Summary
 
 Contract Testing is essential for microservices to ensure communication is reliable, versioned, and testable. It reduces test complexity while increasing confidence in API interactions.
 
-### ✅ Use Contract Testing When:
+###  Use Contract Testing When:
 
 * Services are developed independently
 * You want fast CI pipelines
 * You're struggling with flaky integration tests
 
-### ❌ Avoid Relying Only on Contract Tests When:
+###  Avoid Relying Only on Contract Tests When:
 
 * You need to verify end-to-end business flows
 * You need to test real-world data or side effects

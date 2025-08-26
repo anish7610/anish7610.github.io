@@ -15,7 +15,7 @@ Mutation testing is a technique used to assess the **quality of your test suite*
 
 ---
 
-### 🔍 What is a Mutation?
+###  What is a Mutation?
 
 A **mutation** is a small syntactic change in your source code meant to mimic a common developer mistake. Examples:
 
@@ -30,7 +30,7 @@ These are injected one at a time to create **mutants** (modified versions of you
 
 ---
 
-### 🧪 Process of Mutation Testing
+###  Process of Mutation Testing
 
 1. **Original Test Run**
    Ensure all tests pass on the unmodified (original) code.
@@ -46,7 +46,7 @@ These are injected one at a time to create **mutants** (modified versions of you
 
 ---
 
-### 📊 Mutation Score
+###  Mutation Score
 
 $$
 \text{Mutation Score} = \frac{\text{Killed Mutants}}{\text{Total Mutants}} \times 100
@@ -57,7 +57,7 @@ $$
 
 ---
 
-### 🛠 Tools by Language
+###  Tools by Language
 
 | Language   | Tool                            |
 | ---------- | ------------------------------- |
@@ -69,7 +69,7 @@ $$
 
 ---
 
-### ✅ Example (Python with `mutmut`)
+###  Example (Python with `mutmut`)
 
 #### Original Function (example.py):
 
@@ -104,7 +104,7 @@ You now know at least one mutant was **not** caught by the test suite.
 
 ---
 
-### 🧠 Why Mutation Testing?
+###  Why Mutation Testing?
 
 * Goes beyond **line/code coverage** — which might be misleading.
 * Uncovers:
@@ -115,7 +115,7 @@ You now know at least one mutant was **not** caught by the test suite.
 
 ---
 
-### ⚠️ Caveats
+### ️ Caveats
 
 * **Performance**: It runs tests multiple times (once per mutant), so it’s slower than normal test runs.
 * **False Positives**: Some mutants are **equivalent** (they don't change the behavior), and no test could kill them.
@@ -123,7 +123,7 @@ You now know at least one mutant was **not** caught by the test suite.
 
 ---
 
-### 👌 Best Practices
+###  Best Practices
 
 * Use in **CI pipelines selectively** (e.g., nightly or on core services).
 * Focus mutation testing on **critical or high-risk** components.
@@ -132,7 +132,7 @@ You now know at least one mutant was **not** caught by the test suite.
 
 ---
 
-### 📦 Integration with Pytest
+###  Integration with Pytest
 
 Some tools like [`mutmut`](https://github.com/boxed/mutmut) integrate well with `pytest`. You can set it to use your pytest runner with:
 

@@ -6,15 +6,15 @@ title: SSH
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🔐 SSH (Secure Shell) – Technical Writeup
+#  SSH (Secure Shell) – Technical Writeup
 
-## 📌 Introduction
+##  Introduction
 
 **SSH (Secure Shell)** is a cryptographic network protocol used for secure communication over an unsecured network. It enables users to securely access remote systems, execute commands, transfer files, and manage services. SSH replaces older protocols like **Telnet**, **FTP**, and **rlogin**, which transmit data in plaintext.
 
 ---
 
-## 🧱 Key Features
+##  Key Features
 
 * **End-to-end encryption** of traffic (including passwords and session data).
 * **Authentication mechanisms**: Password-based, public-key-based, GSSAPI, etc.
@@ -25,7 +25,7 @@ title: SSH
 
 ---
 
-## 🔐 SSH Protocol Stack
+##  SSH Protocol Stack
 
 SSH operates at the **application layer** of the OSI model and comprises three major components:
 
@@ -37,7 +37,7 @@ SSH operates at the **application layer** of the OSI model and comprises three m
 
 ---
 
-## 🔑 Authentication Mechanisms
+##  Authentication Mechanisms
 
 ### 1. **Password-Based Authentication**
 
@@ -58,7 +58,7 @@ SSH operates at the **application layer** of the OSI model and comprises three m
 
 ---
 
-## 🔄 SSH Key Generation
+##  SSH Key Generation
 
 ```bash
 # Generate key pair (RSA 4096 bits)
@@ -78,7 +78,7 @@ ssh-copy-id user@hostname
 
 ---
 
-## 🔌 SSH Commands and Usage
+##  SSH Commands and Usage
 
 ### 1. **Remote Login**
 
@@ -123,7 +123,7 @@ sftp> put file.txt
 
 ---
 
-## ⚙️ SSH Configuration
+## ️ SSH Configuration
 
 Global: `/etc/ssh/ssh_config`
 User-specific: `~/.ssh/config`
@@ -146,7 +146,7 @@ ssh devserver
 
 ---
 
-## 🔍 Security Best Practices
+##  Security Best Practices
 
 * Disable root login (`PermitRootLogin no`)
 * Use only public key authentication (`PasswordAuthentication no`)
@@ -157,7 +157,7 @@ ssh devserver
 
 ---
 
-## 🔁 SSH Agent and Agent Forwarding
+##  SSH Agent and Agent Forwarding
 
 * `ssh-agent` stores decrypted private keys in memory.
 * `ssh-add` adds keys to agent.
@@ -170,7 +170,7 @@ ssh-add ~/.ssh/id_rsa
 
 ---
 
-## 🌉 SSH Tunneling (Use Case: Secure Database Access)
+##  SSH Tunneling (Use Case: Secure Database Access)
 
 To forward a remote MySQL database port:
 
@@ -182,7 +182,7 @@ Then connect locally to `localhost:3306` as if the DB were local.
 
 ---
 
-## 📦 Advanced Tools
+##  Advanced Tools
 
 | Tool       | Purpose                             |
 | ---------- | ----------------------------------- |
@@ -193,7 +193,7 @@ Then connect locally to `localhost:3306` as if the DB were local.
 
 ---
 
-## 🧪 Example Python Code Using `paramiko`
+##  Example Python Code Using `paramiko`
 
 ```python
 import paramiko
@@ -210,14 +210,14 @@ ssh.close()
 
 ---
 
-## 📜 SSH Log Location
+##  SSH Log Location
 
 * Ubuntu/Debian: `/var/log/auth.log`
 * Red Hat/CentOS: `/var/log/secure`
 
 ---
 
-## 🏁 Conclusion
+##  Conclusion
 
 SSH is a fundamental tool for secure remote administration, scripting, and file transfer in Unix-like systems. Mastering its full capabilities, including tunneling, key management, and secure configurations, significantly enhances your system security posture and operational efficiency.
 

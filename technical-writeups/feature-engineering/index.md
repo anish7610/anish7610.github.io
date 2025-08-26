@@ -12,7 +12,7 @@ Fraud detection, particularly in domains like banking, e-commerce, and insurance
 
 ---
 
-## 🧠 What is Feature Engineering?
+##  What is Feature Engineering?
 
 Feature engineering is the process of transforming raw data into informative inputs for machine learning models. In fraud detection, this includes constructing features that capture:
 
@@ -24,7 +24,7 @@ Feature engineering is the process of transforming raw data into informative inp
 
 ---
 
-## 🧩 Types of Features in Fraud Detection
+##  Types of Features in Fraud Detection
 
 ### 1. **Transactional Features**
 
@@ -133,7 +133,7 @@ df['merchant_fraud_rate'] = df['merchant_id'].map(fraud_rate)
 
 ---
 
-## 🛠 Best Practices
+##  Best Practices
 
 * Normalize or scale numeric features
 * Handle class imbalance (SMOTE, undersampling)
@@ -143,7 +143,7 @@ df['merchant_fraud_rate'] = df['merchant_id'].map(fraud_rate)
 
 ---
 
-## 🧪 Real-World Example
+##  Real-World Example
 
 ```python
 # Creating a velocity feature for transaction count in past hour
@@ -154,7 +154,7 @@ Fraudulent accounts may show bursts of transactions in short windows—a strong 
 
 ---
 
-## 🔍 Tools and Libraries
+##  Tools and Libraries
 
 * **Pandas** / **Polars** – Data manipulation
 * **scikit-learn** – Preprocessing, pipelines
@@ -164,7 +164,7 @@ Fraudulent accounts may show bursts of transactions in short windows—a strong 
 
 ---
 
-## 🎯 Conclusion
+##  Conclusion
 
 Feature engineering is central to fraud detection. Unlike some ML applications, off-the-shelf models perform poorly without customized domain features. A deep understanding of both domain context and user behavior is key to designing high-value features that surface subtle fraud signals.
 

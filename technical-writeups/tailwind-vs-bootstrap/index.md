@@ -12,7 +12,7 @@ Modern frontend development involves several choices when it comes to styling: u
 
 ---
 
-## 📌 1. Philosophy and Approach
+##  1. Philosophy and Approach
 
 | Feature                | Tailwind CSS                    | Bootstrap                                 | CSS-in-JS                              |
 | ---------------------- | ------------------------------- | ----------------------------------------- | -------------------------------------- |
@@ -22,21 +22,21 @@ Modern frontend development involves several choices when it comes to styling: u
 
 ---
 
-## 🛠️ 2. Developer Experience
+## ️ 2. Developer Experience
 
-### ✅ Tailwind CSS
+###  Tailwind CSS
 
 * No need to leave HTML/JSX; style using utility classes.
 * Autocompletion support in IDEs (with plugins).
 * Easy to apply conditional styling (with variants).
 
-### ✅ Bootstrap
+###  Bootstrap
 
 * Quick to prototype using pre-built components.
 * Great documentation and consistent design patterns.
 * Requires custom CSS/overrides for deep customization.
 
-### ✅ CSS-in-JS
+###  CSS-in-JS
 
 * Full dynamic styling capabilities using JS/TS.
 * Can access props, themes, and runtime logic in styles.
@@ -44,7 +44,7 @@ Modern frontend development involves several choices when it comes to styling: u
 
 ---
 
-## ⚙️ 3. Performance Considerations
+## ️ 3. Performance Considerations
 
 | Criteria             | Tailwind               | Bootstrap                | CSS-in-JS                             |
 | -------------------- | ---------------------- | ------------------------ | ------------------------------------- |
@@ -52,29 +52,29 @@ Modern frontend development involves several choices when it comes to styling: u
 | **Runtime Overhead** | None (pure CSS)        | None (pure CSS)          | Some (JS runtime injection/rendering) |
 | **Caching**          | Good (static styles)   | Good                     | Poorer caching (runtime generated)    |
 
-> 🔧 Tailwind's Just-in-Time (JIT) engine reduces CSS size drastically by including only used classes.
+>  Tailwind's Just-in-Time (JIT) engine reduces CSS size drastically by including only used classes.
 
 ---
 
-## 🎨 4. Customization and Theming
+##  4. Customization and Theming
 
-### ✅ Tailwind CSS
+###  Tailwind CSS
 
 * Uses `tailwind.config.js` for central configuration.
 * Supports custom themes, color palettes, breakpoints.
 
-### ✅ Bootstrap
+###  Bootstrap
 
 * Customizable using SCSS variables.
 * Theming system is comprehensive but can be verbose.
 
-### ✅ CSS-in-JS
+###  CSS-in-JS
 
 * Ultimate flexibility: you can define themes in JS and use logic to change styles dynamically.
 
 ---
 
-## 🔁 5. Reusability and Maintainability
+##  5. Reusability and Maintainability
 
 | Aspect                     | Tailwind CSS                                 | Bootstrap                                 | CSS-in-JS                           |
 | -------------------------- | -------------------------------------------- | ----------------------------------------- | ----------------------------------- |
@@ -84,7 +84,7 @@ Modern frontend development involves several choices when it comes to styling: u
 
 ---
 
-## 📚 Use Cases
+##  Use Cases
 
 | Use Case                        | Recommended Approach  |
 | ------------------------------- | --------------------- |
@@ -95,7 +95,7 @@ Modern frontend development involves several choices when it comes to styling: u
 
 ---
 
-## 🧠 Summary
+##  Summary
 
 | Feature         | Tailwind         | Bootstrap        | CSS-in-JS                    |
 | --------------- | ---------------- | ---------------- | ---------------------------- |

@@ -100,8 +100,8 @@ This write-up explores the **technical differences** between OAuth 2.0 and OpenI
 | User Info Provided     | No                                 | Yes (`ID Token`, `/userinfo`)       |
 | Is User Authenticated? | Not guaranteed                     | Yes                                 |
 
-> 🔑 **Authorization** = What can the app do?
-> 👤 **Authentication** = Who is the user?
+>  **Authorization** = What can the app do?
+>  **Authentication** = Who is the user?
 
 ---
 

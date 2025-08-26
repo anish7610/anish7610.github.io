@@ -12,7 +12,7 @@ API contract testing ensures that the communication between different components
 
 ---
 
-## 🔍 **What is API Contract Testing?**
+##  **What is API Contract Testing?**
 
 Unlike traditional API tests that check **functionality**, contract testing verifies the **structure, semantics, and validity** of the API request and response payloads. It ensures that the provider (API server) and consumer (client) agree on:
 
@@ -23,7 +23,7 @@ Unlike traditional API tests that check **functionality**, contract testing veri
 
 ---
 
-## 🧪 **Why API Contract Testing?**
+##  **Why API Contract Testing?**
 
 * Prevents breaking changes in APIs
 * Improves collaboration between frontend and backend teams
@@ -32,19 +32,19 @@ Unlike traditional API tests that check **functionality**, contract testing veri
 
 ---
 
-## 🛠️ **Tooling Options**
+## ️ **Tooling Options**
 
 ### **1. Postman + Newman**
 
 **Postman** is a GUI tool for developing and testing APIs. **Newman** is the CLI runner that allows these collections to be run in CI/CD.
 
-#### ✅ Pros:
+####  Pros:
 
 * Easy to set up and use
 * Supports schema validation with JSON schema
 * Large ecosystem and GUI-based testing
 
-#### 🔧 Example: JSON Schema Validation in Postman
+####  Example: JSON Schema Validation in Postman
 
 ```javascript
 pm.test("Contract test: response matches schema", function () {
@@ -61,7 +61,7 @@ pm.test("Contract test: response matches schema", function () {
 });
 ```
 
-#### ➕ Integration with Newman
+####  Integration with Newman
 
 ```bash
 newman run collection.json -e environment.json
@@ -75,19 +75,19 @@ Can be run in CI pipelines to fail builds on schema mismatches.
 
 **Pact** is a powerful framework based on **consumer-driven contracts**. It allows consumers to define their expectations, which providers must then fulfill.
 
-#### ✅ Pros:
+####  Pros:
 
 * Strong versioning and contract negotiation
 * Supports multiple languages (JS, Java, Python, Go)
 * CI/CD friendly with Pact Broker for sharing contracts
 
-#### 🔄 Workflow:
+####  Workflow:
 
 1. **Consumer** writes a test that generates a pact file (JSON).
 2. Pact file is shared with **provider**.
 3. **Provider** runs tests to ensure it satisfies the consumer’s expectations.
 
-#### 🔧 Example (Node.js):
+####  Example (Node.js):
 
 ```javascript
 const { Pact } = require('@pact-foundation/pact');
@@ -135,14 +135,14 @@ describe('Contract Test', () => {
 
 ---
 
-## 🔄 **CI/CD Integration Example**
+##  **CI/CD Integration Example**
 
 * Run **Newman** collections post-deployment in your Jenkins or GitHub Actions workflow.
 * Use **Pact** to verify contract compatibility during pull requests before merging to main.
 
 ---
 
-## ✅ **Best Practices**
+##  **Best Practices**
 
 * Keep your contracts in version control
 * Run contract tests early in the pipeline
@@ -151,6 +151,6 @@ describe('Contract Test', () => {
 
 ---
 
-## 📌 **Conclusion**
+##  **Conclusion**
 
 API contract testing is a critical part of ensuring stable and reliable communication between services. Whether you're using Postman for quick validation or Pact for full-blown consumer-driven contracts, integrating these practices helps catch issues early and streamline development in modern, service-oriented architectures.

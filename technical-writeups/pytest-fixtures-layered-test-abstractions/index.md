@@ -12,7 +12,7 @@ In large and complex Python test suites, **Pytest fixtures** help abstract test 
 
 ---
 
-### 🧩 What Are Pytest Fixtures?
+###  What Are Pytest Fixtures?
 
 A fixture is a function decorated with `@pytest.fixture` that provides data, state, or setup code to your tests. You can:
 
@@ -23,7 +23,7 @@ A fixture is a function decorated with `@pytest.fixture` that provides data, sta
 
 ---
 
-### 🔁 Layered Fixture Architecture
+###  Layered Fixture Architecture
 
 Let’s illustrate the idea by using a layered test setup for a microservice-based API with database dependencies.
 
@@ -106,7 +106,7 @@ def test_api_register_user(start_test_server, api_client):
 
 ---
 
-### ⚙ Best Practices
+###  Best Practices
 
 * **Keep fixtures lean and focused** on one responsibility.
 * **Avoid shared state** unless using proper teardown or session-scoped resources.
@@ -116,7 +116,7 @@ def test_api_register_user(start_test_server, api_client):
 
 ---
 
-### 📌 Summary
+###  Summary
 
 Layered test abstractions using Pytest fixtures allow you to:
 

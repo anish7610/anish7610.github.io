@@ -12,7 +12,7 @@ Python offers multiple paradigms to manage concurrency and parallelism in applic
 
 ---
 
-## 📌 Overview
+##  Overview
 
 | Feature                 | Multithreading                             | Async IO                            |
 | ----------------------- | ------------------------------------------ | ----------------------------------- |
@@ -25,23 +25,23 @@ Python offers multiple paradigms to manage concurrency and parallelism in applic
 
 ---
 
-## 🧵 Multithreading in Python
+##  Multithreading in Python
 
-### ✅ What It Is:
+###  What It Is:
 
 Multithreading uses the `threading` module in Python to spawn OS-level threads that can run concurrently. However, due to the **Global Interpreter Lock (GIL)** in CPython, only one thread executes Python bytecode at a time.
 
-### ✅ When to Use:
+###  When to Use:
 
 * When tasks spend time **waiting** (e.g., for I/O, network responses).
 * When you want to write **simpler** concurrent code without managing an event loop.
 
-### ❌ When to Avoid:
+###  When to Avoid:
 
 * In **CPU-bound** tasks (e.g., computation-heavy loops).
 * When spawning **too many threads** — overhead is non-trivial.
 
-### ✅ Example:
+###  Example:
 
 ```python
 import threading
@@ -64,23 +64,23 @@ for t in threads:
 
 ---
 
-## ⚙️ Async IO in Python
+## ️ Async IO in Python
 
-### ✅ What It Is:
+###  What It Is:
 
 `asyncio` provides a single-threaded, single-process model that runs code using an **event loop**. Tasks cooperatively yield control using `await` and resume when I/O is ready.
 
-### ✅ When to Use:
+###  When to Use:
 
 * High-concurrency, I/O-bound applications (web scraping, socket servers).
 * When managing thousands of lightweight tasks.
 
-### ❌ When to Avoid:
+###  When to Avoid:
 
 * For CPU-intensive workloads.
 * When dealing with non-async APIs without wrappers.
 
-### ✅ Example:
+###  Example:
 
 ```python
 import asyncio
@@ -99,7 +99,7 @@ asyncio.run(main())
 
 ---
 
-## 🔄 Key Differences: Scheduling & Memory
+##  Key Differences: Scheduling & Memory
 
 | Aspect                 | Multithreading            | Async IO                       |
 | ---------------------- | ------------------------- | ------------------------------ |
@@ -110,7 +110,7 @@ asyncio.run(main())
 
 ---
 
-## 🧠 Use Case Comparison
+##  Use Case Comparison
 
 | Use Case                           | Best Option                   | Reason                                            |
 | ---------------------------------- | ----------------------------- | ------------------------------------------------- |
@@ -121,7 +121,7 @@ asyncio.run(main())
 
 ---
 
-## 🧰 Tools and Libraries
+##  Tools and Libraries
 
 ### Multithreading:
 
@@ -136,7 +136,7 @@ asyncio.run(main())
 
 ---
 
-## 🧵🔁 Multithreading + Async IO?
+##  Multithreading + Async IO?
 
 It’s possible to combine both:
 
@@ -149,7 +149,7 @@ loop.run_in_executor(None, blocking_function)
 
 ---
 
-## 🧩 Conclusion
+##  Conclusion
 
 * For modern **I/O-bound** Python applications, **Async IO is generally more scalable and memory-efficient**.
 * For legacy code or when using **blocking APIs**, **multithreading** can be easier.

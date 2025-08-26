@@ -6,9 +6,9 @@ title: test-automation-pyramid
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🧪 Test Automation Pyramid: Unit, Integration, End-to-End
+#  Test Automation Pyramid: Unit, Integration, End-to-End
 
-## 📌 Introduction
+##  Introduction
 
 The **Test Automation Pyramid** is a software testing strategy that helps teams achieve **fast feedback**, **high coverage**, and **efficient test maintenance**. It proposes a layered testing approach, advocating **more low-level (unit) tests** and **fewer high-level (E2E) tests** to optimize quality and speed.
 
@@ -17,9 +17,9 @@ The **Test Automation Pyramid** is a software testing strategy that helps teams 
 
 ---
 
-## 🧱 The Layers of the Pyramid
+##  The Layers of the Pyramid
 
-### 1. ✅ **Unit Tests** (Bottom Layer)
+### 1.  **Unit Tests** (Bottom Layer)
 
 * **Purpose:** Test individual components or functions in isolation.
 * **Tools:** Pytest, JUnit, NUnit, Mocha, etc.
@@ -40,7 +40,7 @@ def test_add():
 
 ---
 
-### 2. 🔗 **Integration Tests** (Middle Layer)
+### 2.  **Integration Tests** (Middle Layer)
 
 * **Purpose:** Test interactions between components/modules.
 * **Scope:** May include database, APIs, or services.
@@ -60,7 +60,7 @@ def test_user_login_flow():
 
 ---
 
-### 3. 🌐 **End-to-End (E2E) Tests** (Top Layer)
+### 3.  **End-to-End (E2E) Tests** (Top Layer)
 
 * **Purpose:** Simulate real user scenarios across the full stack (UI → Backend → DB).
 * **Tools:** Selenium, Cypress, Playwright.
@@ -82,7 +82,7 @@ def test_login_ui():
 
 ---
 
-## 📈 Why the Pyramid Structure?
+##  Why the Pyramid Structure?
 
 * **More Unit Tests:** They're fast and give quick feedback.
 * **Fewer E2E Tests:** High maintenance cost and longer run times.
@@ -90,7 +90,7 @@ def test_login_ui():
 
 ---
 
-## 🧰 Best Practices
+##  Best Practices
 
 1. **Mock External Dependencies** in unit tests.
 2. **Use CI/CD pipelines** to automate test stages.
@@ -100,7 +100,7 @@ def test_login_ui():
 
 ---
 
-## 🧩 Common Pitfalls
+##  Common Pitfalls
 
 | Pitfall                         | Fix                                                         |
 | ------------------------------- | ----------------------------------------------------------- |
@@ -110,6 +110,6 @@ def test_login_ui():
 
 ---
 
-## 📚 Conclusion
+##  Conclusion
 
 The **Test Automation Pyramid** is a **guiding principle**, not a hard rule. The goal is to **optimize test speed, reliability, and coverage** by using the right tests at the right layer. Investing wisely in **unit and integration tests**, while keeping E2E tests lean and focused, leads to **robust and scalable test automation**.

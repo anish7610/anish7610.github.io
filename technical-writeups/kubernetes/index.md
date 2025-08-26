@@ -12,7 +12,7 @@ Kubernetes (K8s) is a powerful container orchestration platform designed to auto
 
 ---
 
-## 🧱 1. Pods
+##  1. Pods
 
 **Definition**: A Pod is the smallest deployable unit in Kubernetes. It encapsulates one or more containers that share the same network namespace and storage.
 
@@ -37,7 +37,7 @@ spec:
 
 ---
 
-## 🌐 2. Services
+##  2. Services
 
 **Definition**: A Service is an abstraction that exposes a set of Pods as a network service.
 
@@ -72,7 +72,7 @@ spec:
 
 ---
 
-## 🚀 3. Deployments
+##  3. Deployments
 
 **Definition**: A Deployment manages the creation and scaling of Pods. It ensures a specified number of Pods are always running.
 
@@ -106,7 +106,7 @@ spec:
 
 ---
 
-## ⚙️ 4. Custom Resource Definitions (CRDs)
+## ️ 4. Custom Resource Definitions (CRDs)
 
 **Definition**: CRDs allow users to extend Kubernetes by defining their own resource types.
 
@@ -156,7 +156,7 @@ spec:
 
 ---
 
-## 🧠 Summary Table
+##  Summary Table
 
 | Concept        | Purpose                              | Key Resource Type          | Managed By               |
 | -------------- | ------------------------------------ | -------------------------- | ------------------------ |
@@ -167,6 +167,6 @@ spec:
 
 ---
 
-## ✅ Conclusion
+##  Conclusion
 
 Kubernetes provides a modular and extensible system through these primitives. Understanding **Pods** for container execution, **Services** for networking, **Deployments** for declarative management, and **CRDs** for custom workflows equips you to build robust, scalable systems on Kubernetes.

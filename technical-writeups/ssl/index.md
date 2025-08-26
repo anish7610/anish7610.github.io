@@ -6,7 +6,7 @@ title: SSL/TLS
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-## 🔐 SSL/TLS: Secure Communication Protocols - Technical Writeup
+##  SSL/TLS: Secure Communication Protocols - Technical Writeup
 
 ### **Overview**
 
@@ -14,7 +14,7 @@ title: SSL/TLS
 
 ---
 
-### 🔄 **Evolution of SSL/TLS**
+###  **Evolution of SSL/TLS**
 
 | Protocol | Release | Status                     |
 | -------- | ------- | -------------------------- |
@@ -27,21 +27,21 @@ title: SSL/TLS
 
 ---
 
-### 🧱 **Architecture Stack**
+###  **Architecture Stack**
 
 ```
 Application Layer: HTTPS, FTPS, SMTPS
-⬇
+
 TLS Layer: Encryption/Decryption, Authentication
-⬇
+
 Transport Layer: TCP
-⬇
+
 Network Layer: IP
 ```
 
 ---
 
-### 🔑 **Goals of SSL/TLS**
+###  **Goals of SSL/TLS**
 
 1. **Confidentiality** – via symmetric encryption
 2. **Integrity** – via message authentication codes
@@ -50,13 +50,13 @@ Network Layer: IP
 
 ---
 
-## 🤝 TLS Handshake Protocol
+##  TLS Handshake Protocol
 
 The **TLS handshake** establishes a secure session between the client and server. It negotiates cryptographic parameters and securely shares symmetric keys.
 
 ---
 
-### ✅ TLS 1.2 Handshake Steps
+###  TLS 1.2 Handshake Steps
 
 ```
 Client                             Server
@@ -77,7 +77,7 @@ Client                             Server
 
 ---
 
-### 🔍 TLS 1.2 Handshake (Detailed)
+###  TLS 1.2 Handshake (Detailed)
 
 1. **ClientHello**
 
@@ -117,7 +117,7 @@ Client                             Server
 
 ---
 
-### ⚡ TLS 1.3 Handshake (Simplified)
+###  TLS 1.3 Handshake (Simplified)
 
 TLS 1.3 removes many legacy features and reduces the handshake to **1 round trip**:
 
@@ -144,7 +144,7 @@ Client                               Server
 
 ---
 
-## 🔒 Cryptographic Components
+##  Cryptographic Components
 
 | Component      | Algorithms                        |
 | -------------- | --------------------------------- |
@@ -155,7 +155,7 @@ Client                               Server
 
 ---
 
-## ⚠️ Known SSL/TLS Attacks (Historical)
+## ️ Known SSL/TLS Attacks (Historical)
 
 * **POODLE**: SSL 3.0 padding attack
 * **BEAST**: TLS 1.0 CBC vulnerability
@@ -163,11 +163,11 @@ Client                               Server
 * **DROWN**: Weak SSLv2 support
 * **CRIME/BREACH**: Compression-based attacks
 
-➡️ **Mitigation**: Use TLS 1.3 or TLS 1.2 with strong configs only
+️ **Mitigation**: Use TLS 1.3 or TLS 1.2 with strong configs only
 
 ---
 
-## 🛡️ Best Practices
+## ️ Best Practices
 
 1. **Disable SSL, TLS 1.0, and 1.1**
 2. Prefer **TLS 1.3**
@@ -179,7 +179,7 @@ Client                               Server
 
 ---
 
-## 📦 Real-World Applications
+##  Real-World Applications
 
 * Web Browsing: HTTPS (TLS + HTTP)
 * Email Security: SMTPS, IMAPS
@@ -189,7 +189,7 @@ Client                               Server
 
 ---
 
-## 📚 References
+##  References
 
 * [RFC 8446 - TLS 1.3 Specification](https://datatracker.ietf.org/doc/html/rfc8446)
 * [SSL Labs Test Tool](https://www.ssllabs.com/ssltest/)

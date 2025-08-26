@@ -10,23 +10,23 @@ title: interrupt-driven-vs-polling
 
 Embedded systems often need to respond to external events—such as user input, sensor readings, or communication data. The choice between **interrupt-driven** and **polling-based** mechanisms to handle these events is fundamental to system performance, power consumption, and responsiveness.
 
-## 🔁 What is Polling?
+##  What is Polling?
 
 Polling is a **synchronous** method where the processor continuously checks (or "polls") a device or register to see if an event has occurred.
 
-### 📌 How It Works
+###  How It Works
 
 * CPU repeatedly reads a status register in a loop.
 * If the event hasn't occurred, the CPU keeps checking.
 * When the event occurs (e.g., data ready), the CPU handles it.
 
-### ✅ Pros
+###  Pros
 
 * Simple to implement.
 * Predictable timing.
 * No concurrency issues; all logic is in a single thread/loop.
 
-### ❌ Cons
+###  Cons
 
 * Inefficient for low-frequency events (wastes CPU cycles).
 * Higher power consumption.
@@ -45,24 +45,24 @@ while (1) {
 
 ---
 
-## ⚡ What is Interrupt-Driven Handling?
+##  What is Interrupt-Driven Handling?
 
 Interrupt-driven design allows a peripheral to **asynchronously notify** the processor when it requires attention, suspending the current flow to handle the event.
 
-### 📌 How It Works
+###  How It Works
 
 * The CPU performs normal operations.
 * When an event occurs (e.g., button press), an **interrupt request (IRQ)** is triggered.
 * CPU stops current execution, saves context, and jumps to an **Interrupt Service Routine (ISR)**.
 * After the ISR executes, normal execution resumes.
 
-### ✅ Pros
+###  Pros
 
 * Efficient: CPU only acts when needed.
 * Ideal for low-frequency or unpredictable events.
 * Allows multitasking or power-saving modes.
 
-### ❌ Cons
+###  Cons
 
 * More complex to implement (needs ISRs, priorities, etc.).
 * Risk of race conditions or re-entrancy bugs if not handled properly.
@@ -82,7 +82,7 @@ enable_UART_interrupts();
 
 ---
 
-## 🧠 Choosing Between the Two
+##  Choosing Between the Two
 
 | Criteria                 | Polling             | Interrupt                   |
 | ------------------------ | ------------------- | --------------------------- |
@@ -94,7 +94,7 @@ enable_UART_interrupts();
 
 ---
 
-## 🛠️ Real-World Embedded Example
+## ️ Real-World Embedded Example
 
 **Scenario**: A temperature sensor sends data every 1 second.
 
@@ -108,7 +108,7 @@ enable_UART_interrupts();
 
 ---
 
-## 🧩 Hybrid Approach
+##  Hybrid Approach
 
 Some systems use a **hybrid** model:
 
@@ -117,14 +117,14 @@ Some systems use a **hybrid** model:
 
 ---
 
-## 🧵 Summary
+##  Summary
 
 | Aspect         | Polling | Interrupt |
 | -------------- | ------- | --------- |
-| CPU Efficiency | ❌       | ✅         |
-| Simplicity     | ✅       | ❌         |
-| Real-Time Use  | ❌       | ✅         |
-| Power Saving   | ❌       | ✅         |
+| CPU Efficiency |        |          |
+| Simplicity     |        |          |
+| Real-Time Use  |        |          |
+| Power Saving   |        |          |
 
 Choose **interrupts** when:
 

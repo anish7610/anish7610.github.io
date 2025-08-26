@@ -6,7 +6,7 @@ title: cgroups-and-namespaces
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🐳 Understanding cgroups and namespaces in Docker/Containers
+#  Understanding cgroups and namespaces in Docker/Containers
 
 Modern container technologies like **Docker** are made possible by two key Linux kernel features:
 
@@ -17,15 +17,15 @@ Together, they form the foundation of container security, performance, and indep
 
 ---
 
-## 🧭 1. What Are Linux Namespaces?
+##  1. What Are Linux Namespaces?
 
-### 🧠 Definition:
+###  Definition:
 
 **Namespaces** allow a process (or group of processes) to have its own isolated instance of certain kernel resources.
 
 Each namespace type isolates a different part of the system, ensuring containers don’t interfere with each other or the host.
 
-### 📂 Types of Namespaces:
+###  Types of Namespaces:
 
 | Namespace | Isolates                                  | CLI flag     |
 | --------- | ----------------------------------------- | ------------ |
@@ -37,7 +37,7 @@ Each namespace type isolates a different part of the system, ensuring containers
 | `user`    | User and group ID mapping                 | `--user`     |
 | `cgroup`  | Cgroup root visibility                    | `--cgroupns` |
 
-### 🧪 Example:
+###  Example:
 
 When a Docker container is run, it gets its **own PID namespace**. That means:
 
@@ -46,15 +46,15 @@ When a Docker container is run, it gets its **own PID namespace**. That means:
 
 ---
 
-## ⚙️ 2. What Are cgroups (Control Groups)?
+## ️ 2. What Are cgroups (Control Groups)?
 
-### 🧠 Definition:
+###  Definition:
 
 **cgroups** (short for control groups) limit, prioritize, and account for resource usage (CPU, memory, disk I/O, etc.) among process groups.
 
 cgroups ensure that one container can't starve others or the host of system resources.
 
-### 📂 Key Features:
+###  Key Features:
 
 | Feature           | Example                                |
 | ----------------- | -------------------------------------- |
@@ -64,7 +64,7 @@ cgroups ensure that one container can't starve others or the host of system reso
 | **PIDs limit**    | Max number of processes per container  |
 | **Accounting**    | Monitor per-container usage statistics |
 
-### 🧪 Docker Example:
+###  Docker Example:
 
 ```bash
 docker run -m 256m --cpus="1.0" ubuntu
@@ -75,7 +75,7 @@ docker run -m 256m --cpus="1.0" ubuntu
 
 ---
 
-## 🔩 How Docker Uses Namespaces + cgroups Together
+##  How Docker Uses Namespaces + cgroups Together
 
 | Feature           | Uses                              |
 | ----------------- | --------------------------------- |
@@ -103,7 +103,7 @@ docker run -m 256m --cpus="1.0" ubuntu
 
 ---
 
-## 🛡️ Benefits for Containers
+## ️ Benefits for Containers
 
 | Feature               | Enabled By     | Benefit                                    |
 | --------------------- | -------------- | ------------------------------------------ |
@@ -115,7 +115,7 @@ docker run -m 256m --cpus="1.0" ubuntu
 
 ---
 
-## 🔍 Inspecting from the Host
+##  Inspecting from the Host
 
 ### View namespaces:
 
@@ -137,7 +137,7 @@ docker inspect <container_id> | grep -A5 "HostConfig"
 
 ---
 
-## 🧪 Manual Namespace (Example)
+##  Manual Namespace (Example)
 
 ```bash
 unshare --pid --mount --uts --ipc --net --user --fork bash
@@ -147,7 +147,7 @@ This launches a shell with isolated namespaces — similar to a minimal containe
 
 ---
 
-## 📌 Summary Table
+##  Summary Table
 
 | Feature     | Namespaces                           | cgroups                              |
 | ----------- | ------------------------------------ | ------------------------------------ |
@@ -158,7 +158,7 @@ This launches a shell with isolated namespaces — similar to a minimal containe
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 * **Namespaces** isolate containers from each other and the host.
 * **Cgroups** control and limit how much a container can use.

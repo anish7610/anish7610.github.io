@@ -12,7 +12,7 @@ MLOps (Machine Learning Operations) bridges the gap between data science and ope
 
 ---
 
-## 🔁 Why Versioning Models?
+##  Why Versioning Models?
 
 Just as source code needs version control, so do ML models — but models are more complex. You must track:
 
@@ -22,7 +22,7 @@ Just as source code needs version control, so do ML models — but models are mo
 * **Training code and environment**
 * **Metrics and evaluation results**
 
-### 🔧 Tools for Model Versioning
+###  Tools for Model Versioning
 
 | Tool                       | Purpose                                |
 | -------------------------- | -------------------------------------- |
@@ -43,11 +43,11 @@ git commit -m "Add trained model v1"
 
 ---
 
-## 🚀 Automating Deployment of Models
+##  Automating Deployment of Models
 
 Automating deployment is about continuously delivering and updating models in production with minimal manual intervention.
 
-### 📦 Packaging the Model
+###  Packaging the Model
 
 Models are usually packaged as:
 
@@ -55,11 +55,11 @@ Models are usually packaged as:
 * REST APIs using Flask/FastAPI
 * Docker containers for portability
 
-### 📈 CI/CD Pipeline for ML (MLOps)
+###  CI/CD Pipeline for ML (MLOps)
 
 ```plaintext
-[Git Push] ➜ [CI: Test + Build] ➜ [Model Registry Push] ➜ 
-[CD: Deploy to Staging/Production] ➜ [Monitor and Retrain]
+[Git Push]  [CI: Test + Build]  [Model Registry Push]  
+[CD: Deploy to Staging/Production]  [Monitor and Retrain]
 ```
 
 **Popular CI/CD Tools for MLOps:**
@@ -69,7 +69,7 @@ Models are usually packaged as:
 * **Seldon Core / KFServing:** Deploy models on Kubernetes
 * **Argo Workflows:** For ML workflows in Kubernetes
 
-### ⚙️ Deployment Patterns
+### ️ Deployment Patterns
 
 * **Batch Inference**: Pre-compute predictions and store
 * **Online Inference**: Serve predictions in real-time via API
@@ -77,7 +77,7 @@ Models are usually packaged as:
 
 ---
 
-## 🧪 Example: MLflow Model Deployment (REST API)
+##  Example: MLflow Model Deployment (REST API)
 
 ```bash
 mlflow models serve -m runs:/<run-id>/model -p 5000
@@ -87,7 +87,7 @@ This exposes your model as a REST API with `/predict` endpoint.
 
 ---
 
-## 📊 Monitoring and Retraining
+##  Monitoring and Retraining
 
 Once deployed, models must be:
 
@@ -99,7 +99,7 @@ Tools: Prometheus + Grafana, EvidentlyAI, A/B Testing pipelines
 
 ---
 
-## 🔒 Version Control Best Practices
+##  Version Control Best Practices
 
 * Use semantic versioning (`v1.0.0`)
 * Save metadata: metrics, git hash, environment (conda/pip)
@@ -107,7 +107,7 @@ Tools: Prometheus + Grafana, EvidentlyAI, A/B Testing pipelines
 
 ---
 
-## ✅ Summary
+##  Summary
 
 | Step                  | Tool/Concept            |
 | --------------------- | ----------------------- |

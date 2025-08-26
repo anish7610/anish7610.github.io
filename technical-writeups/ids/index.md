@@ -34,8 +34,8 @@ Intrusion Detection and Prevention Systems (IDS/IPS) are critical components in 
 
 | Feature       | IDS                   | IPS                            |
 | ------------- | --------------------- | ------------------------------ |
-| Detection     | ✅                     | ✅                              |
-| Prevention    | ❌                     | ✅                              |
+| Detection     |                      |                               |
+| Prevention    |                      |                               |
 | Response Type | Passive (alerts/logs) | Active (blocks, drops packets) |
 | Deployment    | Out-of-band           | Inline                         |
 

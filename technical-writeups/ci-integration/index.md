@@ -12,7 +12,7 @@ Continuous Integration (CI) is a fundamental part of modern software development
 
 ---
 
-## ✅ Benefits of CI-TestRail Integration
+##  Benefits of CI-TestRail Integration
 
 * **Automated Result Publishing**: Avoid manual updates by pushing results directly from your CI jobs.
 * **Centralized Reporting**: View manual and automated test runs together in one dashboard.
@@ -21,7 +21,7 @@ Continuous Integration (CI) is a fundamental part of modern software development
 
 ---
 
-## 🧱 Architecture Overview
+##  Architecture Overview
 
 ```
 CI/CD Tool (GitHub Actions / GitLab CI / Jenkins / CircleCI)
@@ -35,7 +35,7 @@ CI/CD Tool (GitHub Actions / GitLab CI / Jenkins / CircleCI)
 
 ---
 
-## 🧪 Prerequisites
+##  Prerequisites
 
 * TestRail account with API access enabled
 * Project and test cases already created in TestRail
@@ -45,7 +45,7 @@ CI/CD Tool (GitHub Actions / GitLab CI / Jenkins / CircleCI)
 
 ---
 
-## ⚙️ Integration Steps
+## ️ Integration Steps
 
 ### 1. **Tag Test Cases with TestRail IDs**
 
@@ -137,7 +137,7 @@ for case_id, status in parsed_results:
 
 ---
 
-## ⚙️ CI Pipeline Example – GitHub Actions
+## ️ CI Pipeline Example – GitHub Actions
 
 ```yaml
 name: Test and Report
@@ -165,7 +165,7 @@ jobs:
 
 ---
 
-## 📊 Best Practices
+##  Best Practices
 
 * **Mark all automated test cases with Case IDs**.
 * **Fail fast**: Stop the pipeline if critical tests fail.
@@ -176,7 +176,7 @@ jobs:
 
 ---
 
-## 🧪 Sample TestRail Status IDs
+##  Sample TestRail Status IDs
 
 | Status   | ID |
 | -------- | -- |
@@ -188,7 +188,7 @@ jobs:
 
 ---
 
-## 🚀 Advanced Features
+##  Advanced Features
 
 * **Custom Fields**: Add automation run metadata like environment, branch, etc.
 * **Update existing test runs** instead of creating new ones
@@ -197,6 +197,6 @@ jobs:
 
 ---
 
-## ✅ Summary
+##  Summary
 
 CI-TestRail integration ensures real-time, traceable, and accurate test reporting across automated test pipelines. By pushing test results directly to TestRail, teams gain visibility and control over release readiness and can make informed decisions with confidence.

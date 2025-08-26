@@ -12,13 +12,13 @@ Modern applications—especially those involving fraud detection, user behavior 
 
 ---
 
-## 🔁 What is Stream Processing?
+##  What is Stream Processing?
 
 **Stream processing** refers to the continuous processing of data as it flows through a system. Unlike batch processing (which processes data in chunks), stream processing operates on data item by item or micro-batches.
 
 ---
 
-## 🧱 Kafka Overview
+##  Kafka Overview
 
 **Apache Kafka** is a distributed event streaming platform used for high-throughput, low-latency messaging.
 
@@ -34,7 +34,7 @@ Kafka stores messages durably and can retain them for a configurable period, all
 
 ---
 
-## ⚙️ Spark Streaming Overview
+## ️ Spark Streaming Overview
 
 **Apache Spark Streaming** is a real-time processing extension of Apache Spark.
 
@@ -44,7 +44,7 @@ Kafka stores messages durably and can retain them for a configurable period, all
 
 ---
 
-## 🔌 Kafka + Spark Streaming Integration
+##  Kafka + Spark Streaming Integration
 
 Spark provides a **Kafka connector** to consume messages from Kafka topics and process them.
 
@@ -64,7 +64,7 @@ Kafka Producers → Kafka Topics → Spark Streaming → Data Sink (DB, Dashboar
 
 ---
 
-## 🧪 Code Example (PySpark)
+##  Code Example (PySpark)
 
 ```python
 from pyspark.sql import SparkSession
@@ -100,7 +100,7 @@ query.awaitTermination()
 
 ---
 
-## 📌 Key Features
+##  Key Features
 
 | Kafka Features               | Spark Streaming Features                 |
 | ---------------------------- | ---------------------------------------- |
@@ -111,7 +111,7 @@ query.awaitTermination()
 
 ---
 
-## 📉 Use Cases
+##  Use Cases
 
 * Fraud detection (e.g., credit card transactions)
 * Real-time dashboards (e.g., metrics, logs)
@@ -121,7 +121,7 @@ query.awaitTermination()
 
 ---
 
-## 🛠 Best Practices
+##  Best Practices
 
 * Tune Spark micro-batch intervals carefully.
 * Use **checkpointing** for fault tolerance.
@@ -130,7 +130,7 @@ query.awaitTermination()
 
 ---
 
-## 🔒 Security Considerations
+##  Security Considerations
 
 * Enable **TLS encryption** for Kafka brokers.
 * Use **SASL or Kerberos** for Kafka authentication.
@@ -138,6 +138,6 @@ query.awaitTermination()
 
 ---
 
-## 🧠 Conclusion
+##  Conclusion
 
 Combining Kafka with Spark Streaming creates a robust, scalable real-time stream processing pipeline. Kafka handles ingestion and durability, while Spark processes and transforms the data efficiently. Together, they enable businesses to respond to events in real-time, making data instantly actionable.

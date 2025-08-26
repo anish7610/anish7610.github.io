@@ -14,7 +14,7 @@ Two of the most popular tools in the IaC ecosystem are **Terraform** and **Ansib
 
 ---
 
-## ❓ What Is IaC?
+##  What Is IaC?
 
 IaC allows you to:
 
@@ -25,7 +25,7 @@ IaC allows you to:
 
 ---
 
-## 🛠️ Terraform: Declarative Provisioning
+## ️ Terraform: Declarative Provisioning
 
 **Terraform**, developed by HashiCorp, is a tool focused on **provisioning infrastructure**.
 
@@ -44,7 +44,7 @@ IaC allows you to:
 
 ---
 
-## 🧰 Ansible: Configuration Management and Orchestration
+##  Ansible: Configuration Management and Orchestration
 
 **Ansible**, developed by Red Hat, is an **agentless configuration management and automation** tool.
 
@@ -63,7 +63,7 @@ IaC allows you to:
 
 ---
 
-## 🔍 Terraform vs Ansible: Key Differences
+##  Terraform vs Ansible: Key Differences
 
 | Feature           | Terraform                         | Ansible                         |
 | ----------------- | --------------------------------- | ------------------------------- |
@@ -78,7 +78,7 @@ IaC allows you to:
 
 ---
 
-## 🧪 Complementary Usage
+##  Complementary Usage
 
 In real-world DevOps workflows, **Terraform and Ansible are often used together**:
 
@@ -94,7 +94,7 @@ ansible-playbook -i inventory.ini configure.yml  # Installs Docker, sets up apps
 
 ---
 
-## 🧠 Summary
+##  Summary
 
 * **Terraform** is best for infrastructure provisioning in a consistent, version-controlled manner.
 * **Ansible** excels at post-provisioning configuration and ongoing system management.

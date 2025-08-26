@@ -12,7 +12,7 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 📏 Why Performance Matters
+##  Why Performance Matters
 
 * **User Experience**: Fast-loading websites improve user satisfaction and lower bounce rates.
 * **SEO**: Google uses Core Web Vitals as ranking signals.
@@ -21,11 +21,11 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 🚀 Lighthouse: Auditing Your Site
+##  Lighthouse: Auditing Your Site
 
 **Lighthouse** is an open-source tool from Google that audits websites for performance, accessibility, SEO, best practices, and PWA capabilities.
 
-### 🔍 Key Lighthouse Metrics:
+###  Key Lighthouse Metrics:
 
 1. **Performance**: Measures page speed and interactivity.
 2. **Accessibility**: Checks for ARIA roles, color contrast, semantic HTML.
@@ -33,7 +33,7 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 4. **SEO**: Valid HTML, meta tags, canonical links.
 5. **Progressive Web App (PWA)** readiness.
 
-### ✅ How to Use:
+###  How to Use:
 
 * **Chrome DevTools** > Lighthouse tab.
 * CLI: `npx lighthouse https://your-site.com`
@@ -41,7 +41,7 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 📊 Core Web Vitals (CWV)
+##  Core Web Vitals (CWV)
 
 **Web Vitals** are a set of metrics from Google to quantify real-world UX. The **Core Web Vitals** focus on three key aspects:
 
@@ -62,7 +62,7 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 🛠 Optimization Techniques
+##  Optimization Techniques
 
 ### 1. **Reduce Initial Load Time**
 
@@ -89,7 +89,7 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 🔧 CI/CD Integration
+##  CI/CD Integration
 
 * Integrate Lighthouse and Web Vitals checks into your deployment pipelines.
 * Block deploys if performance budgets (e.g., LCP > 3s) are exceeded.
@@ -97,7 +97,7 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 🧠 Best Practices
+##  Best Practices
 
 * Monitor both **lab data** (controlled testing) and **field data** (real-user metrics).
 * Use lazy hydration and progressive enhancement techniques.
@@ -106,6 +106,6 @@ In an era where milliseconds matter, optimizing web performance is crucial not o
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 Web performance is a critical pillar of modern web development. By leveraging tools like **Lighthouse** and tracking **Core Web Vitals**, developers can ensure their applications deliver a fast, accessible, and user-friendly experience. Continuous monitoring and optimization will not only boost user engagement but also provide a competitive SEO edge.

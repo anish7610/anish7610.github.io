@@ -6,13 +6,13 @@ title: linux-boot-process
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🐧 Technical Writeup: Linux Boot Process — From BIOS to Shell
+#  Technical Writeup: Linux Boot Process — From BIOS to Shell
 
 The Linux boot process is a sequence of steps that your system follows to transition from powered-off hardware to a fully functional Linux environment, complete with a shell. Understanding each stage is crucial for system administrators, developers, and security professionals.
 
 ---
 
-## 🧭 1. BIOS / UEFI: Power-On and Hardware Initialization
+##  1. BIOS / UEFI: Power-On and Hardware Initialization
 
 ### BIOS (Basic Input/Output System)
 
@@ -27,11 +27,11 @@ The Linux boot process is a sequence of steps that your system follows to transi
 * Loads a **.efi** bootloader from the EFI system partition (usually `/boot/efi`).
 * UEFI directly loads the Linux bootloader, bypassing the MBR.
 
-> 🔧 **Key Difference**: BIOS uses MBR and legacy bootloaders like GRUB Legacy; UEFI uses GPT and newer bootloaders like GRUB2 or systemd-boot.
+>  **Key Difference**: BIOS uses MBR and legacy bootloaders like GRUB Legacy; UEFI uses GPT and newer bootloaders like GRUB2 or systemd-boot.
 
 ---
 
-## 💽 2. Bootloader: GRUB or systemd-boot
+##  2. Bootloader: GRUB or systemd-boot
 
 The bootloader is responsible for loading the Linux kernel into memory.
 
@@ -48,7 +48,7 @@ The bootloader is responsible for loading the Linux kernel into memory.
 
 ---
 
-## 🧠 3. Kernel Initialization
+##  3. Kernel Initialization
 
 Once the kernel is loaded into memory:
 
@@ -64,7 +64,7 @@ Once the kernel is loaded into memory:
 
 ---
 
-## 🧱 4. init System: PID 1
+##  4. init System: PID 1
 
 The init system is the first userspace process (PID 1) that manages user-space services.
 
@@ -83,7 +83,7 @@ The init system is the first userspace process (PID 1) that manages user-space s
 
 ---
 
-## 💻 5. Login Prompt and Shell
+##  5. Login Prompt and Shell
 
 Once the system reaches the default target:
 
@@ -93,7 +93,7 @@ Once the system reaches the default target:
 
 ---
 
-## 🔁 Summary Diagram
+##  Summary Diagram
 
 ```
 [Power On]
@@ -113,7 +113,7 @@ Once the system reaches the default target:
 
 ---
 
-## 🧪 Troubleshooting Tools
+##  Troubleshooting Tools
 
 * `dmesg` — Kernel ring buffer logs.
 * `journalctl` — Logs managed by systemd.
@@ -122,7 +122,7 @@ Once the system reaches the default target:
 
 ---
 
-## 📌 Final Notes
+##  Final Notes
 
 * **Fast Boot** options in UEFI/BIOS can skip POST checks.
 * **Secure Boot** restricts unsigned kernel/modules — must be configured correctly for custom kernels.

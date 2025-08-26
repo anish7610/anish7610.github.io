@@ -12,7 +12,7 @@ As machine learning (ML) models grow in complexity—ranging from random forests
 
 ---
 
-## ⚙️ Why Explainability Matters
+## ️ Why Explainability Matters
 
 * **Trust**: Users and stakeholders need to understand model decisions, especially in high-stakes domains like healthcare, finance, and law.
 * **Debugging**: Developers can identify biases, spurious correlations, or data leakage.
@@ -21,7 +21,7 @@ As machine learning (ML) models grow in complexity—ranging from random forests
 
 ---
 
-## 🧠 Types of Models
+##  Types of Models
 
 * **White-box models**: Interpretable by design (e.g., decision trees, linear/logistic regression).
 * **Black-box models**: High-performing but opaque (e.g., deep learning, ensemble methods like XGBoost or random forests).
@@ -30,7 +30,7 @@ XAI primarily targets **black-box models**.
 
 ---
 
-## 🛠️ Common XAI Techniques
+## ️ Common XAI Techniques
 
 ### 1. **LIME (Local Interpretable Model-Agnostic Explanations)**
 
@@ -121,7 +121,7 @@ from captum.attr import IntegratedGradients
 
 ---
 
-## 🔍 Choosing the Right Tool
+##  Choosing the Right Tool
 
 | Technique            | Best For                     | Scope  | Model Support              |
 | -------------------- | ---------------------------- | ------ | -------------------------- |
@@ -134,7 +134,7 @@ from captum.attr import IntegratedGradients
 
 ---
 
-## 🚨 Challenges in XAI
+##  Challenges in XAI
 
 * **Scalability**: Many methods are slow for large datasets or complex models.
 * **Faithfulness**: Do explanations truly reflect what the model is doing?
@@ -142,7 +142,7 @@ from captum.attr import IntegratedGradients
 
 ---
 
-## 🧾 Summary
+##  Summary
 
 Explainable AI techniques are crucial for understanding, trusting, and debugging complex black-box models. Tools like SHAP and LIME are powerful allies in demystifying model predictions, especially in domains where accountability and fairness are paramount.
 

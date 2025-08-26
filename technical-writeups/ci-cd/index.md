@@ -12,7 +12,7 @@ Modern software development practices prioritize speed, reliability, and consist
 
 ---
 
-## 🚀 What is CI/CD?
+##  What is CI/CD?
 
 * **Continuous Integration (CI):** Automatically integrating code changes into a shared repository and running tests to detect issues early.
 * **Continuous Delivery (CD):** Automating the release of validated code to staging or production.
@@ -20,7 +20,7 @@ Modern software development practices prioritize speed, reliability, and consist
 
 ---
 
-## ⚙️ Jenkins
+## ️ Jenkins
 
 ### Overview:
 
@@ -70,7 +70,7 @@ pipeline {
 
 ---
 
-## 🧪 GitLab CI/CD
+##  GitLab CI/CD
 
 ### Overview:
 
@@ -116,7 +116,7 @@ deploy_job:
 
 ---
 
-## ⚡ GitHub Actions
+##  GitHub Actions
 
 ### Overview:
 
@@ -158,7 +158,7 @@ jobs:
 
 ---
 
-## 🔄 Comparison Summary
+##  Comparison Summary
 
 | Feature         | Jenkins           | GitLab CI/CD       | GitHub Actions    |
 | --------------- | ----------------- | ------------------ | ----------------- |
@@ -171,7 +171,7 @@ jobs:
 
 ---
 
-## ✅ Best Practices for CI/CD
+##  Best Practices for CI/CD
 
 * **Fail fast:** Run tests early in the pipeline
 * **Parallelization:** Split tests/builds across jobs
@@ -181,6 +181,6 @@ jobs:
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 Whether you're a team looking for a fully integrated DevOps platform (GitLab), already invested in GitHub (GitHub Actions), or need a highly customizable solution (Jenkins), choosing the right CI/CD tool hinges on your development workflow, hosting preference, and integration needs.

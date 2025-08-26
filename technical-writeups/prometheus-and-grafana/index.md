@@ -12,11 +12,11 @@ Monitoring is a fundamental aspect of modern DevOps and SRE practices. Prometheu
 
 ---
 
-## 🔧 What is Prometheus?
+##  What is Prometheus?
 
 **Prometheus** is a time-series database and monitoring system originally developed at SoundCloud. It collects metrics from configured targets at given intervals, evaluates rule expressions, and triggers alerts when certain conditions are observed.
 
-### 📌 Key Features:
+###  Key Features:
 
 * Pull-based metrics collection via HTTP endpoints (`/metrics`)
 * Powerful **PromQL** (Prometheus Query Language)
@@ -26,11 +26,11 @@ Monitoring is a fundamental aspect of modern DevOps and SRE practices. Prometheu
 
 ---
 
-## 📊 What is Grafana?
+##  What is Grafana?
 
 **Grafana** is a multi-platform, open-source analytics and interactive visualization web application. It allows users to query, visualize, alert on, and explore metrics from various data sources, including Prometheus.
 
-### 📌 Key Features:
+###  Key Features:
 
 * Interactive dashboards
 * Rich plugin ecosystem
@@ -40,7 +40,7 @@ Monitoring is a fundamental aspect of modern DevOps and SRE practices. Prometheu
 
 ---
 
-## 🧱 Architecture Overview
+##  Architecture Overview
 
 ```
  [ Target Services ]
@@ -58,7 +58,7 @@ Monitoring is a fundamental aspect of modern DevOps and SRE practices. Prometheu
 
 ---
 
-## 🚀 Setting Up Prometheus and Grafana
+##  Setting Up Prometheus and Grafana
 
 ### 1. Export Metrics
 
@@ -114,7 +114,7 @@ Run Prometheus with:
 
 ---
 
-## 🔍 Example Metrics to Monitor
+##  Example Metrics to Monitor
 
 * **System**: CPU, Memory, Disk, Network (via Node Exporter)
 * **Applications**: Request latency, error rate, throughput
@@ -123,7 +123,7 @@ Run Prometheus with:
 
 ---
 
-## ⚠️ Alerting with Prometheus
+## ️ Alerting with Prometheus
 
 Configure alert rules in `prometheus.yml`:
 
@@ -149,7 +149,7 @@ Use **Alertmanager** to route alerts via:
 
 ---
 
-## 🧪 Best Practices
+##  Best Practices
 
 * **Use labels wisely**: Too many labels → high cardinality
 * **Alert on symptoms, not causes**: e.g., “Latency > 300ms”
@@ -158,7 +158,7 @@ Use **Alertmanager** to route alerts via:
 
 ---
 
-## 📚 Use Cases
+##  Use Cases
 
 * Kubernetes monitoring (`kube-prometheus-stack`)
 * Microservices performance visualization
@@ -167,7 +167,7 @@ Use **Alertmanager** to route alerts via:
 
 ---
 
-## 🧰 Tools and Exporters
+##  Tools and Exporters
 
 | Tool              | Purpose                           |
 | ----------------- | --------------------------------- |
@@ -179,6 +179,6 @@ Use **Alertmanager** to route alerts via:
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 Prometheus and Grafana provide a robust, flexible, and scalable monitoring stack that’s widely adopted in cloud-native environments. Prometheus handles metric collection and alerting, while Grafana turns those metrics into rich dashboards and insights.

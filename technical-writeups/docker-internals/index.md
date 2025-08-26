@@ -14,7 +14,7 @@ Docker revolutionized how developers build, ship, and run applications by using 
 
 ## 1. Docker Image Layers: Union Filesystems
 
-### 📦 What are Layers?
+###  What are Layers?
 
 Docker images are built in layers using a **union filesystem** (like AUFS, OverlayFS, or Btrfs). Each instruction in a Dockerfile (e.g., `RUN`, `COPY`, `ADD`) creates a new layer. Layers are **read-only** and **cached**, allowing for:
 
@@ -22,7 +22,7 @@ Docker images are built in layers using a **union filesystem** (like AUFS, Overl
 * Faster builds
 * Smaller storage footprint
 
-### 🔄 Layer Composition
+###  Layer Composition
 
 * **Base image layer**: Starts from an OS like `ubuntu`, `alpine`, etc.
 * **Intermediate layers**: Commands like `RUN apt-get update`.
@@ -32,7 +32,7 @@ Docker images are built in layers using a **union filesystem** (like AUFS, Overl
 docker history <image-name>
 ```
 
-### 🔧 Example:
+###  Example:
 
 ```Dockerfile
 FROM python:3.9
@@ -48,17 +48,17 @@ Each of these commands creates a new immutable layer.
 
 ## 2. Docker Volumes: Persistent Storage
 
-### 💾 Why Volumes?
+###  Why Volumes?
 
 Containers are **ephemeral** — once destroyed, data in them is lost. Volumes provide a **persistent storage mechanism**.
 
-### 🔍 Types of Mounts:
+###  Types of Mounts:
 
 * **Volumes**: Managed by Docker (`/var/lib/docker/volumes/`)
 * **Bind Mounts**: Maps host path to container path
 * **tmpfs Mounts**: RAM-only storage, useful for sensitive data
 
-### 📘 Use Cases:
+###  Use Cases:
 
 * Database storage
 * Sharing logs between containers
@@ -70,7 +70,7 @@ docker volume create mydata
 docker run -v mydata:/data myimage
 ```
 
-### 🧹 Volume Lifecycle:
+###  Volume Lifecycle:
 
 Volumes persist beyond the life of a container unless manually removed:
 
@@ -84,7 +84,7 @@ docker volume rm mydata
 
 Docker provides multiple **network drivers** to allow containers to communicate internally or with the outside world.
 
-### 🔌 Common Network Drivers:
+###  Common Network Drivers:
 
 | Driver  | Description                                 |
 | ------- | ------------------------------------------- |
@@ -94,7 +94,7 @@ Docker provides multiple **network drivers** to allow containers to communicate 
 | none    | Isolated container, no networking           |
 | macvlan | Assigns MAC to container for LAN visibility |
 
-### 🧱 Bridge Network (Default):
+###  Bridge Network (Default):
 
 * Each container gets a virtual NIC (veth pair)
 * Docker manages a bridge (e.g., `docker0`) for internal communication
@@ -104,7 +104,7 @@ Docker provides multiple **network drivers** to allow containers to communicate 
 docker network inspect bridge
 ```
 
-### 🌐 Creating Custom Networks:
+###  Creating Custom Networks:
 
 Useful for service discovery and isolated communication.
 
@@ -120,11 +120,11 @@ Now, `busybox` can ping `web`.
 
 ## 4. Advanced Concepts
 
-### 🔄 Copy-on-Write (COW)
+###  Copy-on-Write (COW)
 
 When a container writes to a file, it's copied from the underlying image layer to the writable container layer. This is how Docker maintains immutability of base image layers.
 
-### 🕵️ Debugging:
+### ️ Debugging:
 
 ```bash
 docker inspect <container-name>
@@ -138,6 +138,6 @@ Useful to understand:
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 Understanding Docker's internal workings — how it builds images with layers, manages persistent state with volumes, and connects containers through networks — empowers developers to write efficient, scalable, and secure containerized applications. Mastery of these concepts also helps in debugging complex container orchestration setups in tools like Docker Compose and Kubernetes.

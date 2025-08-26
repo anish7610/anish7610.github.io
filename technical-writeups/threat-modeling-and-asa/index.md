@@ -6,26 +6,26 @@ title: Threat Modeling And ASA
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🔐 Threat Modeling and Attack Surface Analysis: A Technical Overview
+#  Threat Modeling and Attack Surface Analysis: A Technical Overview
 
-## 🔎 Introduction
+##  Introduction
 
 In today's cybersecurity landscape, understanding *how* attackers might target your systems is just as important as securing them. **Threat Modeling** and **Attack Surface Analysis (ASA)** are two proactive techniques used during software development and security assessments to identify and mitigate potential vulnerabilities before they are exploited.
 
 ---
 
-## 🧠 What is Threat Modeling?
+##  What is Threat Modeling?
 
 **Threat Modeling** is a structured process for identifying potential threats to a system and developing mitigations to prevent or minimize their impact.
 
-### 🛠️ Key Goals
+### ️ Key Goals
 
 * Understand what you're building.
 * Identify security risks and vulnerabilities.
 * Enumerate potential attackers and their goals.
 * Prioritize mitigations early in the development lifecycle (Shift-Left Security).
 
-### 🎯 When to Perform Threat Modeling?
+###  When to Perform Threat Modeling?
 
 * During design phase of software/system development (ideal).
 * After major architectural changes.
@@ -33,7 +33,7 @@ In today's cybersecurity landscape, understanding *how* attackers might target y
 
 ---
 
-## 🧩 Core Components of Threat Modeling
+##  Core Components of Threat Modeling
 
 | Component        | Description                                                                |
 | ---------------- | -------------------------------------------------------------------------- |
@@ -45,7 +45,7 @@ In today's cybersecurity landscape, understanding *how* attackers might target y
 
 ---
 
-## ⚙️ Common Threat Modeling Methodologies
+## ️ Common Threat Modeling Methodologies
 
 ### 1. **STRIDE (by Microsoft)**
 
@@ -70,13 +70,13 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 🧱 What is Attack Surface Analysis?
+##  What is Attack Surface Analysis?
 
 **Attack Surface Analysis (ASA)** involves identifying all the points where an attacker could interact with your system — also known as **attack vectors**.
 
 > Think of ASA as mapping the doors and windows into your digital "house."
 
-### 🎯 Goals of ASA
+###  Goals of ASA
 
 * Minimize entry points.
 * Harden each entry point with security controls.
@@ -84,7 +84,7 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 🔍 Types of Attack Surfaces
+##  Types of Attack Surfaces
 
 | Category         | Examples                                                 |
 | ---------------- | -------------------------------------------------------- |
@@ -96,7 +96,7 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 🧰 Tools for Threat Modeling & ASA
+##  Tools for Threat Modeling & ASA
 
 | Tool                           | Purpose                            |
 | ------------------------------ | ---------------------------------- |
@@ -109,7 +109,7 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 🌐 Real-World Example: Web Application
+##  Real-World Example: Web Application
 
 **Scenario**: An online banking portal.
 
@@ -145,7 +145,7 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 📉 Threat Modeling vs Attack Surface Analysis
+##  Threat Modeling vs Attack Surface Analysis
 
 | Aspect       | Threat Modeling                            | Attack Surface Analysis                   |
 | ------------ | ------------------------------------------ | ----------------------------------------- |
@@ -156,7 +156,7 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 🔁 Best Practices
+##  Best Practices
 
 * Perform both threat modeling and ASA **early and often**.
 * Integrate into **SDLC** (Shift-left security).
@@ -166,7 +166,7 @@ Focuses on identifying privacy-related threats like data linkability and unaware
 
 ---
 
-## 🧩 Conclusion
+##  Conclusion
 
 Threat Modeling and Attack Surface Analysis are complementary practices that together build a resilient security posture. By identifying *what can go wrong* and *how attackers could break in*, teams can proactively defend systems — reducing costly vulnerabilities and protecting critical assets.
 

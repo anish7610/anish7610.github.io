@@ -93,7 +93,7 @@ Svelte’s compile-time optimizations yield minimal runtime overhead and better 
 
 | Metric         | React      | Vue      | Svelte  |
 | -------------- | ---------- | -------- | ------- |
-| GitHub Stars   | ⭐⭐⭐⭐⭐      | ⭐⭐⭐⭐     | ⭐⭐⭐     |
+| GitHub Stars   |       |      |      |
 | Job Market     | High       | Moderate | Low     |
 | Community Size | Very Large | Large    | Growing |
 

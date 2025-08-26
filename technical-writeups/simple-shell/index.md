@@ -12,7 +12,7 @@ A **shell** is a command-line interpreter that provides a user interface for acc
 
 ---
 
-## 🧠 Overview of a Shell's Responsibilities
+##  Overview of a Shell's Responsibilities
 
 A simple shell performs the following tasks in a loop:
 
@@ -24,7 +24,7 @@ A simple shell performs the following tasks in a loop:
 
 ---
 
-## 🛠️ Required System Calls
+## ️ Required System Calls
 
 * `fork()`: Creates a new process (child).
 * `execvp()`: Replaces the current process image with a new one.
@@ -33,7 +33,7 @@ A simple shell performs the following tasks in a loop:
 
 ---
 
-## 🔍 Minimal Shell Code in C
+##  Minimal Shell Code in C
 
 ```c
 #include <stdio.h>
@@ -97,7 +97,7 @@ int main() {
 
 ---
 
-## 🔧 Enhancements to Explore
+##  Enhancements to Explore
 
 * **Pipelines (`|`)** – Use `pipe()` and `dup2()`.
 * **Redirection (`>`, `<`)** – Use `open()` and `dup2()`.
@@ -106,7 +106,7 @@ int main() {
 
 ---
 
-## 📦 Key Concepts
+##  Key Concepts
 
 | Concept             | Explanation                                                 |
 | ------------------- | ----------------------------------------------------------- |
@@ -117,7 +117,7 @@ int main() {
 
 ---
 
-## 🧪 Example Run
+##  Example Run
 
 ```
 mysh> echo Hello, World!
@@ -129,7 +129,7 @@ mysh> exit
 
 ---
 
-## 🧩 Conclusion
+##  Conclusion
 
 Writing a shell helps you deeply understand:
 

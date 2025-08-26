@@ -6,22 +6,22 @@ title: tcp-fragmentation
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-## ⚙️ TCP Fragmentation
+## ️ TCP Fragmentation
 
 ---
 
-### 🔹 1. TCP Segmentation vs. IP Fragmentation
+###  1. TCP Segmentation vs. IP Fragmentation
 
 | Layer         | Action            | What Happens                                               |
 | ------------- | ----------------- | ---------------------------------------------------------- |
 | **TCP Layer** | **Segmentation**  | Application sends data → TCP breaks it into segments ≤ MSS |
 | **IP Layer**  | **Fragmentation** | If segment > MTU → IP splits it into **fragments**         |
 
-> ⚠️ **TCP does not fragment data** — it segments data. Fragmentation only occurs at the IP layer.
+> ️ **TCP does not fragment data** — it segments data. Fragmentation only occurs at the IP layer.
 
 ---
 
-### 🔹 2. Path MTU and Fragmentation Trigger
+###  2. Path MTU and Fragmentation Trigger
 
 * **MTU (Maximum Transmission Unit)**: Largest IP packet size (typically 1500 bytes for Ethernet).
 * **MSS (Maximum Segment Size)**: Largest segment TCP can send (MTU - 40 bytes).
@@ -46,7 +46,7 @@ Router detects MTU = 1200
 
 ---
 
-### 🔹 3. Packet Structure in Fragmentation
+###  3. Packet Structure in Fragmentation
 
 Let’s take an example: A TCP segment of 1400 bytes, but the path MTU is 1000 bytes. IP fragments it:
 
@@ -59,7 +59,7 @@ Let’s take an example: A TCP segment of 1400 bytes, but the path MTU is 1000 b
 
 ---
 
-### 🔹 4. Path MTU Discovery (PMTUD)
+###  4. Path MTU Discovery (PMTUD)
 
 * TCP uses PMTUD to avoid IP fragmentation.
 * Works by sending packets with the **DF** (Don’t Fragment) bit set.
@@ -74,20 +74,20 @@ Let’s take an example: A TCP segment of 1400 bytes, but the path MTU is 1000 b
 
 ---
 
-### 🔹 5. Consequences of Fragmentation
+###  5. Consequences of Fragmentation
 
-#### 🔸 a. Performance
+####  a. Performance
 
 * Increases processing overhead on sender and receiver.
 * Causes **head-of-line blocking** if fragments arrive out of order.
 
-#### 🔸 b. Reliability
+####  b. Reliability
 
 * IP fragments are individually unreliable.
 * **Loss of one fragment = retransmission of entire TCP segment**.
 * No per-fragment retransmission in IP.
 
-#### 🔸 c. Security
+####  c. Security
 
 * **Fragmentation attacks:**
 
@@ -97,15 +97,15 @@ Let’s take an example: A TCP segment of 1400 bytes, but the path MTU is 1000 b
 
 ---
 
-### 🔹 6. Fragmentation and TCP Performance Tuning
+###  6. Fragmentation and TCP Performance Tuning
 
-#### 🔸 Tunneling Protocols
+####  Tunneling Protocols
 
 * IP-in-IP, GRE, IPSec add 20-60 bytes of headers.
 * Reduces effective MTU, often to **\~1400 or lower**.
 * Neglecting this causes fragmentation or black holes.
 
-#### 🔸 MSS Clamping
+####  MSS Clamping
 
 Ensures TCP doesn't try to send segments larger than the path can carry:
 
@@ -119,9 +119,9 @@ iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \
 
 ---
 
-### 🔹 7. Detecting and Debugging Fragmentation
+###  7. Detecting and Debugging Fragmentation
 
-#### 🔸 Tools and Methods
+####  Tools and Methods
 
 | Tool                      | Usage                                                                |
 | ------------------------- | -------------------------------------------------------------------- |
@@ -131,7 +131,7 @@ iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \
 | `iptables -A INPUT -f`    | Match (and optionally log) all fragmented packets                    |
 | `netstat -s`              | Look for IP statistics under “fragments created/successful failures” |
 
-#### 🔸 Example: Detecting PMTUD Failure
+####  Example: Detecting PMTUD Failure
 
 ```bash
 ping -M do -s 1472 <host>    # 1472 + 28 (ICMP/IP header) = 1500
@@ -141,7 +141,7 @@ ping -M do -s 1400 <host>
 
 ---
 
-### 🔹 8. Kernel Internals and Fragmentation
+###  8. Kernel Internals and Fragmentation
 
 #### Fragmentation Logic in Linux
 
@@ -158,7 +158,7 @@ ping -M do -s 1400 <host>
 
 ---
 
-### 🔹 9. Fragmentation in IPv6
+###  9. Fragmentation in IPv6
 
 > **IPv6 routers do not fragment packets.**
 > Only **end hosts** may do so using **IPv6 Fragment Header**.
@@ -169,7 +169,7 @@ ping -M do -s 1400 <host>
 
 ---
 
-## ✅ Best Practices Summary
+##  Best Practices Summary
 
 | Area            | Recommendation                                      |
 | --------------- | --------------------------------------------------- |
@@ -181,7 +181,7 @@ ping -M do -s 1400 <host>
 
 ---
 
-### 📌 Real-World Scenarios
+###  Real-World Scenarios
 
 1. **VPN tunnel breaks large TCP transfers**
    → Fix: Clamp MSS to \~1350

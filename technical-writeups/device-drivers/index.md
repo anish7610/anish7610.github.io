@@ -12,7 +12,7 @@ Device drivers act as the bridge between the hardware and the kernel. They allow
 
 ---
 
-## 📌 What is a Linux Device Driver?
+##  What is a Linux Device Driver?
 
 A **Linux device driver** is a kernel module that controls a specific piece of hardware. These modules can be loaded and unloaded dynamically using tools like `insmod` and `rmmod`.
 
@@ -25,7 +25,7 @@ There are different types of drivers:
 
 ---
 
-## 🧩 Anatomy of a Simple Character Device Driver
+##  Anatomy of a Simple Character Device Driver
 
 Here's what’s typically needed for a character device:
 
@@ -36,7 +36,7 @@ Here's what’s typically needed for a character device:
 
 ---
 
-## 🛠️ Minimal Skeleton of a Character Driver
+## ️ Minimal Skeleton of a Character Driver
 
 ```c
 #include <linux/init.h>
@@ -93,7 +93,7 @@ MODULE_LICENSE("GPL");
 
 ---
 
-## 🧪 Testing the Driver
+##  Testing the Driver
 
 1. **Compile** with a Makefile
 2. **Insert** using `insmod mydriver.ko`
@@ -111,14 +111,14 @@ MODULE_LICENSE("GPL");
 
 ---
 
-## 🔐 Kernel Space vs User Space
+##  Kernel Space vs User Space
 
 * Drivers run in **kernel space**, unlike applications that run in **user space**.
 * Kernel-space code has full access to hardware, making it powerful but dangerous (a bug can crash the system).
 
 ---
 
-## 📚 Key Concepts
+##  Key Concepts
 
 * **Device number (major/minor)**: Identifies the driver and the device.
 * **File operations struct**: Maps system calls (`read`, `write`, etc.) to your driver’s functions.
@@ -126,7 +126,7 @@ MODULE_LICENSE("GPL");
 
 ---
 
-## 🧵 Next Steps
+##  Next Steps
 
 * Handle **interrupts** and **DMA**
 * Add **IOCTL** support for custom commands
@@ -135,7 +135,7 @@ MODULE_LICENSE("GPL");
 
 ---
 
-## 🚧 Precautions
+##  Precautions
 
 * Always test drivers on virtual machines or non-critical systems.
 * Use logging (`printk`) generously.
@@ -143,7 +143,7 @@ MODULE_LICENSE("GPL");
 
 ---
 
-## 📘 References
+##  References
 
 * [Linux Device Drivers, 3rd Edition](https://lwn.net/Kernel/LDD3/)
 * `man 9` pages: `man 9 register_chrdev`, `man 9 file_operations`

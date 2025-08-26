@@ -12,7 +12,7 @@ title: unix-domain-sockets
 
 ---
 
-### 🧠 Key Concepts
+###  Key Concepts
 
 * **UDS vs TCP/IP**:
 
@@ -26,7 +26,7 @@ title: unix-domain-sockets
 
 ---
 
-### 📁 How It Works
+###  How It Works
 
 1. **Server process** creates a socket and binds it to a pathname.
 2. **Client process** connects to that path to initiate communication.
@@ -36,7 +36,7 @@ The kernel mediates all interactions without going through the network stack.
 
 ---
 
-### 🛠️ Example: Stream Socket
+### ️ Example: Stream Socket
 
 #### Server
 
@@ -70,7 +70,7 @@ read(sockfd, buf, 100);
 
 ---
 
-### 📦 Advantages
+###  Advantages
 
 * **Faster than TCP/IP**: No overhead of IP stack, no checksum/fragmentation.
 * **Secure**: Access controlled via file system permissions (`chmod`, `chown`).
@@ -79,7 +79,7 @@ read(sockfd, buf, 100);
 
 ---
 
-### 📡 Use Cases
+###  Use Cases
 
 * **Local daemons**: e.g., systemd’s communication with journald.
 * **Docker / Podman API socket**: `/var/run/docker.sock`.
@@ -88,7 +88,7 @@ read(sockfd, buf, 100);
 
 ---
 
-### ⚙️ Real-World Integration Example
+### ️ Real-World Integration Example
 
 #### Nginx Configuration
 
@@ -102,7 +102,7 @@ This avoids TCP overhead by communicating over a Unix socket instead of localhos
 
 ---
 
-### 🧪 Debugging Tips
+###  Debugging Tips
 
 * Use `lsof | grep mysocket` to check who has the socket open.
 * Use `netstat -a | grep unix` or `ss -x` to inspect active Unix sockets.
@@ -110,7 +110,7 @@ This avoids TCP overhead by communicating over a Unix socket instead of localhos
 
 ---
 
-### ⚠️ Considerations
+### ️ Considerations
 
 * Path length limit (often 108 bytes for `sun_path`).
 * Must manually clean up the socket file on shutdown.

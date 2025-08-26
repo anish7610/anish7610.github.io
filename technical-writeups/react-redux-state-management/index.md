@@ -12,13 +12,13 @@ Managing state is a cornerstone of building reliable, scalable, and maintainable
 
 ---
 
-## 🧠 What is State in React?
+##  What is State in React?
 
 In React, **state** refers to data that changes over time and affects what is rendered. While local state (via `useState`) works well for isolated components, it becomes harder to manage as the app grows and more components need access to the same state.
 
 ---
 
-## 1. 🔁 Redux
+## 1.  Redux
 
 ### Overview:
 
@@ -70,7 +70,7 @@ const Counter = () => {
 
 ---
 
-## 2. 🌐 Context API
+## 2.  Context API
 
 ### Overview:
 
@@ -115,7 +115,7 @@ const Counter = () => {
 
 ---
 
-## 3. ⚛️ Recoil
+## 3. ️ Recoil
 
 ### Overview:
 
@@ -157,7 +157,7 @@ const Counter = () => {
 
 ---
 
-## ⚖️ Comparison Summary
+## ️ Comparison Summary
 
 | Feature          | Redux                      | Context API               | Recoil                    |
 | ---------------- | -------------------------- | ------------------------- | ------------------------- |
@@ -170,7 +170,7 @@ const Counter = () => {
 
 ---
 
-## 🧩 When to Use What?
+##  When to Use What?
 
 * **Redux**: Ideal for large-scale applications with complex state logic, strict architectural needs, and the need for debugging tools.
 * **Context API**: Suitable for simple use cases like theme, language, or authentication state.
@@ -178,6 +178,6 @@ const Counter = () => {
 
 ---
 
-## 🧵 Conclusion
+##  Conclusion
 
 State management is not one-size-fits-all. Choose based on your **app size**, **complexity**, **performance needs**, and **team familiarity**. Modern React applications can even mix and match — using Context for auth, Redux for global app state, and Recoil for local yet shared atoms.

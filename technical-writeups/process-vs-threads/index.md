@@ -6,19 +6,19 @@ title: process-vs-threads
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# ⚙️ Process vs Thread vs Coroutine: Memory and Scheduling Differences
+# ️ Process vs Thread vs Coroutine: Memory and Scheduling Differences
 
 Understanding the distinctions between **processes**, **threads**, and **coroutines** is crucial in systems programming, performance tuning, and concurrent application design. Each model has unique characteristics in terms of memory isolation, execution context, and scheduling behavior.
 
 ---
 
-## 🧩 1. Processes
+##  1. Processes
 
-### 🔍 Definition:
+###  Definition:
 
 A **process** is an independent, self-contained unit of execution with its **own memory space**, system resources, and at least one thread (main thread).
 
-### 🧠 Memory:
+###  Memory:
 
 * Completely **separate address space**.
 * No shared heap or global variables with other processes.
@@ -34,20 +34,20 @@ A **process** is an independent, self-contained unit of execution with its **own
   * Switching memory address spaces
   * Flushing TLB (Translation Lookaside Buffer)
 
-### 📌 Use Cases:
+###  Use Cases:
 
 * Strong isolation needed (e.g., browsers spawning processes per tab, microservices)
 * Crashes don't affect others
 
 ---
 
-## 🧵 2. Threads
+##  2. Threads
 
-### 🔍 Definition:
+###  Definition:
 
 A **thread** is a lightweight unit of execution within a process. Threads share the **same memory space** but have separate stacks and registers.
 
-### 🧠 Memory:
+###  Memory:
 
 * Threads within the same process **share heap and global memory**.
 * Each thread has its own **stack** and **thread-local storage**.
@@ -59,20 +59,20 @@ A **thread** is a lightweight unit of execution within a process. Threads share 
 * Lighter than processes but still requires kernel-level context switching.
 * Can run concurrently on multi-core CPUs.
 
-### 📌 Use Cases:
+###  Use Cases:
 
 * Tasks requiring parallel computation or background work
 * Web servers (handling multiple client connections)
 
 ---
 
-## 🌀 3. Coroutines
+##  3. Coroutines
 
-### 🔍 Definition:
+###  Definition:
 
 A **coroutine** is a **cooperative** (non-preemptive) unit of execution that runs in user space. It's a generalization of a function that can **pause and resume** its execution.
 
-### 🧠 Memory:
+###  Memory:
 
 * Lives in **user space** and consumes very little memory (just stack + state).
 * All coroutines typically share the same thread’s memory space.
@@ -84,14 +84,14 @@ A **coroutine** is a **cooperative** (non-preemptive) unit of execution that run
 * No kernel context switching → **very fast** to switch between coroutines.
 * Must explicitly yield control (`await`, `yield`, etc.) — no preemption.
 
-### 📌 Use Cases:
+###  Use Cases:
 
 * High-concurrency I/O-bound applications
 * Network servers, web scraping, UI event loops
 
 ---
 
-## ⚖️ Comparison Table
+## ️ Comparison Table
 
 | Feature             | Process             | Thread           | Coroutine                   |
 | ------------------- | ------------------- | ---------------- | --------------------------- |
@@ -107,7 +107,7 @@ A **coroutine** is a **cooperative** (non-preemptive) unit of execution that run
 
 ---
 
-## 🔧 Example Scenarios
+##  Example Scenarios
 
 | Scenario                           | Recommended Approach                 |
 | ---------------------------------- | ------------------------------------ |
@@ -119,7 +119,7 @@ A **coroutine** is a **cooperative** (non-preemptive) unit of execution that run
 
 ---
 
-## 🧪 Python Code Glimpse
+##  Python Code Glimpse
 
 ```python
 # Coroutine Example (asyncio)
@@ -154,7 +154,7 @@ t2.join()
 
 ---
 
-## 🧠 Key Takeaways
+##  Key Takeaways
 
 * **Processes** offer **isolation** but at a higher cost.
 * **Threads** enable **true parallelism**, but require synchronization.

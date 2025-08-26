@@ -12,7 +12,7 @@ Secure Boot and Measured Boot are two critical components in the UEFI (Unified E
 
 ---
 
-### 🔐 Secure Boot
+###  Secure Boot
 
 **Objective:** Prevent unauthorized or malicious bootloaders, kernels, or OS components from executing during system startup.
 
@@ -39,7 +39,7 @@ Secure Boot and Measured Boot are two critical components in the UEFI (Unified E
 
 ---
 
-### 📏 Measured Boot
+###  Measured Boot
 
 **Objective:** Record and report the integrity of the boot process, allowing detection of unauthorized modifications.
 
@@ -62,7 +62,7 @@ Secure Boot and Measured Boot are two critical components in the UEFI (Unified E
 
 ---
 
-### 🔄 Secure Boot vs Measured Boot
+###  Secure Boot vs Measured Boot
 
 | Feature     | Secure Boot                         | Measured Boot                         |
 | ----------- | ----------------------------------- | ------------------------------------- |
@@ -74,7 +74,7 @@ Secure Boot and Measured Boot are two critical components in the UEFI (Unified E
 
 ---
 
-### 🛡 Real-World Example
+###  Real-World Example
 
 **Secure Boot in Action:** On a Windows 11 machine, the bootloader and kernel are signed by Microsoft. If a rootkit modifies the bootloader, the signature won’t match, and the firmware blocks it.
 
@@ -82,7 +82,7 @@ Secure Boot and Measured Boot are two critical components in the UEFI (Unified E
 
 ---
 
-### 🔧 Implementation Tips
+###  Implementation Tips
 
 * Enable Secure Boot in UEFI BIOS settings.
 * Maintain updated keys and revocation lists.

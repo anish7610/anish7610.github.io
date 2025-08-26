@@ -6,7 +6,7 @@ title: shift-left-strategy
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🧪 Shift Left Testing in Agile Development Cycles
+#  Shift Left Testing in Agile Development Cycles
 
 ## Introduction
 
@@ -76,11 +76,11 @@ Agile methodology promotes **continuous integration, short iterations (sprints)*
 
 | Benefit                    | Description                                                              |
 | -------------------------- | ------------------------------------------------------------------------ |
-| 🔍 Early Defect Detection  | Bugs are found when they are cheaper and easier to fix.                  |
-| ⚡ Faster Time to Market    | Shorter test/fix cycles accelerate delivery.                             |
-| 💰 Reduced Cost of Quality | Preventing defects is significantly cheaper than correcting them later.  |
-| 🧩 Better Collaboration    | Encourages dev-test alignment and team ownership of quality.             |
-| 🧪 Increased Test Coverage | Early test planning ensures edge cases and negative tests aren’t missed. |
+|  Early Defect Detection  | Bugs are found when they are cheaper and easier to fix.                  |
+|  Faster Time to Market    | Shorter test/fix cycles accelerate delivery.                             |
+|  Reduced Cost of Quality | Preventing defects is significantly cheaper than correcting them later.  |
+|  Better Collaboration    | Encourages dev-test alignment and team ownership of quality.             |
+|  Increased Test Coverage | Early test planning ensures edge cases and negative tests aren’t missed. |
 
 ---
 

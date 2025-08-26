@@ -12,7 +12,7 @@ In large-scale engineering organizations, monolithic repositories (monorepos) ar
 
 ---
 
-### 🔹 The Challenge
+###  The Challenge
 
 In a monorepo setup:
 
@@ -22,7 +22,7 @@ In a monorepo setup:
 
 ---
 
-### 🔸 Test Sharding: Divide and Conquer
+###  Test Sharding: Divide and Conquer
 
 **Test sharding** refers to splitting the total test suite into smaller subsets (shards) which can be executed independently and in parallel.
 
@@ -45,7 +45,7 @@ pytest --dist=loadscope --tx 4*popen
 
 ---
 
-### 🔸 Parallel Test Execution
+###  Parallel Test Execution
 
 **Parallelization** complements sharding by running multiple tests simultaneously on different CPU cores or CI agents.
 
@@ -62,7 +62,7 @@ pytest --dist=loadscope --tx 4*popen
 
 ---
 
-### 🔹 Tools and Frameworks
+###  Tools and Frameworks
 
 * **Bazel**: Native support for test parallelization and caching
 * **pytest-xdist**: Parallel test runner plugin
@@ -72,7 +72,7 @@ pytest --dist=loadscope --tx 4*popen
 
 ---
 
-### 🔸 Test Splitting in CI/CD
+###  Test Splitting in CI/CD
 
 CI systems like **CircleCI**, **GitHub Actions**, and **GitLab CI** provide:
 
@@ -91,7 +91,7 @@ strategy:
 
 ---
 
-### 🔹 Best Practices
+###  Best Practices
 
 * Tag tests for selective runs (e.g., `@smoke`, `@integration`)
 * Collect and analyze test duration metrics
@@ -101,6 +101,6 @@ strategy:
 
 ---
 
-### 🔸 Conclusion
+###  Conclusion
 
 Test sharding and parallelization are essential for maintaining agility and scalability in large monorepos. By carefully splitting test execution and using modern tooling, teams can drastically cut down CI times, reduce flakiness, and deliver faster, more reliable code.

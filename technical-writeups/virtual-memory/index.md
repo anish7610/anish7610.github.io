@@ -6,36 +6,36 @@ title: virtual-memory
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-# 🧠 Virtual Memory, Paging, and Swapping Explained
+#  Virtual Memory, Paging, and Swapping Explained
 
 Efficient memory management is critical for any modern operating system. **Virtual memory**, **paging**, and **swapping** are key mechanisms that make it possible to run large and multiple applications on limited physical RAM, while maintaining system stability and performance.
 
 ---
 
-## 📦 1. Virtual Memory
+##  1. Virtual Memory
 
-### 🔍 What is Virtual Memory?
+###  What is Virtual Memory?
 
 Virtual memory is an abstraction where each process is given the **illusion** of having access to a large, contiguous block of memory, even if the physical RAM is smaller or fragmented.
 
-> 🧠 Think of it as a **virtualized address space** — the OS and CPU translate virtual addresses into physical ones.
+>  Think of it as a **virtualized address space** — the OS and CPU translate virtual addresses into physical ones.
 
-### 💡 Why Use Virtual Memory?
+###  Why Use Virtual Memory?
 
 * **Isolation**: Each process is protected from accessing another’s memory.
 * **Convenience**: Programmers don't need to manage physical addresses.
 * **Flexibility**: Enables **memory overcommitment** and efficient use of RAM.
 
-### 🔗 How It Works:
+###  How It Works:
 
 * The **MMU (Memory Management Unit)** in the CPU translates **Virtual Addresses (VA)** to **Physical Addresses (PA)** using **page tables**.
 * The OS maintains a mapping for each process's virtual address space.
 
 ---
 
-## 📄 2. Paging
+##  2. Paging
 
-### 🔍 What is Paging?
+###  What is Paging?
 
 Paging divides memory into fixed-size blocks:
 
@@ -44,13 +44,13 @@ Paging divides memory into fixed-size blocks:
 
 The OS maintains a **page table** for each process, mapping virtual pages to physical frames.
 
-### 💡 Benefits of Paging:
+###  Benefits of Paging:
 
 * **No external fragmentation**
 * Enables **non-contiguous allocation**
 * Easy to implement **demand paging** (load pages only when needed)
 
-### 🔁 Page Table Mechanics:
+###  Page Table Mechanics:
 
 | Virtual Address | → | Page Table | → | Physical Address |
 | --------------- | - | ---------- | - | ---------------- |
@@ -59,24 +59,24 @@ The OS maintains a **page table** for each process, mapping virtual pages to phy
 
 ---
 
-## 🧊 3. Swapping
+##  3. Swapping
 
-### 🔍 What is Swapping?
+###  What is Swapping?
 
 Swapping moves **pages of memory** to disk when physical RAM is full.
 
 * Pages not currently in use are written to a **swap space** (a swap file or partition).
 * Later, if the process needs that page again, it is **paged back into RAM**, possibly pushing another page out.
 
-> 🔄 This mechanism is called **demand paging with swapping**.
+>  This mechanism is called **demand paging with swapping**.
 
-### 📂 Swap Space:
+###  Swap Space:
 
 * Defined at install time or dynamically via a file.
 * Managed by the OS.
 * Much slower than RAM (\~100x slower), but prevents out-of-memory crashes.
 
-### 🔧 Linux Tools:
+###  Linux Tools:
 
 * `free -h` → See swap usage.
 * `swapon -s` → View active swap devices.
@@ -85,7 +85,7 @@ Swapping moves **pages of memory** to disk when physical RAM is full.
 
 ---
 
-## 📉 Performance Implications
+##  Performance Implications
 
 | Mechanism    | Speed     | Memory Location   | Use Case                        |
 | ------------ | --------- | ----------------- | ------------------------------- |
@@ -93,11 +93,11 @@ Swapping moves **pages of memory** to disk when physical RAM is full.
 | Swapped Page | Very Slow | Disk              | Idle or rarely-used pages       |
 | Page Fault   | Slow      | Triggers disk I/O | When accessing swapped-out page |
 
-> ⚠️ **Thrashing** occurs when the system spends more time swapping pages in and out than doing useful work — typically due to insufficient RAM.
+> ️ **Thrashing** occurs when the system spends more time swapping pages in and out than doing useful work — typically due to insufficient RAM.
 
 ---
 
-## 📌 Key Terms Summary
+##  Key Terms Summary
 
 | Term            | Description                                     |
 | --------------- | ----------------------------------------------- |
@@ -112,7 +112,7 @@ Swapping moves **pages of memory** to disk when physical RAM is full.
 
 ---
 
-## 🧠 Real-World Analogy
+##  Real-World Analogy
 
 * **Virtual Memory** = A large office desk with many drawers (virtual space)
 * **RAM** = The part of the desk where you’re currently working
@@ -121,7 +121,7 @@ Swapping moves **pages of memory** to disk when physical RAM is full.
 
 ---
 
-## 🧪 Example (Linux)
+##  Example (Linux)
 
 ```bash
 # Check total memory and swap usage
@@ -139,7 +139,7 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 ---
 
-## 🔚 Conclusion
+##  Conclusion
 
 * **Virtual memory** provides abstraction and isolation.
 * **Paging** enables fine-grained memory management without fragmentation.

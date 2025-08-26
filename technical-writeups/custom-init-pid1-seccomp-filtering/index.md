@@ -10,7 +10,7 @@ Creating a **custom init system with PID 1 and syscall filtering using seccomp**
 
 ---
 
-### 🧩 Why Create a Custom Init System?
+###  Why Create a Custom Init System?
 
 The `init` system (PID 1) is the first userspace process started by the kernel after boot and is responsible for starting all other processes. Writing your own gives you control over:
 
@@ -20,7 +20,7 @@ The `init` system (PID 1) is the first userspace process started by the kernel a
 
 ---
 
-### 🔧 Basic Responsibilities of an Init Process
+###  Basic Responsibilities of an Init Process
 
 A minimal init process in Linux must:
 
@@ -31,7 +31,7 @@ A minimal init process in Linux must:
 
 ---
 
-### 🧪 Basic C Implementation of Custom Init
+###  Basic C Implementation of Custom Init
 
 ```c
 #define _GNU_SOURCE
@@ -100,7 +100,7 @@ int main() {
 
 ---
 
-### 🧪 Running Your Init in a Container
+###  Running Your Init in a Container
 
 You can test it inside a minimal Docker container:
 
@@ -119,7 +119,7 @@ Note: `--init=false` disables Docker's own tini init process.
 
 ---
 
-### 🛡️ Adding More Syscall Filters
+### ️ Adding More Syscall Filters
 
 Use `strace` or `seccomp-tools` to monitor what syscalls your process actually makes, and refine the filter to allow only necessary ones:
 
@@ -129,7 +129,7 @@ strace -f -e trace=all ./myinit
 
 ---
 
-### 📌 Security Hardening Additions
+###  Security Hardening Additions
 
 * Use `prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)` before applying filters.
 * Use `capset` to drop capabilities.
@@ -138,7 +138,7 @@ strace -f -e trace=all ./myinit
 
 ---
 
-### 🔚 Summary
+###  Summary
 
 A custom init with syscall filtering:
 

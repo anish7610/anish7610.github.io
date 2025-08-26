@@ -6,9 +6,9 @@ title: ZTA
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-## 🔐 Zero Trust Architecture Explained — With Real-World Scenarios
+##  Zero Trust Architecture Explained — With Real-World Scenarios
 
-### 📌 What is Zero Trust?
+###  What is Zero Trust?
 
 **Zero Trust** is a cybersecurity model that assumes **no implicit trust** — whether the user is inside or outside the network perimeter. Instead of trusting users, devices, or applications by default, **every access request is continuously verified** based on multiple factors such as identity, device health, location, and behavior.
 
@@ -16,7 +16,7 @@ title: ZTA
 
 ---
 
-### 🧱 Pillars of Zero Trust
+###  Pillars of Zero Trust
 
 1. **Verify Explicitly**
    Authenticate and authorize based on all available data points (identity, device, location, etc.).
@@ -29,7 +29,7 @@ title: ZTA
 
 ---
 
-### 🧰 Core Components of Zero Trust Architecture
+###  Core Components of Zero Trust Architecture
 
 | Component                                | Description                                                      |
 | ---------------------------------------- | ---------------------------------------------------------------- |
@@ -41,9 +41,9 @@ title: ZTA
 
 ---
 
-### 🌍 Real-World Scenarios of Zero Trust in Action
+###  Real-World Scenarios of Zero Trust in Action
 
-#### 🏢 Scenario 1: Corporate Employee Accessing Internal Tools
+####  Scenario 1: Corporate Employee Accessing Internal Tools
 
 **Before ZTA (Traditional Model):**
 
@@ -63,7 +63,7 @@ title: ZTA
 
 ---
 
-#### 🌐 Scenario 2: Remote Contractor Access
+####  Scenario 2: Remote Contractor Access
 
 **Problem:**
 
@@ -78,7 +78,7 @@ title: ZTA
 
 ---
 
-#### 🏫 Scenario 3: Educational Institution with BYOD
+####  Scenario 3: Educational Institution with BYOD
 
 **Challenge:**
 
@@ -96,7 +96,7 @@ title: ZTA
 
 ---
 
-#### 🏥 Scenario 4: Hospital Protecting Patient Data (HIPAA Compliance)
+####  Scenario 4: Hospital Protecting Patient Data (HIPAA Compliance)
 
 **Challenge:**
 
@@ -111,7 +111,7 @@ title: ZTA
 
 ---
 
-### ⚙️ How to Implement Zero Trust (Step-by-Step)
+### ️ How to Implement Zero Trust (Step-by-Step)
 
 1. **Identify protect surfaces:** What are your crown jewels? (E.g., databases, source code, EHR systems)
 2. **Map the transaction flows:** Understand how users and devices interact with data.
@@ -121,7 +121,7 @@ title: ZTA
 
 ---
 
-### ✅ Benefits of Zero Trust
+###  Benefits of Zero Trust
 
 * Reduces risk of data breaches.
 * Enhances visibility and control over who accesses what.
@@ -130,7 +130,7 @@ title: ZTA
 
 ---
 
-### 🚧 Challenges to Adoption
+###  Challenges to Adoption
 
 * Legacy systems may not integrate easily.
 * User experience friction (more authentication steps).
@@ -139,6 +139,6 @@ title: ZTA
 
 ---
 
-### 🔚 Conclusion
+###  Conclusion
 
 Zero Trust is not a product — it's a **security philosophy and architecture** that assumes every access request is potentially hostile. By continuously validating trust, enforcing least privilege, and segmenting access, organizations can drastically reduce the attack surface and improve their overall security posture.

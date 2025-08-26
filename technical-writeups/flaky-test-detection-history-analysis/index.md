@@ -6,7 +6,7 @@ title: flaky-test-detection-history-analysis
 <a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
-## 🧪 Flaky Test Detection with Historical Test Analysis
+##  Flaky Test Detection with Historical Test Analysis
 
 ### Overview
 
@@ -14,7 +14,7 @@ title: flaky-test-detection-history-analysis
 
 ---
 
-### 🔍 Causes of Flaky Tests
+###  Causes of Flaky Tests
 
 | Category             | Common Issues                                       |
 | -------------------- | --------------------------------------------------- |
@@ -26,7 +26,7 @@ title: flaky-test-detection-history-analysis
 
 ---
 
-### 🧠 Historical Analysis for Flake Detection
+###  Historical Analysis for Flake Detection
 
 #### 1. **Test Result Logging**
 
@@ -48,17 +48,17 @@ Define metrics such as:
 * **Bounce rate**: Failures followed by pass in next retry
 * **Intermittency score**: Normalized standard deviation of results
 
-> 🔁 Example:
+>  Example:
 >
 > ```
 > test_login_flow:
->   15 runs → [✓ ✓ ✗ ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✗ ✓ ✓]
+>   15 runs → [              ]
 >   Flake Rate = 3/15 = 20%
 > ```
 
 ---
 
-### 📊 Visualization
+###  Visualization
 
 * Heatmaps of flaky test frequency across time or branches
 * Time-series dashboards (Grafana, Kibana) for flake trends
@@ -66,7 +66,7 @@ Define metrics such as:
 
 ---
 
-### 🛠 Tools for Flake Detection
+###  Tools for Flake Detection
 
 | Tool                         | Features                                               |
 | ---------------------------- | ------------------------------------------------------ |
@@ -78,7 +78,7 @@ Define metrics such as:
 
 ---
 
-### 🔁 Retry Logic & Detection
+###  Retry Logic & Detection
 
 Incorporate retries *only* for detection (not masking flakiness):
 
@@ -90,14 +90,14 @@ If a test passes after 1 or 2 reruns — flag it as potentially flaky.
 
 ---
 
-### 🧪 Automated Flaky Test Quarantine
+###  Automated Flaky Test Quarantine
 
 1. Label flake candidates via thresholds (`flake_rate > 10%`)
 2. Auto-quarantine in CI (e.g., skip unless manually invoked)
 3. Notify developers with links to analysis
 4. Periodically reintroduce and retest quarantined tests
 
-> ✅ GitHub Actions Example:
+>  GitHub Actions Example:
 
 ```yaml
 if: steps.detect-flake.outputs.flaky == 'true'
@@ -106,7 +106,7 @@ run: echo "Quarantining test ${{ matrix.test }}"
 
 ---
 
-### ✅ Best Practices
+###  Best Practices
 
 * Run tests in isolation and with random seeds
 * Record test metadata: CPU load, memory, container ID

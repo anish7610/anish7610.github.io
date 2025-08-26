@@ -8,13 +8,13 @@ title: chaos-testing-apis-fault-network
 
 ## Chaos Testing APIs with Fault Injection and Network Partitioning
 
-### 🧪 What is Chaos Testing?
+###  What is Chaos Testing?
 
 **Chaos testing** is a discipline within **resilience engineering** that involves deliberately introducing failures into a system to verify its ability to withstand turbulent conditions in production. When applied to **APIs**, chaos testing focuses on how the services behave under various failures such as timeouts, dropped connections, latency spikes, and backend outages.
 
 ---
 
-### 🎯 Goals
+###  Goals
 
 * Ensure **graceful degradation** under failure
 * Validate **retry mechanisms** and **fallback logic**
@@ -23,7 +23,7 @@ title: chaos-testing-apis-fault-network
 
 ---
 
-## 🔧 Techniques for Chaos Testing APIs
+##  Techniques for Chaos Testing APIs
 
 ### 1. **Fault Injection**
 
@@ -87,7 +87,7 @@ spec:
 
 ---
 
-### ⚙️ Injecting Chaos in a CI/CD Pipeline
+### ️ Injecting Chaos in a CI/CD Pipeline
 
 Chaos tests can be automated post-deployment:
 
@@ -109,7 +109,7 @@ You can validate via health checks, alert logs, and synthetic monitoring during 
 
 ---
 
-### 🧪 Example: Using Toxiproxy with Python
+###  Example: Using Toxiproxy with Python
 
 ```python
 from toxiproxy import Toxic, ToxicDirection, Toxiproxy
@@ -127,7 +127,7 @@ proxy.toxics.add(
 
 ---
 
-### 🧠 Best Practices
+###  Best Practices
 
 * Always monitor **metrics and logs** during chaos experiments
 * Define clear **SLOs/SLAs** and **recovery thresholds**
@@ -137,7 +137,7 @@ proxy.toxics.add(
 
 ---
 
-### 📈 Observability Tools to Pair
+###  Observability Tools to Pair
 
 * **Prometheus + Grafana** (metrics + alerting)
 * **Jaeger** (tracing)
@@ -146,6 +146,6 @@ proxy.toxics.add(
 
 ---
 
-## ✅ Summary
+##  Summary
 
 Chaos testing APIs helps simulate unexpected behavior and infrastructure failures in order to build **resilient systems**. With fault injection and network partitioning techniques, you can proactively identify failure points and harden your APIs before real outages occur.

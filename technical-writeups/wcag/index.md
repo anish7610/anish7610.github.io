@@ -14,7 +14,7 @@ The **Web Content Accessibility Guidelines (WCAG)**, developed by the W3C, provi
 
 ---
 
-## 🚩 The Four WCAG Principles
+##  The Four WCAG Principles
 
 ### 1. **Perceivable**
 
@@ -52,7 +52,7 @@ Content must be robust enough to be interpreted reliably by assistive technologi
 
 ---
 
-## 🎯 Practical Accessibility Techniques
+##  Practical Accessibility Techniques
 
 | Technique                       | Benefit                              |
 | ------------------------------- | ------------------------------------ |
@@ -65,7 +65,7 @@ Content must be robust enough to be interpreted reliably by assistive technologi
 
 ---
 
-## ✅ WCAG Compliance Levels
+##  WCAG Compliance Levels
 
 | Level   | Description                            |
 | ------- | -------------------------------------- |
@@ -75,7 +75,7 @@ Content must be robust enough to be interpreted reliably by assistive technologi
 
 ---
 
-## 🛠️ Tools for Accessibility Testing
+## ️ Tools for Accessibility Testing
 
 * **Lighthouse (Chrome DevTools)** – Provides accessibility audits.
 * **axe DevTools** – Browser extension for detecting WCAG issues.
@@ -85,7 +85,7 @@ Content must be robust enough to be interpreted reliably by assistive technologi
 
 ---
 
-## 🌐 Real-World Considerations
+##  Real-World Considerations
 
 * Ensure accessible forms: proper labeling, error messages, fieldsets.
 * Support screen readers: test dynamic content and live regions (`aria-live`).
@@ -94,7 +94,7 @@ Content must be robust enough to be interpreted reliably by assistive technologi
 
 ---
 
-## 🧪 Example: Accessible Button
+##  Example: Accessible Button
 
 ```html
 <!-- Good -->
@@ -106,7 +106,7 @@ Content must be robust enough to be interpreted reliably by assistive technologi
 
 ---
 
-## 📚 References
+##  References
 
 * [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 * [WebAIM Checklist](https://webaim.org/standards/wcag/checklist)

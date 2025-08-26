@@ -12,7 +12,7 @@ Mounting file systems manually is a core task in Linux system administration. It
 
 ---
 
-## 🧱 What is Mounting in Linux?
+##  What is Mounting in Linux?
 
 In Linux, everything is treated as a file—including disks and partitions. The `mount` command links a storage device (like `/dev/sda1`) or file (like an `.iso`) to a directory (called a **mount point**) so its contents can be accessed.
 
@@ -24,11 +24,11 @@ mount <device> <mount_point>
 
 ---
 
-## 🔄 Loop Devices: Mounting Disk Images
+##  Loop Devices: Mounting Disk Images
 
 A **loop device** is a pseudo-device that allows a file to be accessed as a block device. This is useful for mounting ISO files or raw disk images.
 
-### 🔧 Use Case: Mounting an ISO File
+###  Use Case: Mounting an ISO File
 
 1. **Create a mount point:**
 
@@ -53,7 +53,7 @@ A **loop device** is a pseudo-device that allows a file to be accessed as a bloc
 
 ---
 
-## 🧪 Mounting a Raw Disk Image (e.g., `.img` from `dd`)
+##  Mounting a Raw Disk Image (e.g., `.img` from `dd`)
 
 If you're working with full disk images (e.g., Raspberry Pi OS image), you can mount partitions inside the image:
 
@@ -71,7 +71,7 @@ If you're working with full disk images (e.g., Raspberry Pi OS image), you can m
 
 ---
 
-## 📁 Mounting File Systems Manually
+##  Mounting File Systems Manually
 
 ### Mounting a USB drive (e.g., `/dev/sdb1`):
 
@@ -94,7 +94,7 @@ sudo umount /mnt/usb
 
 ---
 
-## 🛠 Useful Options with `mount`
+##  Useful Options with `mount`
 
 | Option        | Description                                 |
 | ------------- | ------------------------------------------- |
@@ -105,7 +105,7 @@ sudo umount /mnt/usb
 
 ---
 
-## 📚 Summary
+##  Summary
 
 | Task                               | Command                                  |
 | ---------------------------------- | ---------------------------------------- |

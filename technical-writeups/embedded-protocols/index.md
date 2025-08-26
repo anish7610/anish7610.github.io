@@ -12,43 +12,43 @@ Communication between microcontrollers and peripheral devices is a cornerstone o
 
 ---
 
-## 🔸 1. UART (Universal Asynchronous Receiver/Transmitter)
+##  1. UART (Universal Asynchronous Receiver/Transmitter)
 
-### ➤ Overview
+###  Overview
 
 UART is a **full-duplex**, **asynchronous** serial communication protocol that transmits data **bit by bit** between two devices — a **transmitter** and a **receiver**.
 
-### ➤ Characteristics
+###  Characteristics
 
 * **Lines Required**: 2 (TX, RX)
 * **Speed**: Typically up to 1 Mbps (can vary by hardware)
-* **Synchronous?**: ❌ No clock line, uses start/stop bits and baud rate
-* **Point-to-Point**: ✅ Only 1-to-1 communication
+* **Synchronous?**:  No clock line, uses start/stop bits and baud rate
+* **Point-to-Point**:  Only 1-to-1 communication
 
-### ➤ Frame Format
+###  Frame Format
 
 * Start bit → Data bits (usually 8) → Optional parity → Stop bit(s)
 
-### ➤ Pros
+###  Pros
 
 * Simple and widely supported
 * Good for short-distance communication
 * Works well for console/debug logging
 
-### ➤ Cons
+###  Cons
 
 * No built-in addressing → only one device can be connected per UART port
 * Baud rate must be matched between devices
 
 ---
 
-## 🔸 2. SPI (Serial Peripheral Interface)
+##  2. SPI (Serial Peripheral Interface)
 
-### ➤ Overview
+###  Overview
 
 SPI is a **synchronous**, **full-duplex** protocol typically used for high-speed communication between a master device and one or more slaves.
 
-### ➤ Characteristics
+###  Characteristics
 
 * **Lines Required**: 4+
 
@@ -57,15 +57,15 @@ SPI is a **synchronous**, **full-duplex** protocol typically used for high-speed
   * SCLK (Serial Clock)
   * SS/CS (Slave Select)
 * **Speed**: Typically up to 10+ Mbps
-* **Multi-Device**: ✅ Yes, using separate SS lines or daisy-chaining
+* **Multi-Device**:  Yes, using separate SS lines or daisy-chaining
 
-### ➤ Pros
+###  Pros
 
 * High-speed communication
 * Simple protocol, low overhead
 * Full-duplex (can send and receive simultaneously)
 
-### ➤ Cons
+###  Cons
 
 * Requires more GPIOs for multiple devices
 * No error checking or acknowledgment
@@ -73,13 +73,13 @@ SPI is a **synchronous**, **full-duplex** protocol typically used for high-speed
 
 ---
 
-## 🔸 3. I2C (Inter-Integrated Circuit)
+##  3. I2C (Inter-Integrated Circuit)
 
-### ➤ Overview
+###  Overview
 
 I2C is a **synchronous**, **half-duplex**, **multi-master** serial protocol designed for communication over short distances between ICs on the same PCB.
 
-### ➤ Characteristics
+###  Characteristics
 
 * **Lines Required**: 2 (SDA – data, SCL – clock)
 * **Speed**:
@@ -88,16 +88,16 @@ I2C is a **synchronous**, **half-duplex**, **multi-master** serial protocol desi
   * Fast: 400 kbps
   * Fast Mode Plus: 1 Mbps
   * High-speed: 3.4 Mbps
-* **Multi-Device**: ✅ Yes, using 7-bit or 10-bit addressing
+* **Multi-Device**:  Yes, using 7-bit or 10-bit addressing
 
-### ➤ Pros
+###  Pros
 
 * Only two wires for many devices
 * Supports multi-master communication
 * Built-in addressing and acknowledgment
 * Great for sensor networks or EEPROMs
 
-### ➤ Cons
+###  Cons
 
 * Slower than SPI
 * Susceptible to noise due to open-drain lines
@@ -105,7 +105,7 @@ I2C is a **synchronous**, **half-duplex**, **multi-master** serial protocol desi
 
 ---
 
-## 🔍 Protocol Comparison Table
+##  Protocol Comparison Table
 
 | Feature           | UART            | SPI                       | I2C                  |
 | ----------------- | --------------- | ------------------------- | -------------------- |
@@ -113,13 +113,13 @@ I2C is a **synchronous**, **half-duplex**, **multi-master** serial protocol desi
 | Speed             | Medium          | High                      | Low to Medium        |
 | Duplex Mode       | Full            | Full                      | Half                 |
 | Clock Sync        | No              | Yes (Master)              | Yes (Master)         |
-| Multiple Devices  | ❌               | ✅ (with multiple SS)      | ✅ (with addressing)  |
+| Multiple Devices  |                |  (with multiple SS)      |  (with addressing)  |
 | Complexity        | Low             | Medium                    | High                 |
 | Use Case Examples | Debug UART, GPS | Flash memory, LCD         | Sensors, RTC, EEPROM |
 
 ---
 
-## 🔧 When to Use What?
+##  When to Use What?
 
 * **UART**: Use for **console communication**, **GPS modules**, or where simple one-to-one connection is enough.
 * **SPI**: Ideal for **high-speed**, **low-pin-count** communication with **displays**, **flash memory**, or **high-speed ADCs**.
