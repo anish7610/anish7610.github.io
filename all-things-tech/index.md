@@ -7,8 +7,10 @@ title: Tech News
 
 ## Tech News
 
-It's always better to get news directly from accredited sources than someone's watered-down personal views, rants and opinions on the Internet. Even bookmarking the original sources is a great start to get going.
-
+- [🐧 Linux 08/29/2025](https://anish7600.github.io/all-things-tech/linux_news_20250829_112945.html)
+- [🤖 Robotics 08/29/2025](https://anish7600.github.io/all-things-tech/robotics_news_20250829_112840.html)
+- [🔒 Security 08/29/2025](https://anish7600.github.io/all-things-tech/security_news_20250829_112729.html)
+- [🚀 Tech 08/29/2025](https://anish7600.github.io/all-things-tech/tech_news_20250829_112604.html)
 - [🐧 Linux 08/28/2025](https://anish7600.github.io/all-things-tech/linux_news_20250828_082741.html)
 - [🤖 Robotics 08/28/2025](https://anish7600.github.io/all-things-tech/robotics_news_20250828_082636.html)
 - [🔒 Security 08/28/2025](https://anish7600.github.io/all-things-tech/security_news_20250828_082536.html)
@@ -18,4 +20,3 @@ It's always better to get news directly from accredited sources than someone's w
 - [🔒 Security 08/27/2025](https://anish7600.github.io/all-things-tech/tech_news_security_20250827_105816.html)
 - [🚀 Tech 08/27/2025](https://anish7600.github.io/all-things-tech/tech_news_20250827_105655.html)
 - [🚀 Tech 08-26-2025](https://anish7600.github.io/all-things-tech/tech_news_20250826_213449.html)
-
