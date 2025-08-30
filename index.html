@@ -3,413 +3,743 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio</title>
+    <title>Anish - Portfolio</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* General Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-          font-family: 'Arial', sans-serif;
-          margin: 0;
-          padding: 0;
-          background-color: #f9f9f9;
-          color: #333;
-          line-height: 1.6;
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
-        
-        header {
-          background-color: #2c3e50;
-          color: #fff;
-          padding: 40px 20px;
-          text-align: center;
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
         }
-        
-        h1 {
-          margin: 0;
-          font-size: 2.5rem;
-        }
-        
-        h2 {
-          color: #2c3e50;
-          margin-top: 0;
-        }
-        
-        li {
-          color: #000000;
-        }
-        
+
         .container {
-          max-width: 800px;
-          margin: 20px auto;
-          padding: 20px;
-          background-color: #fff;
-          box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-          border-radius: 8px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        
-        a {
-          color: #3498db;
-          text-decoration: none;
+
+        .terminal-window {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
         }
-        
-        a:hover {
-          text-decoration: underline;
+
+        .terminal-header {
+            background: #1a1a1a;
+            padding: 10px;
+            border-bottom: 1px solid #00ff41;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        /* Expandable Sections */
-        .expandable {
-          margin-bottom: 20px;
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
         }
-        
-        .expandable-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background-color: #ecf0f1;
-          padding: 15px;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: background-color 0.3s ease;
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
         }
-        
-        .expandable-header:hover {
-          background-color: #d5dbdb;
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #888;
+            font-size: 14px;
         }
-        
-        .expandable-header h2 {
-          margin: 0;
-          font-size: 1.3rem;
+
+        .terminal-content {
+            padding: 20px;
         }
-        
-        .expandable-header h3 {
-          margin: 0;
-          font-size: 1.3rem;
-          color: #2c3e50;
+
+        .prompt {
+            color: #00ff41;
+            margin-bottom: 10px;
         }
-        
-        .expandable-header .arrow {
-          font-size: 1.5rem;
-          transition: transform 0.3s ease;
+
+        .command {
+            color: #ff6b6b;
         }
-        
-        .expandable-content {
-          padding: 15px;
-          background-color: #f9f9f9;
-          border-radius: 0 0 8px 8px;
-          display: none;
+
+        h1, h2, h3 {
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            margin-bottom: 15px;
         }
-        
-        .expandable-content ul {
-          margin: 0;
-          padding-left: 20px;
-          color: #555;
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 30px;
+            animation: glow 2s ease-in-out infinite alternate;
         }
-        
-        .expandable-content ul li {
-          margin-bottom: 5px;
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 65, 0.6); }
         }
-        
-        /* Open state for expandable sections */
-        .expandable.open .expandable-content {
-          display: block;
+
+        .ascii-art {
+            color: #00ff41;
+            white-space: pre;
+            text-align: center;
+            margin: 20px 0;
+            font-size: 12px;
+            line-height: 1.2;
         }
-        
-        .expandable.open .arrow {
-          transform: rotate(180deg);
+
+        .section {
+            margin-bottom: 30px;
         }
-        
-        /* GitHub Projects Section */
-        .projects-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 20px;
+
+        .job, .education-item, .cert-item {
+            background: rgba(0, 20, 0, 0.5);
+            border-left: 3px solid #00ff41;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
         }
-        
-        .project-card {
-          background-color: #ecf0f1;
-          padding: 15px;
-          border-radius: 8px;
-          flex: 1 1 calc(50% - 20px);
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease;
+
+        .job:hover, .education-item:hover, .cert-item:hover {
+            background: rgba(0, 30, 0, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+            transform: translateX(10px);
         }
-        
-        .project-card:hover {
-          transform: translateY(-5px);
+
+        .job-title, .degree, .cert-name {
+            color: #ff6b6b;
+            font-weight: bold;
+            font-size: 1.2em;
         }
-        
-        .project-card h3 {
-          margin: 0 0 10px;
-          font-size: 1.2rem;
+
+        .company, .school, .cert-issuer {
+            color: #4ecdc4;
+            font-weight: bold;
         }
-        
-        .project-card p {
-          margin: 0;
-          color: #666;
+
+        .duration {
+            color: #888;
+            float: right;
         }
-        
-        /* Grouped Projects */
-        .group-card {
-          background-color: #d5dbdb;
-          padding: 15px;
-          border-radius: 8px;
-          flex: 1 1 100%;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
         }
-        
-        .group-card h3 {
-          margin: 0 0 10px;
-          font-size: 1.3rem;
-          color: #2c3e50;
+
+        .skill-tag {
+            background: linear-gradient(45deg, #001100, #003300);
+            border: 1px solid #00ff41;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            color: #00ff41;
+            transition: all 0.3s ease;
         }
-        
-        .group-card .sub-projects {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 10px;
+
+        .skill-tag:hover {
+            background: linear-gradient(45deg, #003300, #005500);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
         }
-        
-        .group-card .sub-projects .project-card {
-          flex: 1 1 calc(50% - 10px);
-          background-color: #f4f4f4;
+
+        .typing-animation {
+            border-right: 2px solid #00ff41;
+            animation: blink 1s infinite;
         }
-        
-        /* Work History Section */
-        .work-history {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff41; }
+            51%, 100% { border-color: transparent; }
         }
-        
-        .job-card {
-          background-color: #ecf0f1;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease;
+
+        .glitch {
+            color: #00ff41;
+            position: relative;
+            display: inline-block;
         }
-        
-        .job-card:hover {
-          transform: translateY(-5px);
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
         }
-        
-        .job-card h3 {
-          margin: 0 0 10px;
-          font-size: 1.3rem;
-          color: #2c3e50;
+
+        .glitch::before {
+            animation: glitch1 0.5s infinite;
+            color: #ff00ff;
+            z-index: -1;
         }
-        
-        .job-card p {
-          margin: 0 0 10px;
-          color: #666;
+
+        .glitch::after {
+            animation: glitch2 0.5s infinite;
+            color: #00ffff;
+            z-index: -2;
         }
-        
-        .job-card ul {
-          margin: 0;
-          padding-left: 20px;
-          color: #555;
+
+        @keyframes glitch1 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
         }
-        
-        .job-card ul li {
-          margin-bottom: 5px;
+
+        @keyframes glitch2 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(-2px, -2px); }
         }
-        
-        /* Education Section */
-        .education-list {
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
+
+        .nav-menu {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 10px 0;
+            text-align: center;
+            border-bottom: 1px solid #00ff41;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
-        
-        .education-card {
-          background-color: #ecf0f1;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          transition: transform 0.3s ease;
+
+        .nav-menu a {
+            color: #00ff41;
+            text-decoration: none;
+            margin: 0 20px;
+            padding: 5px 10px;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
         }
-        
-        .education-card:hover {
-          transform: translateY(-5px);
+
+        .nav-menu a:hover {
+            border: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.8);
         }
-        
-        .education-card h3 {
-          margin: 0 0 10px;
-          font-size: 1.3rem;
-          color: #2c3e50;
+
+        .contact-info {
+            text-align: center;
+            margin: 20px 0;
         }
-        
-        .education-card p {
-          margin: 0;
-          color: #666;
+
+        .contact-info a {
+            color: #4ecdc4;
+            text-decoration: none;
+            margin: 0 15px;
         }
-        
-        .education-card ul {
-          margin: 0;
-          padding-left: 20px;
-          color: #555;
+
+        .contact-info a:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
         }
-        
-        .education-card ul li {
-          margin-bottom: 5px;
+
+        .progress-bar {
+            background: #333;
+            height: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff41, #4ecdc4);
+            transition: width 2s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #00ff41;
+            margin-top: 50px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .nav-menu a {
+                display: block;
+                margin: 5px 0;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #00ff41;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(-100vh);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-      <nav style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 24px; background: #2c3e50; min-height: 20px; padding: 10px 0;">
-        <a href="https://anish7600.github.io/projects" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">Projects</a>
-        <a href="https://deepwiki.com/anish7600" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">DeepWiki</a>
-        <a href="https://anish7600.github.io/tech-writeups" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">Tech Writeups</a>
-        <a href="https://anish7600.github.io/all-things-tech" target="_blank" style="color: #fff; font-weight: bold; font-size: 2rem; margin: 0 20px;">All Things Tech</a>
-      </nav>
-    </header>
-    <div style="margin: 40px auto 0 auto; max-width: 800px; text-align: left; display: flex; align-items: center; gap: 16px;">
-    </div>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <nav class="nav-menu">
+        <a href="#about">about</a>
+        <a href="#experience">experience</a>
+        <a href="#education">education</a>
+        <a href="#skills">skills</a>
+        <a href="#certifications">certifications</a>
+        <a href="https://anish7600.github.io/resources">resources</a>
+        <!-- <a href="https://anish7600.github.io/technical-writeups">writeups</a>
+        <a href="https://anish7600.github.io/news">news</a> -->
+    </nav>
+
     <div class="container">
-        <!-- Work History Section -->
-        <div class="expandable" id="work-history">
-            <div class="expandable-header" onclick="toggleExpandable(this)">
-                <h2>Work History</h2> <span class="arrow">▼</span>
+        <div class="terminal-window" id="about">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/portfolio/about.sh</div>
             </div>
-            <div class="expandable-content">
-                <div class="work-history">
-                    <div class="job-card">
-                      <h3>Quality Assurance Engineer - Quanata</h3>
-                      <p>San Francisco, CA | July 2022 - June 2023</p>
-                      <h4>Key Contributions And Responsibilities:</h4>
-                      <ul>
-                        <li>Executed comprehensive automated and manual testing procedures to ensure software quality.</li>
-                        <li>Validated backend APIs utilizing Pytest for robust functionality testing.</li>
-                        <li>Performed manual verification of GraphQL endpoints to ensure data integrity.</li>
-                        <li>Managed and organized test cases using TestRail for streamlined testing workflows.</li>
-                        <li>Designed and implemented detailed test cases to cover diverse scenarios.</li>
-                        <li>Investigated CI failures and conducted log analysis to identify root causes.</li>
-                        <li>Conducted exploratory testing to uncover potential issues and edge cases.</li>
-                        <li>Applied shift-left testing methodologies to enhance early defect detection.</li>
-                        <li>Identified and reported software defects with detailed documentation.</li>
-                        <li>Collaborated with cross-functional teams to ensure alignment on testing objectives.</li>
-                      </ul>
-                    </div>
-                    <div class="job-card">
-                      <h3>Software Developer in Test - Amount</h3>
-                      <p>Chicago, IL | August 2021 - July 2022</p>
-                      <h4>Key Contributions And Responsibilities:</h4>
-                      <ul>
-                        <li>Developed automated test scripts using TestCafe in JavaScript to ensure application reliability.</li>
-                        <li>Implemented behavior-driven development practices with Cucumber for enhanced collaboration.</li>
-                        <li>Conducted API testing using Postman and Newman to validate endpoint functionality.</li>
-                        <li>Optimized and executed parallel tests to improve testing efficiency.</li>
-                        <li>Tracked and managed software defects using JIRA for effective issue resolution.</li>
-                        <li>Created and maintained comprehensive test documentation and reports.</li>
-                        <li>Developed a proof of concept for end-to-end testing using Cypress in JavaScript.</li>
-                      </ul>
-                    </div>
-                    <div class="job-card">
-                      <h3>Automation Engineer - VMware</h3>
-                      <p>Sandy Springs, GA | July 2019 - July 2020</p>
-                      <h4>Key Contributions And Responsibilities:</h4>
-                      <ul>
-                        <li>Conducted end-to-end testing of VMware Workspace ONE UEM and Windows Tunnel Client.</li>
-                        <li>Performed regression testing for Mobile Email Management (MEM) features.</li>
-                        <li>Designed and maintained test automation frameworks using Ruby for scalable testing.</li>
-                        <li>Contributed to the Page Object Model for efficient test automation.</li>
-                        <li>Automated desktop applications using Appium for enhanced testing coverage.</li>
-                        <li>Performed web application testing using Watir in Ruby.</li>
-                        <li>Automated Windows applications using WinAppDriver for streamlined testing processes.</li>
-                        <li>Conducted smoke and sanity tests on the Windows VPN Tunnel Client MSI Installer.</li>
-                        <li>Managed test cases using HP ALM for organized test management.</li>
-                        <li>Provided customer support, including issue resolution and log analysis.</li>
-                        <li>Developed and maintained automation scripts using PowerShell for system configuration.</li>
-                        <li>Reviewed, refactored, and maintained automation code to ensure quality and efficiency.</li>
-                      </ul>
-                    </div>
-                    <div class="job-card">
-                      <h3>Software Engineer in Test - NetApp</h3>
-                      <p>Boulder, CO | June 2017 - May 2019</p>
-                      <h4>Key Contributions And Responsibilities:</h4>
-                      <ul>
-                        <li>Tested network APIs using Python and Bash to ensure robust functionality.</li>
-                        <li>Automated test environments using virtual machines and containers for efficient testing workflows.</li>
-                        <li>Developed detailed test plans and strategies to ensure comprehensive coverage.</li>
-                        <li>Worked extensively with Linux systems for software testing and configuration.</li>
-                        <li>Configured Arista network switches to support testing environments.</li>
-                        <li>Managed build processes to ensure seamless software integration.</li>
-                        <li>Integrated tests into CI/CD pipelines for continuous delivery and quality assurance.</li>
-                        <li>Implemented continuous integration practices using Jenkins for streamlined development workflows.</li>
-                        <li>Participated in the Scaled Agile Framework to align testing with organizational goals.</li>
-                        <li>Provided training and mentorship to team members to enhance team capabilities.</li>
-                      </ul>
-                    </div>
-                    <div class="job-card">
-                      <h3>Engineering Intern - Webroot</h3>
-                      <p>Broomfiled, CO | May 2016 - Jan 2017</p>
-                      <h4>Key Contributions And Responsibilities</h4>
-                      <ul>
-                          <li>Assisted in the development and debugging of software applications under the guidance of senior developers.</li>
-                          <li>Participated in daily stand-ups, sprint planning, and code reviews within an Agile development team.</li>
-                          <li>Practiced clean code principles and Test-Driven Development to ensure robust and maintainable code.</li>
-                      </ul>
-                    </div>
+            <div class="terminal-content">
+
+                <div class="prompt">root@portfolio:~$ <span class="command">whoami</span></div>
+                <h1 class="glitch" data-text="ANISH">ANISH</h1>
+                <div class="prompt">root@portfolio:~$ <span class="command">cat bio.txt</span></div>
+                <p>QA professional with expertise in quality assurance, automation testing, and network security. Skilled in creating testing frameworks to ensure quality software delivery. Keenly interested in building reliable and secure solutions.</p>
+                <div class="contact-info">
+                    <a href="mailto:anish.parikh50@gmail.com"><i class="fas fa-envelope"></i> Email</a>
+                    <a target="_blank" href="https://github.com/anish7600"><i class="fab fa-github"></i> GitHub</a>
+                    <a target="_blank" href="https://deepwiki.com/anish7600"><i class="fab fa-book"></i> DeepWiki</a>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="container">
-        <!-- Education Section -->
-        <div class="expandable" id="education">
-            <div class="expandable-header" onclick="toggleExpandable(this)">
-                <h2>Education</h2> <span class="arrow">▼</span>
-            </div>
-            <div class="expandable-content">
-                <div class="education-list">
-                    <div class="education-card">
-                        <p style="color: #000000">Master of Science in Interdisciplinary Telecommunication Program (ITP) - Network Security</p>
-                        <p style="color: #000000"><strong>University of Colorado, Boulder</strong> | Graduated: May 2017</p>
-                        <h4>Courses Taken:</h4>
-                        <ul>
-                            <li>Data Communications</li>
-                            <li>Fundamentals of Network Programming</li>
-                            <li>Applied Network Security</li>
-                            <li>Unix System Administration</li>
-                            <li>Network Security Lab</li>
-                            <li>Large Scale Network Analysis (Cisco ASA)</li>
-                            <li>Secure Web Programming (PHP/MySQL)</li>
-                            <li>Secure Embedded Systems (Intel Edison)</li>
-                        </ul>
-                    </div>
-                    <div class="education-card">
-                        <p style="color: #000000">Bachelor of Electronics & Telecommunication Engineering</p>
-                        <p style="color: #000000"><strong>Dwarkadas J. Sanghvi College of Engineering</strong> | Graduated: May 2015</p>
-                    </div>
+
+        <div class="terminal-window" id="experience">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
                 </div>
+                <div class="terminal-title">~/portfolio/experience.log</div>
             </div>
-        </div>
-    </div>
-    <div class="container">
-        <!-- Certifications Section -->
-        <div class="expandable" id="certifications">
-            <div class="expandable-header" onclick="toggleExpandable(this)">
-                <h2>Certifications</h2> <span class="arrow">▼</span>
-            </div>
-            <div class="expandable-content">
-                <div class="education-card">
-                    <ul>
-                        <li><a href="https://www.credly.com/badges/dab1c854-081f-4831-84a8-b33c1c1ce1c8/public_url" target="_blank">AWS Certified DevOps Engineer – Professional</a></li>
-                        <li><a href="https://www.credly.com/badges/2153d465-57f8-484a-923a-f722300c8de6/public_url" target="_blank">AWS Certified SysOps Administrator – Associate</a></li>
-                        <li><a href="https://www.credly.com/badges/2e6af729-161b-427c-93f9-9fa284a5ec9e/public_url" target="_blank">AWS Certified Solutions Architect – Associate</a></li>
-                        <li><a href="https://verified.elearnsecurity.com/certificates/5d33bf46-0142-4097-8191-0dbd84f9fa6b" target="_blank">eLearnSecurity Junior Penetration Tester (eJPT)</a></li>
-                        <li><a href="https://www.credly.com/badges/38ba054f-3d6b-4461-895a-f88b47e5d405" target="_blank">Splunk Core Certified User</a></li>
+            <div class="terminal-content">
+                <div class="prompt">root@portfolio:~$ <span class="command">ls -la /var/log/experience/</span></div>
+                <h2>Work History</h2>
+                
+                <div class="job">
+                    <div class="job-title">Quality Assurance Engineer</div>
+                    <div class="company">Quanata</div>
+                    <div class="duration">July 2022 - June 2023</div>
+                    <ul style="color: #cccccc; margin-left: 20px;">
+                        <li>Executed automated and manual testing for software quality assurance</li>
+                        <li>Validated backend APIs using Pytest framework</li>
+                        <li>Verified GraphQL endpoints and data integrity</li>
+                        <li>Collaborated with teams for shift-left testing</li>
                     </ul>
+                    <div class="skills">
+                        <span class="skill-tag">Pytest</span>
+                        <span class="skill-tag">GraphQL</span>
+                        <span class="skill-tag">CI/CD</span>
+                        <span class="skill-tag">API Testing</span>
+                        <span class="skill-tag">QA</span>
+                    </div>
+                </div>
+
+                <div class="job">
+                    <div class="job-title">Software Developer in Test</div>
+                    <div class="company">Amount</div>
+                    <div class="duration">August 2021 - July 2022</div>
+                    <ul style="color: #cccccc; margin-left: 20px;">
+                        <li>Developed TestCafe & JavaScript automation scripts</li>
+                        <li>Contributed to BDD with Cucumber framework</li>
+                        <li>Automated API testing using Postman/Newman</li>
+                    </ul>
+                    <div class="skills">
+                        <span class="skill-tag">TestCafe</span>
+                        <span class="skill-tag">JavaScript</span>
+                        <span class="skill-tag">Cucumber</span>
+                        <span class="skill-tag">Postman</span>
+                        <span class="skill-tag">Cypress</span>
+                    </div>
+                </div>
+
+                <div class="job">
+                    <div class="job-title">Automation Engineer</div>
+                    <div class="company">VMware</div>
+                    <div class="duration">July 2019 - July 2020</div>
+                    <ul style="color: #cccccc; margin-left: 20px;">
+                        <li>Performed E2E testing for VMware Workspace ONE UEM</li>
+                        <li>Contributed to Ruby-based automation frameworks</li>
+                        <li>Automated mobile/desktop apps with Appium and WinAppDriver</li>
+                    </ul>
+                    <div class="skills">
+                        <span class="skill-tag">Ruby</span>
+                        <span class="skill-tag">Appium</span>
+                        <span class="skill-tag">WinAppDriver</span>
+                        <span class="skill-tag">PowerShell</span>
+                        <span class="skill-tag">E2E Testing</span>
+                    </div>
+                </div>
+
+                <div class="job">
+                    <div class="job-title">Software Engineer in Test</div>
+                    <div class="company">NetApp</div>
+                    <div class="duration">June 2017 - May 2019</div>
+                    <ul style="color: #cccccc; margin-left: 20px;">
+                        <li>Tested network APIs with Python/Bash automation</li>
+                        <li>Integrated CI/CD pipelines with Jenkins</li>
+                        <li>Managed Linux systems and Arista switches</li>
+                        <li>Participated in Scaled Agile Framework and mentored team</li>
+                    </ul>
+                    <div class="skills">
+                        <span class="skill-tag">Python</span>
+                        <span class="skill-tag">Bash</span>
+                        <span class="skill-tag">Jenkins</span>
+                        <span class="skill-tag">Linux</span>
+                        <span class="skill-tag">Networking</span>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <div class="terminal-window" id="education">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/portfolio/education.db</div>
+            </div>
+            <div class="terminal-content">
+                <div class="prompt">root@portfolio:~$ <span class="command">SELECT * FROM education ORDER BY graduation_date DESC;</span></div>
+                <h2>Education</h2>
+                
+                <div class="education-item">
+                    <div class="degree">Master of Science in Network Security</div>
+                    <div class="school">University of Colorado, Boulder</div>
+                    <div class="duration">May 2017</div>
+                    <p>Interdisciplinary Telecommunication Program (ITP). Core modules included Data Communications & Network Programming, Applied Network Security & Security Lab, Unix System Administration, Large Scale Network Analysis (Cisco ASA), Secure Web Programming (PHP/MySQL), and Secure Embedded Systems (Intel Edison).</p>
+                    <div class="skills">
+                        <span class="skill-tag">Network Security</span>
+                        <span class="skill-tag">Unix</span>
+                        <span class="skill-tag">Cisco ASA</span>
+                        <span class="skill-tag">PHP/MySQL</span>
+                        <span class="skill-tag">Embedded Systems</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="terminal-window" id="skills">
+    <div class="terminal-header">
+        <div class="terminal-dots">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+        </div>
+        <div class="terminal-title">~/portfolio/skills.yml</div>
     </div>
+    <div class="terminal-content">
+        <div class="prompt">root@portfolio:~$ <span class="command">cat skills.yml</span></div>
+        <h2>Technical Skills</h2>
+        <div class="section">
+            <h3>Programming Languages</h3>
+            <div class="skills">
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">Bash</span>
+                <span class="skill-tag">Java</span>
+                <span class="skill-tag">C/C++</span>
+                <span class="skill-tag">JavaScript</span>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Security Tools & Technologies</h3>
+            <div class="skills">
+                <span class="skill-tag">Linux</span>
+                <span class="skill-tag">Nmap</span>
+                <span class="skill-tag">Burp Suite</span>
+                <span class="skill-tag">Wireshark</span>
+                <span class="skill-tag">Nessus</span>
+                <span class="skill-tag">Metasploit</span>
+                <span class="skill-tag">Firewalls</span>
+                <span class="skill-tag">SIEM</span>
+                <span class="skill-tag">OWASP</span>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Networking Protocols</h3>
+            <div class="skills">
+                <span class="skill-tag">TCP/IP</span>
+                <span class="skill-tag">ARP</span>
+                <span class="skill-tag">ICMP</span>
+                <span class="skill-tag">TCP</span>
+                <span class="skill-tag">UDP</span>
+                <span class="skill-tag">HTTP</span>
+                <span class="skill-tag">SSL/TLS</span>
+                <span class="skill-tag">SMTP</span>
+                <span class="skill-tag">POP3</span>
+                <span class="skill-tag">DNS</span>
+            </div>
+        </div>
+        <div class="section">
+            <h3>Testing & Automation</h3>
+            <div class="skills">
+                <span class="skill-tag">API Testing</span>
+                <span class="skill-tag">BDD</span>
+                <span class="skill-tag">TestRail</span>
+                <span class="skill-tag">JIRA</span>
+                <span class="skill-tag">Postman</span>
+                <span class="skill-tag">Gherkin</span>
+                <span class="skill-tag">Cucumber</span>
+                <span class="skill-tag">PyTest</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="terminal-window" id="certifications">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/portfolio/certifications.xml</div>
+            </div>
+            <div class="terminal-content">
+                <div class="prompt">root@portfolio:~$ <span class="command">ls -la /etc/certs/</span></div>
+                <h2>Certifications</h2>
+                
+                <div class="cert-item">
+                    <div class="cert-name">AWS Certified DevOps Engineer – Professional</div>
+                    <div class="cert-issuer">AWS</div>
+                    <div class="duration">Expired</div>
+                    <a href="https://www.credly.com/badges/dab1c854-081f-4831-84a8-b33c1c1ce1c8/public_url" target="_blank">View Credential</a>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-name">AWS Certified SysOps Administrator – Associate</div>
+                    <div class="cert-issuer">AWS</div>
+                    <div class="duration">Expired</div>
+                    <a href="https://www.credly.com/badges/2153d465-57f8-484a-923a-f722300c8de6/public_url" target="_blank">View Credential</a>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 95%"></div>
+                    </div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-name">AWS Certified Solutions Architect – Associate</div>
+                    <div class="cert-issuer">AWS</div>
+                    <div class="duration">Expired</div>
+                    <a href="https://www.credly.com/badges/2e6af729-161b-427c-93f9-9fa284a5ec9e/public_url" target="_blank">View Credential</a>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 90%"></div>
+                    </div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-name">eLearnSecurity Junior Penetration Tester (eJPT)</div>
+                    <div class="cert-issuer">eLearnSecurity</div>
+                    <a href="https://verified.elearnsecurity.com/certificates/5d33bf46-0142-4097-8191-0dbd84f9fa6b" target="_blank">View Credential</a>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 85%"></div>
+                    </div>
+                </div>
+
+                <div class="cert-item">
+                    <div class="cert-name">Splunk Core Certified User</div>
+                    <div class="cert-issuer">Splunk</div>
+                    <div class="duration">Expired</div>
+                    <a href="https://www.credly.com/badges/38ba054f-3d6b-4461-895a-f88b47e5d405" target="_blank">View Credential</a>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 80%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="prompt">root@portfolio:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
     <script>
-        // JavaScript to handle expand/collapse functionality
-        function toggleExpandable(header) {
-          const expandable = header.parentElement;
-          expandable.classList.toggle('open');
+        // Matrix rain effect
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const charArray = chars.split('');
+
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
         }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 35);
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Typing animation for main title
+        const title = document.querySelector('h1');
+        const text = title.textContent;
+        title.textContent = '';
+        title.classList.add('typing-animation');
+
+        let i = 0;
+        function typeWriter() {
+            if (i < text.length) {
+                title.textContent += text.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            } else {
+                title.classList.remove('typing-animation');
+            }
+        }
+
+        // Start typing animation when page loads
+        window.addEventListener('load', () => {
+            setTimeout(typeWriter, 1000);
+        });
+
+        // Progress bar animations
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const progressBars = entry.target.querySelectorAll('.progress-fill');
+                    progressBars.forEach(bar => {
+                        const width = bar.style.width;
+                        bar.style.width = '0%';
+                        setTimeout(() => {
+                            bar.style.width = width;
+                        }, 200);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.terminal-window').forEach(window => {
+            observer.observe(window);
+        });
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Terminal prompt simulation
+        document.addEventListener('DOMContentLoaded', function() {
+            const prompts = document.querySelectorAll('.prompt');
+            prompts.forEach((prompt, index) => {
+                setTimeout(() => {
+                    prompt.style.opacity = '0';
+                    prompt.style.animation = 'fadeIn 0.5s ease forwards';
+                }, index * 200);
+            });
+        });
+
+        // Add fadeIn animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>

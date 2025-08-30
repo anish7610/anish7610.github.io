@@ -3,7 +3,7 @@
 # Script to update tech news index.md with new HTML files
 # Usage: ./update_tech_index.sh [directory]
 
-cp ../scrape-news/*html all-things-tech/
+cp ../scrape-news/html/*html all-things-tech/
 
 # Set default directory to current working directory if not provided
 TECH_DIR="${1:-$(pwd)}"
