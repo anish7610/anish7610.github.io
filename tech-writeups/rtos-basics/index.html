@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - rtos-basics</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>rtos-basics</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/rtos-basics/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Real-Time Operating Systems (RTOS) Basics</h1><hr>
+<p>Real-Time Operating Systems (RTOS) are specialized operating systems designed to serve real-time applications that process data as it comes in, typically without buffer delays. RTOSes are crucial in embedded systems, robotics, aerospace, automotive systems, and other domains requiring deterministic and time-critical behavior.</p>
+<hr />
+<h2>1. What is Real-Time?</h2><hr>
+<p>Real-time systems are systems that respond to inputs or events within a <strong>strict time constraint</strong>. The correctness of the system depends not only on the logical result but also on the <strong>time at which the results are produced</strong>.</p>
+<h3>Types of Real-Time Systems:</h3><hr>
+<ul>
+<li><strong>Hard Real-Time</strong>: Missing a deadline is a system failure (e.g., anti-lock braking systems).</li>
+<li><strong>Soft Real-Time</strong>: Occasional deadline misses are acceptable but may degrade performance (e.g., video streaming).</li>
+<li><strong>Firm Real-Time</strong>: Missing a deadline renders the result useless, but no catastrophic consequence (e.g., stock trading).</li>
+</ul>
+<hr />
+<h2>2. Key Components of RTOS</h2><hr>
+<h3>a. <strong>Task Management</strong></h3><hr>
+<p>RTOS manages tasks (or threads) through:</p>
+<ul>
+<li>Priorities</li>
+<li>States (Running, Ready, Blocked)</li>
+<li>Preemption</li>
+</ul>
+<h3>b. <strong>Scheduler</strong></h3><hr>
+<p>The RTOS scheduler ensures tasks are executed in a predictable order. Common policies include:</p>
+<ul>
+<li><strong>Preemptive Priority Scheduling</strong></li>
+<li><strong>Round Robin</strong></li>
+<li><strong>Rate Monotonic Scheduling (RMS)</strong></li>
+<li><strong>Earliest Deadline First (EDF)</strong></li>
+</ul>
+<h3>c. <strong>Inter-Task Communication (ITC)</strong></h3><hr>
+<p>Mechanisms for communication and synchronization:</p>
+<ul>
+<li>Message Queues</li>
+<li>Semaphores (Binary, Counting)</li>
+<li>Mutexes (for mutual exclusion)</li>
+<li>Events/Flags</li>
+</ul>
+<h3>d. <strong>Timers and Clocks</strong></h3><hr>
+<p>Used for task delays, timeouts, and periodic scheduling.</p>
+<h3>e. <strong>Memory Management</strong></h3><hr>
+<p>RTOS typically avoids dynamic memory allocation at runtime; instead, it uses:</p>
+<ul>
+<li>Static memory allocation</li>
+<li>Memory pools (fixed-size block allocation)</li>
+</ul>
+<hr />
+<h2>3. RTOS vs General-Purpose OS (e.g., Linux)</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>RTOS</th>
+<th>General-Purpose OS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Scheduling</td>
+<td>Deterministic</td>
+<td>Best-effort</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Low and predictable</td>
+<td>Variable and high</td>
+</tr>
+<tr>
+<td>Footprint</td>
+<td>Small</td>
+<td>Large</td>
+</tr>
+<tr>
+<td>Preemption</td>
+<td>Fine-grained</td>
+<td>Coarse-grained</td>
+</tr>
+<tr>
+<td>Timing Guarantees</td>
+<td>Strict</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Real-Time Applications</td>
+<td>Supported</td>
+<td>Limited (with PREEMPT_RT)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>4. Popular RTOS Examples</h2><hr>
+<table>
+<thead>
+<tr>
+<th>RTOS Name</th>
+<th>Highlights</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FreeRTOS</strong></td>
+<td>Open source, lightweight, ARM Cortex-M friendly</td>
+</tr>
+<tr>
+<td><strong>RTEMS</strong></td>
+<td>Used in space and avionics (NASA, ESA)</td>
+</tr>
+<tr>
+<td><strong>VxWorks</strong></td>
+<td>Commercial, used in aerospace and medical</td>
+</tr>
+<tr>
+<td><strong>Zephyr</strong></td>
+<td>Linux Foundation project for IoT</td>
+</tr>
+<tr>
+<td><strong>QNX</strong></td>
+<td>Certified for automotive and medical use</td>
+</tr>
+<tr>
+<td><strong>Micrium uC/OS</strong></td>
+<td>Certified RTOS for safety-critical systems</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. Real-Time Constraints: Jitter, Latency, and Throughput</h2><hr>
+<ul>
+<li><strong>Latency</strong>: Time between event and system response.</li>
+<li><strong>Jitter</strong>: Variation in task response time.</li>
+<li><strong>Throughput</strong>: Amount of work performed in a given time.</li>
+</ul>
+<p>RTOS prioritizes <strong>low latency and jitter</strong>, often sacrificing throughput for predictability.</p>
+<hr />
+<h2>6. Use Case Examples</h2><hr>
+<ul>
+<li><strong>Automotive</strong>: Airbag deployment, ECU control</li>
+<li><strong>Medical Devices</strong>: Pacemakers, ventilators</li>
+<li><strong>Industrial Automation</strong>: Robotic arms, PLCs</li>
+<li><strong>Consumer Electronics</strong>: Smartwatches, drones</li>
+</ul>
+<hr />
+<h2>7. RTOS Development Considerations</h2><hr>
+<ul>
+<li>Select appropriate scheduling algorithm for timing needs.</li>
+<li>Avoid blocking calls in high-priority tasks.</li>
+<li>Use hardware timers for critical operations.</li>
+<li>Minimize context switch overhead.</li>
+<li>Use watchdog timers for system reliability.</li>
+</ul>
+<hr />
+<h2>8. RTOS with Embedded Hardware</h2><hr>
+<p>RTOSes are typically used on microcontrollers (e.g., ARM Cortex-M, AVR, ESP32) with limited resources. They integrate with drivers for peripherals and often offer:</p>
+<ul>
+<li>Tickless idle modes for power efficiency.</li>
+<li>Hooks for custom interrupt handling.</li>
+<li>Portability across toolchains (GCC, IAR, Keil).</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>An RTOS enables deterministic behavior essential for time-critical systems. Its design is centered around predictability, task prioritization, and minimal latency. Understanding the internals of RTOS is essential for anyone working with embedded systems or safety-critical applications.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - elk-stack</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>elk-stack</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/elk-stack/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Logging with ELK Stack (Elasticsearch, Logstash, Kibana)</h1><hr>
+<h2>Introduction</h2><hr>
+<p>Modern applications generate massive amounts of log data. To effectively collect, parse, store, and visualize this data, the <strong>ELK stack</strong>—comprising <strong>Elasticsearch</strong>, <strong>Logstash</strong>, and <strong>Kibana</strong>—is one of the most popular open-source solutions used in production environments.</p>
+<h2>Overview of ELK Stack</h2><hr>
+<ol>
+<li>
+<p><strong>Elasticsearch</strong>
+   A distributed, RESTful search and analytics engine capable of storing large volumes of data. It stores the logs and provides powerful full-text search capabilities.</p>
+</li>
+<li>
+<p><strong>Logstash</strong>
+   A data processing pipeline that ingests logs from multiple sources, transforms them, and sends them to a destination (usually Elasticsearch). It supports a wide range of input, filter, and output plugins.</p>
+</li>
+<li>
+<p><strong>Kibana</strong>
+   A web-based UI for visualizing data stored in Elasticsearch. It allows users to create dashboards, search logs, and monitor application behavior.</p>
+</li>
+</ol>
+<hr />
+<h2>Architecture</h2><hr>
+<pre class="codehilite"><code class="language-plaintext">Application Logs
+     |
+[ Filebeat / Log Shipper ]
+     |
+[ Logstash ] --&gt; [ Elasticsearch ] --&gt; [ Kibana ]
+</code></pre>
+
+<ul>
+<li><strong>Filebeat</strong> is a lightweight agent that ships logs from servers to Logstash or Elasticsearch.</li>
+</ul>
+<hr />
+<h2>Setup and Workflow</h2><hr>
+<h3>1. <strong>Log Collection with Filebeat</strong></h3><hr>
+<p>Install Filebeat on your servers to monitor log files (e.g., <code>/var/log/syslog</code>, <code>/var/log/nginx/access.log</code>). Filebeat forwards log entries to Logstash or Elasticsearch.</p>
+<pre class="codehilite"><code class="language-yaml"># filebeat.yml
+filebeat.inputs:
+  - type: log
+    paths:
+      - /var/log/*.log
+output.logstash:
+  hosts: [&quot;localhost:5044&quot;]
+</code></pre>
+
+<h3>2. <strong>Log Processing with Logstash</strong></h3><hr>
+<p>Logstash processes incoming logs with a configurable pipeline of inputs, filters, and outputs.</p>
+<pre class="codehilite"><code class="language-bash"># Example Logstash config: logstash.conf
+input {
+  beats {
+    port =&gt; 5044
+  }
+}
+filter {
+  grok {
+    match =&gt; { &quot;message&quot; =&gt; &quot;%{COMMONAPACHELOG}&quot; }
+  }
+  date {
+    match =&gt; [&quot;timestamp&quot;, &quot;dd/MMM/yyyy:HH:mm:ss Z&quot;]
+  }
+}
+output {
+  elasticsearch {
+    hosts =&gt; [&quot;http://localhost:9200&quot;]
+    index =&gt; &quot;weblogs-%{+YYYY.MM.dd}&quot;
+  }
+}
+</code></pre>
+
+<h3>3. <strong>Log Storage with Elasticsearch</strong></h3><hr>
+<p>Once Logstash sends structured logs to Elasticsearch, they are indexed and stored. Elasticsearch allows fast querying using a powerful DSL (Domain-Specific Language).</p>
+<h3>4. <strong>Log Visualization with Kibana</strong></h3><hr>
+<p>Connect Kibana to Elasticsearch, and you can:</p>
+<ul>
+<li>Search logs by keyword, fields, timestamps</li>
+<li>Create dashboards for real-time monitoring</li>
+<li>Set up alerts and anomaly detection</li>
+</ul>
+<hr />
+<h2>Real-World Use Cases</h2><hr>
+<ul>
+<li><strong>Centralized logging</strong> from microservices</li>
+<li><strong>Debugging and tracing</strong> production issues</li>
+<li><strong>Compliance/auditing</strong></li>
+<li><strong>Security log analysis</strong></li>
+</ul>
+<hr />
+<h2>Key Benefits</h2><hr>
+<ul>
+<li>Scalable and distributed architecture</li>
+<li>Rich querying and full-text search</li>
+<li>Real-time visualization</li>
+<li>Ecosystem integrations (e.g., Beats, APM agents)</li>
+</ul>
+<hr />
+<h2>Alternatives</h2><hr>
+<ul>
+<li><strong>Graylog</strong></li>
+<li><strong>Fluentd + Elasticsearch + Kibana</strong></li>
+<li><strong>Datadog / Splunk</strong> (commercial)</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>The ELK stack is a powerful solution for managing and analyzing logs from various sources in real time. With its modular components and strong community support, it's widely adopted for observability, troubleshooting, and monitoring needs across industries.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

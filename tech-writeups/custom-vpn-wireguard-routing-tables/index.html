@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - custom-vpn-wireguard-routing-tables</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>custom-vpn-wireguard-routing-tables</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/custom-vpn-wireguard-routing-tables/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Implementing a Custom VPN Using WireGuard and Routing Tables</h2><hr>
+<p>WireGuard is a modern, fast, and simple VPN solution that’s well-suited for both embedded devices and high-throughput servers. It uses state-of-the-art cryptography and operates at Layer 3 (network layer). This write-up covers how to implement a custom VPN using WireGuard and modify routing tables for secure communication between two endpoints.</p>
+<hr />
+<h3>1. <strong>Why WireGuard?</strong></h3><hr>
+<ul>
+<li><strong>Simplicity</strong>: Just a few thousand lines of code.</li>
+<li><strong>Performance</strong>: Faster than OpenVPN and IPsec in many benchmarks.</li>
+<li><strong>Security</strong>: Uses modern cryptographic protocols like Curve25519, ChaCha20, and Poly1305.</li>
+</ul>
+<hr />
+<h3>2. <strong>WireGuard Basics</strong></h3><hr>
+<ul>
+<li><strong>Interface</strong>: <code>wg0</code>, <code>wg1</code>, etc.</li>
+<li><strong>Peers</strong>: Defined by public key and allowed IPs.</li>
+<li><strong>Port</strong>: Defaults to UDP 51820.</li>
+<li><strong>Configuration</strong>: Can be done via <code>wg-quick</code> or directly with <code>wg</code>.</li>
+</ul>
+<hr />
+<h3>3. <strong>Installation</strong></h3><hr>
+<p>On Ubuntu:</p>
+<pre class="codehilite"><code class="language-bash">sudo apt update
+sudo apt install wireguard
+</code></pre>
+
+<p>Enable IP forwarding:</p>
+<pre class="codehilite"><code class="language-bash">echo 'net.ipv4.ip_forward=1' | sudo tee -a /etc/sysctl.conf
+sysctl -p
+</code></pre>
+
+<hr />
+<h3>4. <strong>Configuration Files</strong></h3><hr>
+<p><strong>Server <code>/etc/wireguard/wg0.conf</code>:</strong></p>
+<pre class="codehilite"><code class="language-ini">[Interface]
+Address = 10.0.0.1/24
+PrivateKey = &lt;server-private-key&gt;
+ListenPort = 51820
+
+[Peer]
+PublicKey = &lt;client-public-key&gt;
+AllowedIPs = 10.0.0.2/32
+</code></pre>
+
+<p><strong>Client <code>/etc/wireguard/wg0.conf</code>:</strong></p>
+<pre class="codehilite"><code class="language-ini">[Interface]
+Address = 10.0.0.2/24
+PrivateKey = &lt;client-private-key&gt;
+
+[Peer]
+PublicKey = &lt;server-public-key&gt;
+Endpoint = &lt;server-ip&gt;:51820
+AllowedIPs = 0.0.0.0/0
+PersistentKeepalive = 25
+</code></pre>
+
+<hr />
+<h3>5. <strong>Key Generation</strong></h3><hr>
+<pre class="codehilite"><code class="language-bash">wg genkey | tee privatekey | wg pubkey &gt; publickey
+</code></pre>
+
+<p>Do this on both client and server. Exchange public keys securely.</p>
+<hr />
+<h3>6. <strong>Starting WireGuard</strong></h3><hr>
+<pre class="codehilite"><code class="language-bash">sudo wg-quick up wg0
+</code></pre>
+
+<p>To stop:</p>
+<pre class="codehilite"><code class="language-bash">sudo wg-quick down wg0
+</code></pre>
+
+<hr />
+<h3>7. <strong>Routing and NAT</strong></h3><hr>
+<p>On the <strong>server</strong> (to forward packets from VPN to internet):</p>
+<pre class="codehilite"><code class="language-bash">sudo iptables -t nat -A POSTROUTING -s 10.0.0.0/24 -o eth0 -j MASQUERADE
+</code></pre>
+
+<p>Make this persistent using <code>iptables-save</code>.</p>
+<hr />
+<h3>8. <strong>Routing Table Adjustments</strong></h3><hr>
+<p>You may want to route only specific subnets (split tunneling) or all traffic.</p>
+<p>For split tunneling on client:</p>
+<pre class="codehilite"><code class="language-ini">AllowedIPs = 10.0.0.0/24, 192.168.1.0/24
+</code></pre>
+
+<p>For full tunneling:</p>
+<pre class="codehilite"><code class="language-ini">AllowedIPs = 0.0.0.0/0, ::/0
+</code></pre>
+
+<p>Check routes:</p>
+<pre class="codehilite"><code class="language-bash">ip route show
+</code></pre>
+
+<hr />
+<h3>9. <strong>Testing VPN Tunnel</strong></h3><hr>
+<p>From client:</p>
+<pre class="codehilite"><code class="language-bash">ping 10.0.0.1
+curl ifconfig.me # should return server IP if full tunnel
+</code></pre>
+
+<p>Check <code>wg</code> status:</p>
+<pre class="codehilite"><code class="language-bash">sudo wg
+</code></pre>
+
+<hr />
+<h3>10. <strong>Use Cases</strong></h3><hr>
+<ul>
+<li>Secure remote access to private networks</li>
+<li>Site-to-site connectivity (e.g., branch office to HQ)</li>
+<li>VPN for Kubernetes pods or microservices</li>
+</ul>
+<hr />
+<h3>11. <strong>Security Considerations</strong></h3><hr>
+<ul>
+<li>Only use keys with secure permissions (<code>chmod 600</code>)</li>
+<li>Limit <code>AllowedIPs</code> to restrict access scope</li>
+<li>Enable firewall rules to prevent abuse</li>
+<li>Use <code>PersistentKeepalive</code> for NAT traversal</li>
+</ul>
+<hr />
+<h3>Summary</h3><hr>
+<p>Implementing a VPN with WireGuard involves minimal setup but offers robust and performant security. Combined with correct routing table and firewall adjustments, it serves as a lightweight yet production-grade VPN solution suitable for many networking needs.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

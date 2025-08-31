@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - clean-architecture</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>clean-architecture</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/clean-architecture/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Clean Architecture in Backend Design</h2><hr>
+<p><strong>Clean Architecture</strong> is a software design pattern that emphasizes <strong>separation of concerns</strong>, <strong>testability</strong>, and <strong>independence of frameworks</strong>, making systems easier to maintain, scale, and test. Coined by Robert C. Martin (Uncle Bob), Clean Architecture proposes organizing code in concentric layers, where <strong>dependencies point inward</strong>, and core business logic remains independent of delivery mechanisms like databases, web frameworks, or UI.</p>
+<hr />
+<h3>Core Principles</h3><hr>
+<ol>
+<li><strong>Independence</strong>: The business rules should not depend on external elements (databases, UI, frameworks).</li>
+<li><strong>Separation of Concerns</strong>: Different parts of the system should focus on specific roles.</li>
+<li><strong>Dependency Rule</strong>: Code dependencies can only point inwards (e.g., controllers depend on use cases, not vice versa).</li>
+<li><strong>Testability</strong>: Logic can be unit-tested without the need for infrastructure (DBs, web servers).</li>
+</ol>
+<hr />
+<h3>Layered Architecture</h3><hr>
+<p>Clean Architecture typically consists of <strong>four concentric layers</strong>:</p>
+<pre class="codehilite"><code>+----------------------------+
+|        Frameworks &amp;       |
+|        Drivers            |
+|  (DB, Web, UI, CLI)       |
++----------------------------+
+|        Interface Adapters |
+|  (Controllers, Presenters)|
++----------------------------+
+|       Application Business|
+|        Rules              |
+|  (Use Cases, Services)    |
++----------------------------+
+|       Enterprise Business |
+|        Rules              |
+|   (Entities, Core Logic)  |
++----------------------------+
+</code></pre>
+
+<hr />
+<h3>Layer Breakdown</h3><hr>
+<h4>1. <strong>Entities (Enterprise Business Rules)</strong></h4>
+<ul>
+<li><strong>What</strong>: Core objects and logic (e.g., <code>User</code>, <code>Order</code>, <code>Product</code>)</li>
+<li><strong>Responsibilities</strong>: Encapsulate business rules, independent of UI or DB</li>
+<li><strong>Reusable across applications</strong></li>
+</ul>
+<h4>2. <strong>Use Cases (Application Business Rules)</strong></h4>
+<ul>
+<li><strong>What</strong>: Application-specific workflows</li>
+<li><strong>Responsibilities</strong>: Coordinate interactions between entities and external interfaces (e.g., <code>RegisterUser</code>, <code>PlaceOrder</code>)</li>
+<li><strong>Orchestrate business logic</strong></li>
+</ul>
+<h4>3. <strong>Interface Adapters</strong></h4>
+<ul>
+<li><strong>What</strong>: Convert data between formats (e.g., HTTP to Python objects)</li>
+<li><strong>Responsibilities</strong>: Controllers, presenters, gateways</li>
+<li><strong>Implements interfaces from inner layers</strong></li>
+</ul>
+<h4>4. <strong>Frameworks &amp; Drivers</strong></h4>
+<ul>
+<li><strong>What</strong>: Tools and technologies (e.g., Flask, Django, SQLAlchemy, PostgreSQL)</li>
+<li><strong>Responsibilities</strong>: Deliver or store data</li>
+<li><strong>Can be swapped with minimal change to inner layers</strong></li>
+</ul>
+<hr />
+<h3>Example (User Registration)</h3><hr>
+<ul>
+<li><strong>Entity</strong>: <code>User</code> with validation logic</li>
+<li><strong>Use Case</strong>: <code>RegisterUserUseCase</code> coordinates user creation</li>
+<li><strong>Interface Adapter</strong>: <code>UserController</code> handles HTTP request, calls use case</li>
+<li><strong>Framework/Driver</strong>: Flask routes + SQLAlchemy to persist user</li>
+</ul>
+<hr />
+<h3>Benefits</h3><hr>
+<ul>
+<li><strong>Independent of Frameworks</strong>: You can swap out Flask for FastAPI, or MongoDB for Postgres, with minimal impact.</li>
+<li><strong>Highly Testable</strong>: Core logic can be tested without spinning up web servers or databases.</li>
+<li><strong>Easier Maintenance</strong>: Changes in UI or persistence don’t affect business logic.</li>
+<li>️ <strong>Reusability</strong>: Business logic can be reused across different interfaces (REST, CLI, GraphQL, etc.)</li>
+</ul>
+<hr />
+<h3>️ Common Pitfalls</h3><hr>
+<ul>
+<li>Over-engineering for small projects</li>
+<li>Excessive abstraction without clear boundaries</li>
+<li>Violating dependency rules (e.g., inner layers depending on outer)</li>
+</ul>
+<hr />
+<h3>Best Practices</h3><hr>
+<ul>
+<li>Define interfaces for data access (e.g., <code>UserRepository</code>) in the inner layers.</li>
+<li>Implement those interfaces in outer layers (e.g., <code>SQLUserRepository</code>).</li>
+<li>Keep each layer cleanly separated and independently testable.</li>
+<li>Use <strong>Dependency Injection</strong> to invert dependencies.</li>
+</ul>
+<hr />
+<h3>When to Use Clean Architecture</h3><hr>
+<p>Use it when:</p>
+<ul>
+<li>Building large, long-lived systems</li>
+<li>You need <strong>testability</strong> and <strong>scalability</strong></li>
+<li>There are multiple delivery mechanisms (REST, CLI, gRPC)</li>
+<li>You want a <strong>domain-centric</strong> approach</li>
+</ul>
+<p>Avoid it when:</p>
+<ul>
+<li>You’re creating quick MVPs or prototypes</li>
+<li>Project complexity doesn’t justify multiple layers</li>
+</ul>
+<hr />
+<h3>Summary</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Clean Architecture Advantage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framework independence</td>
+<td>Easy to swap tools</td>
+</tr>
+<tr>
+<td>Testability</td>
+<td>Unit-testable without external deps</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Layers can scale independently</td>
+</tr>
+<tr>
+<td>Maintainability</td>
+<td>Well-separated responsibilities</td>
+</tr>
+<tr>
+<td>Learning curve</td>
+<td>Higher for small teams/new developers</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Clean Architecture promotes building systems that are <strong>resilient to change</strong>, <strong>independent of frameworks</strong>, and <strong>easily testable</strong>. While it may seem heavyweight at first, for large systems, it provides clear structure and long-term maintainability.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

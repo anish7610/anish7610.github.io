@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - react-redux-state-management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>react-redux-state-management</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/react-redux-state-management/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>State Management in React: Redux, Context API, Recoil</h1><hr>
+<p>Managing state is a cornerstone of building reliable, scalable, and maintainable React applications. As apps grow, so does the complexity of managing shared state across components. This article compares three widely used tools for managing state in React: <strong>Redux</strong>, <strong>Context API</strong>, and <strong>Recoil</strong>.</p>
+<hr />
+<h2>What is State in React?</h2><hr>
+<p>In React, <strong>state</strong> refers to data that changes over time and affects what is rendered. While local state (via <code>useState</code>) works well for isolated components, it becomes harder to manage as the app grows and more components need access to the same state.</p>
+<hr />
+<h2>1.  Redux</h2><hr>
+<h3>Overview:</h3><hr>
+<p>Redux is a <strong>predictable state container</strong> based on a unidirectional data flow pattern. It maintains application state in a single store and updates it through actions and reducers.</p>
+<h3>Key Concepts:</h3><hr>
+<ul>
+<li><strong>Store</strong>: Holds the global application state.</li>
+<li><strong>Actions</strong>: Plain JavaScript objects that describe what happened.</li>
+<li><strong>Reducers</strong>: Pure functions that take previous state and action, and return the next state.</li>
+<li><strong>Middleware</strong>: Used for side effects like API calls (e.g., Redux Thunk, Redux Saga).</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Mature ecosystem and community support.</li>
+<li>Time-travel debugging and DevTools.</li>
+<li>Enforces a clear data flow and separation of concerns.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Verbose boilerplate.</li>
+<li>Overhead for small to medium apps.</li>
+<li>Asynchronous handling can feel complex.</li>
+</ul>
+<h3>Usage Example:</h3><hr>
+<pre class="codehilite"><code class="language-js">// actions.js
+export const increment = () =&gt; ({ type: 'INCREMENT' });
+
+// reducer.js
+const counter = (state = 0, action) =&gt; {
+  switch (action.type) {
+    case 'INCREMENT': return state + 1;
+    default: return state;
+  }
+};
+
+// store.js
+const store = createStore(counter);
+
+// Component
+const Counter = () =&gt; {
+  const count = useSelector(state =&gt; state);
+  const dispatch = useDispatch();
+  return &lt;button onClick={() =&gt; dispatch(increment())}&gt;{count}&lt;/button&gt;;
+};
+</code></pre>
+
+<hr />
+<h2>2.  Context API</h2><hr>
+<h3>Overview:</h3><hr>
+<p>React’s built-in <strong>Context API</strong> is used for <strong>prop drilling elimination</strong> and light state management across components.</p>
+<h3>Key Concepts:</h3><hr>
+<ul>
+<li><strong>Provider</strong>: Holds the state and provides it to descendants.</li>
+<li><strong>Consumer / useContext Hook</strong>: Consumes the context.</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Native to React — no external libraries.</li>
+<li>Simple to set up.</li>
+<li>Ideal for themes, auth, locales.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Not optimized for frequent updates.</li>
+<li>Triggers re-renders on any value change.</li>
+<li>Difficult to manage deeply nested or large state trees.</li>
+</ul>
+<h3>Usage Example:</h3><hr>
+<pre class="codehilite"><code class="language-js">const CountContext = React.createContext();
+
+const CounterProvider = ({ children }) =&gt; {
+  const [count, setCount] = useState(0);
+  return (
+    &lt;CountContext.Provider value={{ count, setCount }}&gt;
+      {children}
+    &lt;/CountContext.Provider&gt;
+  );
+};
+
+const Counter = () =&gt; {
+  const { count, setCount } = useContext(CountContext);
+  return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;;
+};
+</code></pre>
+
+<hr />
+<h2>3. ️ Recoil</h2><hr>
+<h3>Overview:</h3><hr>
+<p><strong>Recoil</strong> is a modern experimental state management library for React by Facebook. It introduces the concept of <strong>atoms</strong> (shared state) and <strong>selectors</strong> (derived state) with fine-grained updates.</p>
+<h3>Key Concepts:</h3><hr>
+<ul>
+<li><strong>Atoms</strong>: Units of state.</li>
+<li><strong>Selectors</strong>: Compute derived state.</li>
+<li><strong>RecoilRoot</strong>: Top-level provider.</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Easy to use with React’s functional API.</li>
+<li>Fine-grained subscriptions — fewer re-renders.</li>
+<li>Derived/computed state is built-in.</li>
+<li>Concurrent Mode compatible.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Experimental and evolving.</li>
+<li>Smaller community than Redux.</li>
+</ul>
+<h3>Usage Example:</h3><hr>
+<pre class="codehilite"><code class="language-js">import { atom, selector, useRecoilState } from 'recoil';
+
+const countState = atom({
+  key: 'countState',
+  default: 0,
+});
+
+const Counter = () =&gt; {
+  const [count, setCount] = useRecoilState(countState);
+  return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;;
+};
+</code></pre>
+
+<hr />
+<h2>️ Comparison Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Redux</th>
+<th>Context API</th>
+<th>Recoil</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Boilerplate</td>
+<td>High</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>DevTools Support</td>
+<td>Excellent</td>
+<td>Minimal</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>Async Handling</td>
+<td>Middleware (Thunk, Saga)</td>
+<td>Manual with hooks</td>
+<td>Built-in with selectors</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Efficient with memoization</td>
+<td>Poor for frequent changes</td>
+<td>Fine-grained atom updates</td>
+</tr>
+<tr>
+<td>Ecosystem</td>
+<td>Mature</td>
+<td>Native</td>
+<td>Growing</td>
+</tr>
+<tr>
+<td>Use Case Fit</td>
+<td>Large apps</td>
+<td>Small to medium apps</td>
+<td>Medium to large apps</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When to Use What?</h2><hr>
+<ul>
+<li><strong>Redux</strong>: Ideal for large-scale applications with complex state logic, strict architectural needs, and the need for debugging tools.</li>
+<li><strong>Context API</strong>: Suitable for simple use cases like theme, language, or authentication state.</li>
+<li><strong>Recoil</strong>: Great for medium to large applications that want better performance and a more modern, flexible approach without Redux’s boilerplate.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>State management is not one-size-fits-all. Choose based on your <strong>app size</strong>, <strong>complexity</strong>, <strong>performance needs</strong>, and <strong>team familiarity</strong>. Modern React applications can even mix and match — using Context for auth, Redux for global app state, and Recoil for local yet shared atoms.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

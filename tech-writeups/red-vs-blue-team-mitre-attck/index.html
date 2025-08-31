@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - red-vs-blue-team-mitre-attck</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>red-vs-blue-team-mitre-attck</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/red-vs-blue-team-mitre-attck/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Red Team vs Blue Team Tactics with the MITRE ATT\&amp;CK Framework</h2><hr>
+<h4>Overview</h4>
+<p>In modern cybersecurity, proactive defense and simulated adversary behavior are key to building resilient systems. The <strong>Red Team vs Blue Team</strong> paradigm provides a structured way to test, evaluate, and improve an organization's security posture. The <strong>MITRE ATT\&amp;CK Framework</strong> enhances this process by offering a curated knowledge base of real-world adversary behaviors mapped into <strong>Tactics</strong>, <strong>Techniques</strong>, and <strong>Procedures (TTPs)</strong>.</p>
+<hr />
+<h3>Red Team: Offensive Simulation</h3><hr>
+<p><strong>Role</strong>: The Red Team acts like a real-world adversary, performing stealthy, targeted attacks to uncover vulnerabilities.</p>
+<p><strong>Tactics</strong> (based on MITRE ATT\&amp;CK):</p>
+<ul>
+<li><strong>Initial Access</strong>: Use phishing, drive-by compromise, or public-facing applications to gain entry.</li>
+<li><strong>Execution</strong>: Leverage PowerShell, scripting, or malicious binaries to run code on the target.</li>
+<li><strong>Privilege Escalation</strong>: Exploit misconfigurations or kernel flaws to elevate privileges (e.g., <code>Sudo and SUID binaries</code>, <code>Token manipulation</code>).</li>
+<li><strong>Lateral Movement</strong>: Use <code>Remote Desktop Protocol</code>, <code>Pass-the-Hash</code>, or <code>Windows Admin Shares</code>.</li>
+<li><strong>Command and Control (C2)</strong>: Establish persistent communication with tools like <code>Cobalt Strike</code>, <code>Metasploit</code>, or custom reverse shells.</li>
+</ul>
+<p><strong>Toolsets</strong>:</p>
+<ul>
+<li><code>Empire</code>, <code>Nishang</code>, <code>BloodHound</code>, <code>Impacket</code>, <code>Cobalt Strike</code></li>
+</ul>
+<p><strong>Goals</strong>:</p>
+<ul>
+<li>Test detection capabilities</li>
+<li>Simulate advanced persistent threats (APTs)</li>
+<li>Highlight gaps in monitoring, response, and prevention mechanisms</li>
+</ul>
+<hr />
+<h3>Blue Team: Defensive Analysis and Response</h3><hr>
+<p><strong>Role</strong>: The Blue Team detects, contains, and responds to the simulated attacks initiated by the Red Team.</p>
+<p><strong>Tactics</strong>:</p>
+<ul>
+<li><strong>Detection Engineering</strong>: Build detection rules using SIEM tools (e.g., Splunk, ELK).</li>
+<li><strong>Threat Hunting</strong>: Proactively scan for IOC patterns (e.g., DNS beaconing, process injection).</li>
+<li><strong>Incident Response</strong>: Analyze logs, contain breached systems, perform forensics.</li>
+<li><strong>Hardening</strong>: Apply patches, enforce least privilege, implement endpoint protection (EDR).</li>
+<li><strong>Logging and Monitoring</strong>: Use <code>Sysmon</code>, <code>OSQuery</code>, or <code>AuditD</code> to track events in real time.</li>
+</ul>
+<p><strong>Toolsets</strong>:</p>
+<ul>
+<li><code>ELK Stack</code>, <code>Wazuh</code>, <code>OSSEC</code>, <code>Velociraptor</code>, <code>Wireshark</code>, <code>Sysmon</code>, <code>Graylog</code></li>
+</ul>
+<p><strong>Goals</strong>:</p>
+<ul>
+<li>Reduce Mean Time to Detect (MTTD)</li>
+<li>Improve Mean Time to Respond (MTTR)</li>
+<li>Build robust detection coverage mapped to ATT\&amp;CK techniques</li>
+</ul>
+<hr />
+<h3>MITRE ATT\&amp;CK: The Unifying Framework</h3><hr>
+<p>The MITRE ATT\&amp;CK Framework is used by both Red and Blue Teams to:</p>
+<ul>
+<li><strong>Red Team</strong>: Select relevant techniques for adversary emulation (e.g., T1059: Command and Scripting Interpreter).</li>
+<li><strong>Blue Team</strong>: Map detections to ATT\&amp;CK IDs for consistent coverage, validate log sources and detections.</li>
+</ul>
+<p><strong>Key Components</strong>:</p>
+<ul>
+<li><strong>Enterprise ATT\&amp;CK Matrix</strong></li>
+<li><strong>Tactics</strong>: Goals (e.g., Discovery, Exfiltration)</li>
+<li><strong>Techniques/Sub-techniques</strong>: How the goal is achieved (e.g., T1082: System Information Discovery)</li>
+</ul>
+<p><strong>Applications</strong>:</p>
+<ul>
+<li>Purple Teaming (Red + Blue collaboration)</li>
+<li>Threat Intelligence Mapping</li>
+<li>Detection Coverage Gap Analysis</li>
+</ul>
+<hr />
+<h3>Purple Teaming: Closing the Loop</h3><hr>
+<p>A <strong>Purple Team</strong> acts as a bridge, ensuring that lessons learned from the Red Team’s attacks are converted into improved Blue Team defenses.</p>
+<p><strong>Activities</strong>:</p>
+<ul>
+<li>Joint tabletop exercises</li>
+<li>Detection rule testing and refinement</li>
+<li>Red Team emulates → Blue Team detects → Feedback cycle</li>
+</ul>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Using the MITRE ATT\&amp;CK Framework in Red vs Blue simulations enables structured, measurable, and threat-informed security testing. Organizations embracing this model gain:</p>
+<ul>
+<li>Enhanced situational awareness</li>
+<li>Realistic adversary simulation</li>
+<li>Continuous detection and defense improvement</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

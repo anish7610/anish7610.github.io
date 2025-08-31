@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - mocks</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>mocks</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/mocks/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1><strong>Mocking, Stubbing, and Dependency Isolation in Tests</strong></h1><hr>
+<h2><strong>Introduction</strong></h2><hr>
+<p>In software testing—especially unit testing—<strong>isolating the component under test</strong> is critical for ensuring reliable, fast, and deterministic results. This isolation is often achieved using <strong>mocking</strong>, <strong>stubbing</strong>, and other <strong>test double</strong> techniques to control and observe the behavior of dependencies.</p>
+<p>Understanding these strategies is crucial for building robust and maintainable test suites, particularly in <strong>test-driven development (TDD)</strong> and <strong>continuous integration pipelines</strong>.</p>
+<hr />
+<h2><strong>1. The Need for Dependency Isolation</strong></h2><hr>
+<p>When a unit of code interacts with external systems—like databases, web services, or filesystems—it introduces <strong>unpredictability</strong>, <strong>slowness</strong>, and <strong>flakiness</strong> in tests.</p>
+<p><strong>Dependency isolation</strong> helps solve this by replacing real collaborators with controlled test doubles. The key benefits:</p>
+<ul>
+<li>Faster test execution.</li>
+<li>Greater determinism (no network or I/O failures).</li>
+<li>Ability to simulate edge cases.</li>
+<li>Improved fault localization.</li>
+</ul>
+<hr />
+<h2><strong>2. Terminology: Mocks vs Stubs vs Fakes vs Spies</strong></h2><hr>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Stub</strong></td>
+<td>A controllable object that returns predefined responses. Used for indirect input.</td>
+</tr>
+<tr>
+<td><strong>Mock</strong></td>
+<td>A spy + stub with built-in assertions for behavior verification.</td>
+</tr>
+<tr>
+<td><strong>Spy</strong></td>
+<td>Records information about calls made, like arguments and number of invocations.</td>
+</tr>
+<tr>
+<td><strong>Fake</strong></td>
+<td>A working implementation with simplified behavior (e.g., in-memory DB).</td>
+</tr>
+<tr>
+<td><strong>Dummy</strong></td>
+<td>A placeholder object passed to meet parameter requirements, never used.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><strong>3. Stubbing: Returning Controlled Outputs</strong></h2><hr>
+<h3><strong>Purpose</strong>: Control how dependencies behave without asserting how they are used.</h3><hr>
+<pre class="codehilite"><code class="language-python">from unittest.mock import MagicMock
+
+# Example: Service that uses a stubbed payment gateway
+def charge_customer(gateway, customer_id, amount):
+    if gateway.charge(customer_id, amount):
+        return &quot;Charged&quot;
+    return &quot;Failed&quot;
+
+# Test
+def test_charge_success():
+    fake_gateway = MagicMock()
+    fake_gateway.charge.return_value = True
+    assert charge_customer(fake_gateway, &quot;cust123&quot;, 100) == &quot;Charged&quot;
+</code></pre>
+
+<p><strong>Key Point</strong>: We’re not checking <em>how</em> <code>charge()</code> was called, only controlling its return value.</p>
+<hr />
+<h2><strong>4. Mocking: Verifying Interactions</strong></h2><hr>
+<h3><strong>Purpose</strong>: Validate <strong>how</strong> a dependency is used, including call count and parameters.</h3><hr>
+<pre class="codehilite"><code class="language-python">from unittest.mock import Mock
+
+def notify_user(mailer, user_id):
+    mailer.send_email(user_id, &quot;Welcome!&quot;)
+
+def test_notify_user_sends_email():
+    mailer_mock = Mock()
+    notify_user(mailer_mock, &quot;user42&quot;)
+    mailer_mock.send_email.assert_called_once_with(&quot;user42&quot;, &quot;Welcome!&quot;)
+</code></pre>
+
+<p><strong>Key Point</strong>: Mocks assert on interactions; useful for behavior verification.</p>
+<hr />
+<h2><strong>5. Dependency Injection and Isolation</strong></h2><hr>
+<p>Good design encourages injecting dependencies (via constructors, parameters, or service locators) rather than hard-coding them. This enables:</p>
+<ul>
+<li>Easy replacement with mocks/stubs during testing.</li>
+<li>Loose coupling and improved modularity.</li>
+</ul>
+<p><strong>Bad</strong>:</p>
+<pre class="codehilite"><code class="language-python">def save_data(data):
+    db = Database()
+    db.save(data)  # hard to mock `Database`
+</code></pre>
+
+<p><strong>Better</strong>:</p>
+<pre class="codehilite"><code class="language-python">def save_data(db, data):
+    db.save(data)  # easier to test by injecting `db`
+</code></pre>
+
+<hr />
+<h2><strong>6. Using Fakes for In-Memory Alternatives</strong></h2><hr>
+<p>Sometimes you want more behavior than a stub, but without using real systems. A <strong>fake</strong> helps.</p>
+<pre class="codehilite"><code class="language-python">class FakeDatabase:
+    def __init__(self):
+        self.storage = {}
+
+    def save(self, key, value):
+        self.storage[key] = value
+
+    def get(self, key):
+        return self.storage.get(key)
+
+def test_save_and_get():
+    db = FakeDatabase()
+    db.save(&quot;user&quot;, {&quot;name&quot;: &quot;Anish&quot;})
+    assert db.get(&quot;user&quot;) == {&quot;name&quot;: &quot;Anish&quot;}
+</code></pre>
+
+<hr />
+<h2><strong>7. Spies: Tracking Calls Without Controlling Behavior</strong></h2><hr>
+<p>A <strong>spy</strong> wraps a real object and observes interactions.</p>
+<pre class="codehilite"><code class="language-python">from unittest.mock import MagicMock
+
+class Logger:
+    def log(self, message):
+        print(message)
+
+def do_something(logger):
+    logger.log(&quot;Done&quot;)
+
+def test_logger_called():
+    logger = Logger()
+    logger.log = MagicMock()
+    do_something(logger)
+    logger.log.assert_called_with(&quot;Done&quot;)
+</code></pre>
+
+<hr />
+<h2><strong>8. Real-World Examples:</strong></h2><hr>
+<table>
+<thead>
+<tr>
+<th>Context</th>
+<th>Technique</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP API</td>
+<td>Stub</td>
+<td>Return mock API response instead of calling real server</td>
+</tr>
+<tr>
+<td>Email Sender</td>
+<td>Mock</td>
+<td>Assert <code>send_email</code> was called with correct subject/body</td>
+</tr>
+<tr>
+<td>Payment Processor</td>
+<td>Fake</td>
+<td>Simulate card acceptance or decline scenarios</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Spy</td>
+<td>Ensure <code>update()</code> is called exactly once</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><strong>9. Mocking in Popular Testing Frameworks</strong></h2><hr>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Framework</th>
+<th>Mocking Library</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td>pytest</td>
+<td><code>unittest.mock</code>, <code>pytest-mock</code></td>
+</tr>
+<tr>
+<td>Java</td>
+<td>JUnit</td>
+<td>Mockito</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>Jest</td>
+<td>Built-in mocking</td>
+</tr>
+<tr>
+<td>Ruby</td>
+<td>RSpec</td>
+<td>Mocha, FlexMock</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>Testing</td>
+<td>gomock, testify/mock</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><strong>10. Caution: Over-Mocking Anti-Pattern</strong></h2><hr>
+<p>Too much mocking can lead to:</p>
+<ul>
+<li>Fragile tests that break on implementation changes.</li>
+<li>Loss of trust in test results.</li>
+<li>Over-specification of internal behavior.</li>
+</ul>
+<blockquote>
+<p><strong>Guideline</strong>: Mock <strong>collaborators</strong>, not <strong>the system under test</strong>.</p>
+</blockquote>
+<hr />
+<h2><strong>Conclusion</strong></h2><hr>
+<p>Mocking, stubbing, and fakes are indispensable tools for building <strong>fast, focused, and reliable tests</strong>. When used wisely, they lead to better-designed systems and smoother CI/CD pipelines. Understanding when and how to isolate dependencies is a core skill for effective software development.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - Secure Coding</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>Secure Coding</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/secure-coding/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Secure Coding Practices in Web Applications</h1><hr>
+<h3>Focus Areas: XSS, CSRF, SQL Injection</h3><hr>
+<p>Web applications are exposed to various security threats due to improper coding practices. Among the most common and severe vulnerabilities are Cross-Site Scripting (XSS), Cross-Site Request Forgery (CSRF), and SQL Injection. This document outlines each threat and highlights secure coding techniques to prevent them.</p>
+<hr />
+<h2>1. ️ Cross-Site Scripting (XSS)</h2><hr>
+<h3>What is XSS?</h3><hr>
+<p>XSS allows attackers to inject malicious scripts into content that is then served to users. The attacker’s code executes in the victim’s browser, potentially stealing cookies, session tokens, or manipulating the DOM.</p>
+<h3>Types of XSS:</h3><hr>
+<ul>
+<li><strong>Stored XSS</strong> – The payload is stored on the server (e.g., in a database).</li>
+<li><strong>Reflected XSS</strong> – The payload is reflected via the URL or input.</li>
+<li><strong>DOM-based XSS</strong> – The client-side JavaScript dynamically injects untrusted data.</li>
+</ul>
+<h3>Secure Coding Practices:</h3><hr>
+<ul>
+<li><strong>Input Validation:</strong> Reject input that contains HTML tags or JavaScript when not needed.</li>
+<li>
+<p><strong>Output Encoding:</strong> Encode output using context-aware escaping.</p>
+</li>
+<li>
+<p>HTML context: <code>&amp;</code>, <code>&lt;</code>, <code>&gt;</code>, <code>"</code>, <code>'</code></p>
+</li>
+<li>JavaScript context: escape characters like <code>\</code>, <code>"</code>, <code>'</code></li>
+<li>
+<p><strong>Use Trusted Libraries:</strong></p>
+</li>
+<li>
+<p>E.g., <a href="https://owasp.org/www-project-java-encoder/"><code>OWASP Java Encoder</code></a> or Python’s <code>html.escape</code></p>
+</li>
+<li>
+<p><strong>Content Security Policy (CSP):</strong></p>
+</li>
+<li>
+<p>Enforce CSP headers to limit the sources of scripts.</p>
+</li>
+</ul>
+<h3>Example in Flask (Python):</h3><hr>
+<pre class="codehilite"><code class="language-python">from flask import escape
+
+@app.route(&quot;/search&quot;)
+def search():
+    query = request.args.get(&quot;q&quot;, &quot;&quot;)
+    return f&quot;Results for: {escape(query)}&quot;
+</code></pre>
+
+<hr />
+<h2>2. ️ Cross-Site Request Forgery (CSRF)</h2><hr>
+<h3>What is CSRF?</h3><hr>
+<p>CSRF exploits the trust that a web application has in the user’s browser. An attacker tricks the user into submitting unwanted actions (like changing their email) on an authenticated session.</p>
+<h3>Attack Vector:</h3><hr>
+<p>A malicious website submits a form or makes a GET/POST request to another site where the user is already logged in.</p>
+<h3>Secure Coding Practices:</h3><hr>
+<ul>
+<li><strong>Anti-CSRF Tokens:</strong> Generate a unique token for each session/form and validate it on submission.</li>
+<li><strong>SameSite Cookies:</strong> Use <code>SameSite=Lax</code> or <code>Strict</code> to restrict cross-site cookies.</li>
+<li><strong>Double Submit Cookies:</strong> Set a cookie and include the same value in a form/header for verification.</li>
+</ul>
+<h3>Example in Flask-WTF:</h3><hr>
+<pre class="codehilite"><code class="language-python">from flask_wtf import FlaskForm
+from wtforms import StringField
+from wtforms.validators import DataRequired
+
+class ProfileForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired()])
+</code></pre>
+
+<pre class="codehilite"><code class="language-html">&lt;form method=&quot;post&quot;&gt;
+  {{ form.csrf_token }}
+  {{ form.email.label }} {{ form.email() }}
+&lt;/form&gt;
+</code></pre>
+
+<hr />
+<h2>3. ️ SQL Injection</h2><hr>
+<h3>What is SQL Injection?</h3><hr>
+<p>SQL Injection occurs when user inputs are inserted directly into SQL statements without proper sanitization. This allows attackers to manipulate queries, bypass authentication, or extract sensitive data.</p>
+<h3>Attack Vector:</h3><hr>
+<pre class="codehilite"><code class="language-sql">SELECT * FROM users WHERE username = '$input' AND password = '$input';
+</code></pre>
+
+<p>If the user provides <code>admin' OR '1'='1</code>, it bypasses authentication.</p>
+<h3>Secure Coding Practices:</h3><hr>
+<ul>
+<li><strong>Parameterized Queries (Prepared Statements):</strong> Never concatenate user inputs into SQL queries.</li>
+<li><strong>ORMs:</strong> Use Object Relational Mappers (like SQLAlchemy, Django ORM) to abstract SQL logic.</li>
+<li><strong>Input Validation:</strong> Enforce strong typing and validation on user input.</li>
+</ul>
+<h3>Example in Python with SQLite:</h3><hr>
+<pre class="codehilite"><code class="language-python">import sqlite3
+
+def get_user(username):
+    cursor.execute(&quot;SELECT * FROM users WHERE username = ?&quot;, (username,))
+</code></pre>
+
+<hr />
+<h2>General Secure Coding Practices</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Input Validation</td>
+<td>Whitelist approach – only allow expected formats</td>
+</tr>
+<tr>
+<td>Output Encoding</td>
+<td>Encode data based on context (HTML, URL, JavaScript)</td>
+</tr>
+<tr>
+<td>Least Privilege</td>
+<td>DB accounts should have minimal privileges</td>
+</tr>
+<tr>
+<td>Secure Headers</td>
+<td>Use headers like <code>X-Frame-Options</code>, <code>X-XSS-Protection</code>, <code>Content-Security-Policy</code></td>
+</tr>
+<tr>
+<td>Session Management</td>
+<td>Use secure, HTTP-only cookies; regenerate session IDs</td>
+</tr>
+<tr>
+<td>Logging and Monitoring</td>
+<td>Log access attempts, unusual activities, and validation failures</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Tools for Secure Coding</h2><hr>
+<ul>
+<li><strong>Static Analysis:</strong> SonarQube, Bandit (Python)</li>
+<li><strong>Dynamic Analysis:</strong> OWASP ZAP, Burp Suite</li>
+<li><strong>Security Testing:</strong> Postman, sqlmap, XSS Hunter</li>
+<li>
+<p><strong>Framework Features:</strong></p>
+</li>
+<li>
+<p>Django: CSRF Middleware, ORM</p>
+</li>
+<li>Flask: <code>flask-wtf</code>, <code>escape()</code></li>
+<li>Express (Node.js): <code>helmet</code>, <code>express-validator</code></li>
+</ul>
+<hr />
+<h2>Summary Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Prevention</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>XSS</strong></td>
+<td>Escape output, CSP, input validation</td>
+</tr>
+<tr>
+<td><strong>CSRF</strong></td>
+<td>CSRF tokens, SameSite cookies</td>
+</tr>
+<tr>
+<td><strong>SQLi</strong></td>
+<td>Prepared statements, input validation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>References</h2><hr>
+<ul>
+<li><a href="https://owasp.org/www-project-top-ten/">OWASP Top 10</a></li>
+<li><a href="https://cheatsheetseries.owasp.org/">OWASP Cheat Sheet Series</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP">Mozilla CSP Guide</a></li>
+<li><a href="https://flask.palletsprojects.com/en/2.3.x/security/">Flask Security Docs</a></li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

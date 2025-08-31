@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - progressive-web-apps</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>progressive-web-apps</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/progressive-web-apps/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Progressive Web Apps (PWA) vs Native Apps: A Technical Comparison</h1><hr>
+<h2>Overview</h2><hr>
+<p>With the rise of mobile usage, developers often face a critical choice: <strong>build a native app</strong> or develop a <strong>Progressive Web App (PWA)</strong>. Both approaches offer distinct advantages depending on goals like reach, performance, and platform-specific features.</p>
+<hr />
+<h2>What is a Progressive Web App (PWA)?</h2><hr>
+<p>A <strong>PWA</strong> is a web application that behaves like a native app when accessed on a mobile device. It leverages modern web capabilities to deliver:</p>
+<ul>
+<li><strong>Installability</strong> (Add to Home Screen)</li>
+<li><strong>Offline Support</strong> (via Service Workers)</li>
+<li><strong>Push Notifications</strong></li>
+<li><strong>Responsive Design</strong></li>
+</ul>
+<h3>Key Technologies</h3><hr>
+<ul>
+<li><strong>Service Workers</strong>: For caching, background sync, and offline capabilities</li>
+<li><strong>Web App Manifest</strong>: Metadata for icons, themes, and full-screen modes</li>
+<li><strong>HTTPS</strong>: Mandatory for security and service workers</li>
+<li><strong>IndexedDB / localStorage</strong>: Offline storage options</li>
+</ul>
+<hr />
+<h2>What is a Native App?</h2><hr>
+<p>A <strong>native app</strong> is built specifically for a platform (e.g., Android, iOS) using platform-specific tools:</p>
+<ul>
+<li>Android: Java/Kotlin with Android SDK</li>
+<li>iOS: Swift/Objective-C with Xcode</li>
+</ul>
+<h3>Native App Features</h3><hr>
+<ul>
+<li>Full access to hardware APIs (Bluetooth, NFC, camera, GPS)</li>
+<li>Optimized UI performance</li>
+<li>Tightly integrated with OS features (e.g., Siri, system notifications)</li>
+</ul>
+<hr />
+<h2>Comparison Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>PWA</th>
+<th>Native App</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Installation</strong></td>
+<td>Add to home screen</td>
+<td>App Store / Play Store</td>
+</tr>
+<tr>
+<td><strong>Offline Support</strong></td>
+<td>Via service workers</td>
+<td>Full offline support</td>
+</tr>
+<tr>
+<td><strong>Hardware Access</strong></td>
+<td>Limited (Bluetooth, sensors)</td>
+<td>Full access</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Good, browser-dependent</td>
+<td>Best (closer to hardware)</td>
+</tr>
+<tr>
+<td><strong>Distribution</strong></td>
+<td>Web URL, no store required</td>
+<td>Requires app store submission</td>
+</tr>
+<tr>
+<td><strong>Maintenance</strong></td>
+<td>One codebase for all platforms</td>
+<td>Separate builds per platform</td>
+</tr>
+<tr>
+<td><strong>Updates</strong></td>
+<td>Instant, via server</td>
+<td>Requires app store approval</td>
+</tr>
+<tr>
+<td><strong>Push Notifications</strong></td>
+<td>Yes (limited on iOS)</td>
+<td>Full support</td>
+</tr>
+<tr>
+<td><strong>Discoverability</strong></td>
+<td>Search engines</td>
+<td>App stores</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When to Use PWA</h2><hr>
+<ul>
+<li>You want <strong>cross-platform reach</strong> without writing multiple codebases.</li>
+<li>The app is <strong>content-centric</strong> (news, e-commerce, blog, etc.).</li>
+<li>You don’t need deep hardware or OS integration.</li>
+<li>Fast iteration and updates are key (e.g., startups, MVPs).</li>
+</ul>
+<h3>Examples:</h3><hr>
+<ul>
+<li>Twitter Lite</li>
+<li>Pinterest PWA</li>
+<li>Starbucks PWA</li>
+</ul>
+<hr />
+<h2>When to Use Native Apps</h2><hr>
+<ul>
+<li>You require <strong>tight hardware integration</strong> (e.g., camera, AR, sensors).</li>
+<li>Performance is critical (e.g., gaming, 3D rendering).</li>
+<li>You rely on <strong>OS-level integrations</strong> or monetization through app stores.</li>
+<li>You’re building a <strong>brand-heavy app</strong> that benefits from visibility in app stores.</li>
+</ul>
+<hr />
+<h2>Hybrid Alternatives</h2><hr>
+<ul>
+<li><strong>React Native</strong>, <strong>Flutter</strong>, and <strong>Capacitor</strong>: Offer native performance with single-codebase flexibility.</li>
+<li>Useful when you need more than a PWA but want to avoid writing platform-specific code.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Both PWAs and native apps serve their purpose based on context:</p>
+<ul>
+<li><strong>PWAs excel in accessibility, development speed, and distribution.</strong></li>
+<li><strong>Native apps shine in performance, UX consistency, and hardware integration.</strong></li>
+</ul>
+<p>A strategic mix may even make sense—using a PWA as a public-facing front and a native app for advanced use cases.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - tcpip-stack-hardening-zero-trust</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>tcpip-stack-hardening-zero-trust</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/tcpip-stack-hardening-zero-trust/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>TCP/IP Stack Hardening Techniques for Zero Trust Networks</h2><hr>
+<p>Zero Trust Architecture (ZTA) is built on the principle of “never trust, always verify.” While most Zero Trust implementations focus on application-layer controls and identity, a robust ZTA approach also mandates reinforcing security at the transport and network layers—specifically, hardening the TCP/IP stack.</p>
+<p>Hardening the TCP/IP stack reduces the attack surface and mitigates risks from common threats such as IP spoofing, SYN floods, DNS cache poisoning, and protocol abuse.</p>
+<hr />
+<h2>1. <strong>Disabling Unused Protocols and Interfaces</strong></h2><hr>
+<p>Disable support for insecure and legacy protocols such as:</p>
+<ul>
+<li>ICMP redirects (<code>net.ipv4.conf.all.accept_redirects</code>)</li>
+<li>Source routing (<code>net.ipv4.conf.all.accept_source_route</code>)</li>
+<li>IPv6 (if unused) via <code>sysctl</code> and kernel modules</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.ipv4.conf.all.accept_redirects=0
+sysctl -w net.ipv4.conf.all.accept_source_route=0
+</code></pre>
+
+<hr />
+<h2>2. <strong>SYN Flood Protection</strong></h2><hr>
+<p>TCP SYN floods can exhaust connection queues and cause denial of service. Enable SYN cookies:</p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.ipv4.tcp_syncookies=1
+</code></pre>
+
+<p>Also configure maximum backlog settings:</p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.core.somaxconn=1024
+</code></pre>
+
+<hr />
+<h2>3. <strong>Reverse Path Filtering (RPF)</strong></h2><hr>
+<p>Enables source address verification to drop packets with spoofed IP addresses:</p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.ipv4.conf.all.rp_filter=1
+</code></pre>
+
+<hr />
+<h2>4. <strong>IP Spoofing and Source Validation</strong></h2><hr>
+<p>In addition to RPF, use packet filtering (e.g., <code>iptables</code>, <code>nftables</code>) to block:</p>
+<ul>
+<li>Private IP ranges on public interfaces</li>
+<li>Bogons (e.g., 0.0.0.0/8, 169.254.0.0/16)</li>
+</ul>
+<p><strong>Example:</strong></p>
+<pre class="codehilite"><code class="language-bash">iptables -A INPUT -s 10.0.0.0/8 -j DROP
+</code></pre>
+
+<hr />
+<h2>5. <strong>Disable TCP Timestamps</strong></h2><hr>
+<p>Timestamps can reveal system uptime and assist in fingerprinting.</p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.ipv4.tcp_timestamps=0
+</code></pre>
+
+<hr />
+<h2>6. <strong>Prevent IP Fragmentation Attacks</strong></h2><hr>
+<p>Limit and validate fragmented packets:</p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.ipv4.ipfrag_high_thresh=262144
+</code></pre>
+
+<p>Also, consider using IDS/IPS tools to detect overlapping fragment attacks.</p>
+<hr />
+<h2>7. <strong>Secure DNS Traffic</strong></h2><hr>
+<p>Move DNS to encrypted channels:</p>
+<ul>
+<li>Prefer <strong>DoT (DNS over TLS)</strong> or <strong>DoH (DNS over HTTPS)</strong></li>
+<li>Use DNSSEC validation when possible</li>
+</ul>
+<hr />
+<h2>8. <strong>Network Segmentation and Microsegmentation</strong></h2><hr>
+<ul>
+<li>Apply firewall rules per service, even on internal networks.</li>
+<li>Enforce identity-aware segmentation (e.g., Istio for service mesh).</li>
+<li>Avoid any "flat" network assumptions.</li>
+</ul>
+<hr />
+<h2>9. <strong>Disable Broadcast and Multicast Storms</strong></h2><hr>
+<p>Protect against amplification attacks and unwanted discovery protocols:</p>
+<pre class="codehilite"><code class="language-bash">sysctl -w net.ipv4.icmp_echo_ignore_broadcasts=1
+</code></pre>
+
+<hr />
+<h2>10. <strong>Packet Inspection and Logging</strong></h2><hr>
+<p>Implement:</p>
+<ul>
+<li><strong>Netfilter (iptables/nftables)</strong> with detailed logging</li>
+<li><strong>ebpf-based tools</strong> for flow visibility (e.g., Cilium, Falco)</li>
+<li><strong>Suricata</strong> or <strong>Zeek</strong> for real-time anomaly detection</li>
+</ul>
+<hr />
+<h2>11. <strong>Apply Kernel Patches Regularly</strong></h2><hr>
+<p>Zero-day exploits often target the network stack. Automated vulnerability scanning (e.g., OpenSCAP) and frequent patching are essential.</p>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>TCP/IP stack hardening is often neglected in favor of application-layer security. However, in a Zero Trust model, every layer must be scrutinized. A hardened stack complements encrypted communications, endpoint identity, and microsegmentation to enforce a defense-in-depth strategy that aligns with Zero Trust principles.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

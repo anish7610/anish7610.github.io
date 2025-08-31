@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - ZTA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>ZTA</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/zta/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Zero Trust Architecture Explained — With Real-World Scenarios</h2><hr>
+<h3>What is Zero Trust?</h3><hr>
+<p><strong>Zero Trust</strong> is a cybersecurity model that assumes <strong>no implicit trust</strong> — whether the user is inside or outside the network perimeter. Instead of trusting users, devices, or applications by default, <strong>every access request is continuously verified</strong> based on multiple factors such as identity, device health, location, and behavior.</p>
+<blockquote>
+<p><strong>Core principle:</strong> <em>"Never trust, always verify."</em></p>
+</blockquote>
+<hr />
+<h3>Pillars of Zero Trust</h3><hr>
+<ol>
+<li>
+<p><strong>Verify Explicitly</strong>
+   Authenticate and authorize based on all available data points (identity, device, location, etc.).</p>
+</li>
+<li>
+<p><strong>Use Least Privilege Access</strong>
+   Limit user access to only what is necessary — use Just-In-Time (JIT) and Just-Enough-Access (JEA).</p>
+</li>
+<li>
+<p><strong>Assume Breach</strong>
+   Segment networks and monitor continuously — act as if an attacker is already inside.</p>
+</li>
+</ol>
+<hr />
+<h3>Core Components of Zero Trust Architecture</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Identity and Access Management (IAM)</strong></td>
+<td>Verifies user identity via MFA, SSO, risk-based authentication</td>
+</tr>
+<tr>
+<td><strong>Device Security Posture</strong></td>
+<td>Device is checked for compliance (e.g., antivirus, OS patches)</td>
+</tr>
+<tr>
+<td><strong>Microsegmentation</strong></td>
+<td>Divides networks into smaller segments to limit lateral movement</td>
+</tr>
+<tr>
+<td><strong>Policy Enforcement Point (PEP)</strong></td>
+<td>Decides whether to allow access to a resource based on policy</td>
+</tr>
+<tr>
+<td><strong>Continuous Monitoring and Analytics</strong></td>
+<td>Logs, alerts, and behavior analytics to detect anomalies</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Real-World Scenarios of Zero Trust in Action</h3><hr>
+<h4>Scenario 1: Corporate Employee Accessing Internal Tools</h4>
+<p><strong>Before ZTA (Traditional Model):</strong></p>
+<ul>
+<li>Alice is on the company’s LAN or VPN → Automatically trusted.</li>
+<li>Gains access to internal HR and finance apps without re-authentication.</li>
+</ul>
+<p><strong>Risks:</strong></p>
+<ul>
+<li>If Alice’s credentials or device are compromised, the attacker gains full access.</li>
+</ul>
+<p><strong>With Zero Trust:</strong></p>
+<ul>
+<li>Alice must authenticate with <strong>MFA</strong>.</li>
+<li>Her device posture is evaluated (antivirus status, OS patch level).</li>
+<li>Access to HR and finance apps is controlled via <strong>microsegmentation</strong> and <strong>policy checks</strong>.</li>
+<li>If Alice attempts access from an unusual IP (e.g., foreign country), access is blocked or challenged.</li>
+</ul>
+<hr />
+<h4>Scenario 2: Remote Contractor Access</h4>
+<p><strong>Problem:</strong></p>
+<ul>
+<li>A remote third-party contractor needs to work on a specific Kubernetes cluster.</li>
+</ul>
+<p><strong>Zero Trust Solution:</strong></p>
+<ul>
+<li>Contractor logs in via <strong>SSO with time-limited access</strong>.</li>
+<li>Their identity and device posture are validated.</li>
+<li>Access is granted <strong>only to the relevant cluster</strong>, not the entire infrastructure.</li>
+<li>All actions are <strong>logged and monitored</strong> for unusual behavior.</li>
+</ul>
+<hr />
+<h4>Scenario 3: Educational Institution with BYOD</h4>
+<p><strong>Challenge:</strong></p>
+<ul>
+<li>Students and faculty bring their own devices (laptops, phones) and access campus resources.</li>
+</ul>
+<p><strong>Zero Trust Strategy:</strong></p>
+<ul>
+<li>
+<p>Access to sensitive academic systems (e.g., grading servers) is restricted by:</p>
+</li>
+<li>
+<p>Role-based access (faculty vs student).</p>
+</li>
+<li>Device compliance (no rooted/jailbroken phones).</li>
+<li>Network zone (e.g., only over secured Wi-Fi or VPN).</li>
+<li>Public resources (e.g., library catalog) are accessible more freely.</li>
+<li><strong>User behavior analytics (UBA)</strong> flags anomalous access (e.g., 3 AM logins from unknown devices).</li>
+</ul>
+<hr />
+<h4>Scenario 4: Hospital Protecting Patient Data (HIPAA Compliance)</h4>
+<p><strong>Challenge:</strong></p>
+<ul>
+<li>Doctors, nurses, and admin staff need access to patient records (EHR) from multiple locations.</li>
+</ul>
+<p><strong>ZTA Implementation:</strong></p>
+<ul>
+<li><strong>Role-based access control (RBAC):</strong> Only doctors can see diagnosis; nurses see vital stats.</li>
+<li><strong>Device verification:</strong> Hospital-issued devices only.</li>
+<li><strong>Location-aware policies:</strong> Off-site logins trigger stronger MFA or deny access.</li>
+<li>All activity is <strong>logged and monitored</strong> to detect data exfiltration or misuse.</li>
+</ul>
+<hr />
+<h3>️ How to Implement Zero Trust (Step-by-Step)</h3><hr>
+<ol>
+<li><strong>Identify protect surfaces:</strong> What are your crown jewels? (E.g., databases, source code, EHR systems)</li>
+<li><strong>Map the transaction flows:</strong> Understand how users and devices interact with data.</li>
+<li><strong>Build micro-perimeters:</strong> Create segmentation around sensitive resources.</li>
+<li><strong>Enforce least privilege access:</strong> Reduce access rights to minimum needed.</li>
+<li><strong>Continuously monitor and respond:</strong> Use SIEM, UEBA, and analytics.</li>
+</ol>
+<hr />
+<h3>Benefits of Zero Trust</h3><hr>
+<ul>
+<li>Reduces risk of data breaches.</li>
+<li>Enhances visibility and control over who accesses what.</li>
+<li>Enables secure remote work and BYOD.</li>
+<li>Helps achieve regulatory compliance (HIPAA, GDPR, etc.).</li>
+</ul>
+<hr />
+<h3>Challenges to Adoption</h3><hr>
+<ul>
+<li>Legacy systems may not integrate easily.</li>
+<li>User experience friction (more authentication steps).</li>
+<li>Initial complexity in policy design.</li>
+<li>Requires cultural shift and strong IAM practices.</li>
+</ul>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Zero Trust is not a product — it's a <strong>security philosophy and architecture</strong> that assumes every access request is potentially hostile. By continuously validating trust, enforcing least privilege, and segmenting access, organizations can drastically reduce the attack surface and improve their overall security posture.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

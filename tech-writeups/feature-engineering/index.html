@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - feature-engineering</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>feature-engineering</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/feature-engineering/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Feature Engineering Techniques in Fraud Detection</h1><hr>
+<p>Fraud detection, particularly in domains like banking, e-commerce, and insurance, relies heavily on the quality of features fed into machine learning models. Since fraudulent activities often mimic legitimate ones, carefully crafted features can significantly enhance model performance by uncovering hidden patterns. This writeup explores key <strong>feature engineering techniques</strong> specifically tuned for fraud detection use cases.</p>
+<hr />
+<h2>What is Feature Engineering?</h2><hr>
+<p>Feature engineering is the process of transforming raw data into informative inputs for machine learning models. In fraud detection, this includes constructing features that capture:</p>
+<ul>
+<li>Behavioral anomalies</li>
+<li>Temporal/spatial inconsistencies</li>
+<li>Historical patterns</li>
+<li>Aggregate metrics</li>
+<li>Entity relationships</li>
+</ul>
+<hr />
+<h2>Types of Features in Fraud Detection</h2><hr>
+<h3>1. <strong>Transactional Features</strong></h3><hr>
+<p>These are directly extracted from each transaction.</p>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>amount</code></td>
+<td>Monetary value of transaction</td>
+</tr>
+<tr>
+<td><code>merchant</code></td>
+<td>Merchant or vendor ID</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td>Type of transaction (e.g., electronics, food)</td>
+</tr>
+<tr>
+<td><code>timestamp</code></td>
+<td>Time of the transaction</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Transformations:</strong></p>
+<ul>
+<li>Log-transform the <code>amount</code> to reduce skew.</li>
+<li>One-hot encode or target-encode <code>category</code>.</li>
+</ul>
+<hr />
+<h3>2. <strong>Behavioral Features</strong></h3><hr>
+<p>Capture user spending behavior over time:</p>
+<ul>
+<li>Average amount per transaction</li>
+<li>Number of transactions in last 24h/7d</li>
+<li>Ratio of online vs in-store transactions</li>
+<li>Time since last transaction</li>
+<li>Velocity features (e.g., transactions per hour)</li>
+</ul>
+<pre class="codehilite"><code class="language-python">df['txn_per_hour'] = df.groupby('user_id')['transaction_id'].transform(lambda x: x.count() / 24)
+</code></pre>
+
+<hr />
+<h3>3. <strong>Historical Aggregates</strong></h3><hr>
+<p>Use rolling windows to detect deviation from normal behavior:</p>
+<ul>
+<li>Rolling average transaction amount over N days</li>
+<li>Standard deviation or z-score of past spending</li>
+<li>Frequency of visiting same merchant</li>
+</ul>
+<pre class="codehilite"><code class="language-python">df['rolling_avg_7d'] = df.groupby('user_id')['amount'].transform(lambda x: x.rolling('7D').mean())
+</code></pre>
+
+<hr />
+<h3>4. <strong>Geospatial Features</strong></h3><hr>
+<ul>
+<li>Distance between current and last known location</li>
+<li>Transactions from different countries within short time</li>
+<li>IP address-based risk scoring</li>
+</ul>
+<pre class="codehilite"><code class="language-python">def haversine(lat1, lon1, lat2, lon2):
+    # Compute geodesic distance between two points
+    ...
+</code></pre>
+
+<hr />
+<h3>5. <strong>Temporal Features</strong></h3><hr>
+<p>Fraud tends to follow abnormal timing patterns:</p>
+<ul>
+<li>Hour of day or day of week</li>
+<li>Night-time or weekend transactions</li>
+<li>Time gaps between successive transactions</li>
+</ul>
+<pre class="codehilite"><code class="language-python">df['hour'] = pd.to_datetime(df['timestamp']).dt.hour
+df['is_night'] = df['hour'].apply(lambda x: x &lt; 6 or x &gt; 22)
+</code></pre>
+
+<hr />
+<h3>6. <strong>Categorical Encoding</strong></h3><hr>
+<ul>
+<li>Target encoding (replace merchant/category with fraud rate)</li>
+<li>Frequency encoding</li>
+<li>Embedding for deep learning models</li>
+</ul>
+<pre class="codehilite"><code class="language-python"># Target encoding example
+fraud_rate = df.groupby('merchant_id')['is_fraud'].mean()
+df['merchant_fraud_rate'] = df['merchant_id'].map(fraud_rate)
+</code></pre>
+
+<hr />
+<h3>7. <strong>Entity Linking Features</strong></h3><hr>
+<ul>
+<li>Shared card number, device ID, or IP address across multiple users</li>
+<li>Transactions from different users using the same device</li>
+<li>Graph-based clustering for fraud rings</li>
+</ul>
+<hr />
+<h3>8. <strong>Time Series &amp; Sequence Features</strong></h3><hr>
+<ul>
+<li>LSTM input sequences: past N transactions</li>
+<li>Markov chains: transitions between merchants</li>
+<li>Sessionization of transaction patterns</li>
+</ul>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li>Normalize or scale numeric features</li>
+<li>Handle class imbalance (SMOTE, undersampling)</li>
+<li>Avoid data leakage (e.g., future info)</li>
+<li>Use cross-validation across time splits</li>
+<li>Monitor concept drift in production</li>
+</ul>
+<hr />
+<h2>Real-World Example</h2><hr>
+<pre class="codehilite"><code class="language-python"># Creating a velocity feature for transaction count in past hour
+df['txn_last_1hr'] = df.groupby('user_id')['timestamp'].rolling('1H').count().reset_index(0,drop=True)
+</code></pre>
+
+<p>Fraudulent accounts may show bursts of transactions in short windows—a strong feature for anomaly detection.</p>
+<hr />
+<h2>Tools and Libraries</h2><hr>
+<ul>
+<li><strong>Pandas</strong> / <strong>Polars</strong> – Data manipulation</li>
+<li><strong>scikit-learn</strong> – Preprocessing, pipelines</li>
+<li><strong>XGBoost/LightGBM</strong> – Tree-based models</li>
+<li><strong>PyOD</strong> – Outlier detection</li>
+<li><strong>GraphFrames</strong> – Fraud ring detection in Spark</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Feature engineering is central to fraud detection. Unlike some ML applications, off-the-shelf models perform poorly without customized domain features. A deep understanding of both domain context and user behavior is key to designing high-value features that surface subtle fraud signals.</p>
+<p>In production systems, feature pipelines must be efficient, scalable, and real-time, especially when used with streaming platforms like Apache Kafka and Spark Streaming.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

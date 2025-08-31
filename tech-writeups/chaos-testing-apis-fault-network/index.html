@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - chaos-testing-apis-fault-network</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>chaos-testing-apis-fault-network</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/chaos-testing-apis-fault-network/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Chaos Testing APIs with Fault Injection and Network Partitioning</h2><hr>
+<h3>What is Chaos Testing?</h3><hr>
+<p><strong>Chaos testing</strong> is a discipline within <strong>resilience engineering</strong> that involves deliberately introducing failures into a system to verify its ability to withstand turbulent conditions in production. When applied to <strong>APIs</strong>, chaos testing focuses on how the services behave under various failures such as timeouts, dropped connections, latency spikes, and backend outages.</p>
+<hr />
+<h3>Goals</h3><hr>
+<ul>
+<li>Ensure <strong>graceful degradation</strong> under failure</li>
+<li>Validate <strong>retry mechanisms</strong> and <strong>fallback logic</strong></li>
+<li>Test behavior during <strong>dependency outages</strong> or <strong>partial network partitions</strong></li>
+<li>Detect <strong>single points of failure</strong></li>
+</ul>
+<hr />
+<h2>Techniques for Chaos Testing APIs</h2><hr>
+<h3>1. <strong>Fault Injection</strong></h3><hr>
+<p>Fault injection introduces artificial errors in a controlled environment to simulate real-world failures.</p>
+<p><strong>Types of Faults:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Fault Type</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Latency</td>
+<td>Add delay to API response (e.g., +500ms)</td>
+</tr>
+<tr>
+<td>Error response</td>
+<td>Force 500/503 errors from dependent APIs</td>
+</tr>
+<tr>
+<td>Resource limits</td>
+<td>Simulate CPU/memory exhaustion</td>
+</tr>
+<tr>
+<td>DNS failures</td>
+<td>Fail hostname resolution for API targets</td>
+</tr>
+<tr>
+<td>Connection drops</td>
+<td>Kill TCP connections randomly</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Tools</strong>:</p>
+<ul>
+<li><a href="https://www.gremlin.com/"><strong>Gremlin</strong></a></li>
+<li><a href="https://litmuschaos.io/"><strong>LitmusChaos</strong></a></li>
+<li><a href="https://github.com/Shopify/toxiproxy"><strong>Toxiproxy</strong></a></li>
+<li><a href="https://chaos-mesh.org/"><strong>Chaos Mesh</strong></a></li>
+<li>[<strong>Istio Fault Injection</strong> (Service Mesh)]</li>
+</ul>
+<hr />
+<h3>2. <strong>Network Partitioning</strong></h3><hr>
+<p>Simulate real-world failures in <strong>distributed microservices</strong> by blocking or delaying traffic between API services.</p>
+<p><strong>Scenarios to simulate:</strong></p>
+<ul>
+<li>One service is unreachable (API returns timeout)</li>
+<li>Part of the network is <strong>partitioned</strong> (split-brain)</li>
+<li>Random packet loss or corruption</li>
+</ul>
+<p><strong>Kubernetes Example using Chaos Mesh</strong>:</p>
+<pre class="codehilite"><code class="language-yaml">apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: partition-api
+spec:
+  action: partition
+  mode: one
+  selector:
+    namespaces:
+      - api-namespace
+    labelSelectors:
+      app: api-service
+  direction: to
+  target:
+    selector:
+      namespaces:
+        - auth-namespace
+      labelSelectors:
+        app: auth-service
+    mode: all
+  duration: &quot;60s&quot;
+</code></pre>
+
+<hr />
+<h3>️ Injecting Chaos in a CI/CD Pipeline</h3><hr>
+<p>Chaos tests can be automated post-deployment:</p>
+<pre class="codehilite"><code class="language-yaml">stages:
+  - deploy
+  - chaos
+  - validate
+
+chaos:
+  script:
+    - chaosctl inject fault --target=auth-service --latency=500ms
+    - chaosctl inject partition --from=api-service --to=db-service
+  only:
+    - staging
+</code></pre>
+
+<p>You can validate via health checks, alert logs, and synthetic monitoring during the chaos test window.</p>
+<hr />
+<h3>Example: Using Toxiproxy with Python</h3><hr>
+<pre class="codehilite"><code class="language-python">from toxiproxy import Toxic, ToxicDirection, Toxiproxy
+
+proxy = Toxiproxy.from_url(&quot;http://localhost:8474&quot;)
+proxy.create(name=&quot;api_downstream&quot;, listen=&quot;localhost:8666&quot;, upstream=&quot;api.service:8080&quot;)
+
+# Inject 2s latency
+proxy.toxics.add(
+    Toxic(name=&quot;latency&quot;, type=&quot;latency&quot;, stream=ToxicDirection.DOWNSTREAM, attributes={&quot;latency&quot;: 2000})
+)
+
+# Test API call behavior here (with retry/backoff)
+</code></pre>
+
+<hr />
+<h3>Best Practices</h3><hr>
+<ul>
+<li>Always monitor <strong>metrics and logs</strong> during chaos experiments</li>
+<li>Define clear <strong>SLOs/SLAs</strong> and <strong>recovery thresholds</strong></li>
+<li>Use <strong>feature flags</strong> to disable chaos in critical paths</li>
+<li>Run chaos tests in <strong>non-production</strong> first</li>
+<li>Always run <strong>post-chaos assertions</strong> to validate recovery</li>
+</ul>
+<hr />
+<h3>Observability Tools to Pair</h3><hr>
+<ul>
+<li><strong>Prometheus + Grafana</strong> (metrics + alerting)</li>
+<li><strong>Jaeger</strong> (tracing)</li>
+<li><strong>ELK Stack</strong> (logging)</li>
+<li><strong>Datadog / New Relic</strong> (integrated APM)</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<p>Chaos testing APIs helps simulate unexpected behavior and infrastructure failures in order to build <strong>resilient systems</strong>. With fault injection and network partitioning techniques, you can proactively identify failure points and harden your APIs before real outages occur.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - recommendation-engine</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>recommendation-engine</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/recommendation-engine/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Building a Recommendation Engine with Collaborative Filtering</h1><hr>
+<p>Recommendation systems are ubiquitous in the digital world, powering everything from Netflix movie suggestions to Amazon product recommendations. One of the most popular approaches to building recommendation systems is <strong>Collaborative Filtering</strong>.</p>
+<hr />
+<h2>What is Collaborative Filtering?</h2><hr>
+<p>Collaborative Filtering (CF) is a technique that makes automatic predictions about a user's interests by collecting preferences from many users. It operates under the assumption that <strong>if User A has similar preferences to User B in the past, A is more likely to prefer items that B likes in the future.</strong></p>
+<p>CF does not require domain knowledge or item metadata—it relies purely on user-item interactions.</p>
+<hr />
+<h2>Types of Collaborative Filtering</h2><hr>
+<h3>1. <strong>User-Based Collaborative Filtering</strong></h3><hr>
+<ul>
+<li>Measures similarity between users.</li>
+<li>Recommends items liked by similar users.</li>
+</ul>
+<p><strong>Example</strong>: If Alice and Bob liked the same movies in the past, and Bob also liked "Inception", Alice is likely to enjoy "Inception" too.</p>
+<h3>2. <strong>Item-Based Collaborative Filtering</strong></h3><hr>
+<ul>
+<li>Measures similarity between items based on user interactions.</li>
+<li>Recommends items similar to ones the user already liked.</li>
+</ul>
+<p><strong>Example</strong>: If users who liked "The Matrix" also liked "Blade Runner", then a user who liked "The Matrix" may be recommended "Blade Runner".</p>
+<hr />
+<h2>How Does It Work?</h2><hr>
+<h3>Step 1: <strong>Create the User-Item Matrix</strong></h3><hr>
+<p>A matrix <code>M</code> where:</p>
+<ul>
+<li>Rows represent users.</li>
+<li>Columns represent items.</li>
+<li>Values represent ratings (explicit like 1–5 stars or implicit like clicks).</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Movie A</th>
+<th>Movie B</th>
+<th>Movie C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User1</td>
+<td>5</td>
+<td>?</td>
+<td>3</td>
+</tr>
+<tr>
+<td>User2</td>
+<td>4</td>
+<td>2</td>
+<td>5</td>
+</tr>
+<tr>
+<td>User3</td>
+<td>1</td>
+<td>2</td>
+<td>?</td>
+</tr>
+</tbody>
+</table>
+<h3>Step 2: <strong>Compute Similarities</strong></h3><hr>
+<ul>
+<li><strong>User-based</strong>: Use cosine similarity or Pearson correlation between rows.</li>
+<li><strong>Item-based</strong>: Use similarity between columns.</li>
+</ul>
+<h3>Step 3: <strong>Predict Ratings</strong></h3><hr>
+<p>For a missing rating, use a <strong>weighted sum of similar users/items</strong> who have rated that item.</p>
+<h3>Step 4: <strong>Generate Recommendations</strong></h3><hr>
+<p>Sort predicted ratings and recommend the highest-scoring unseen items.</p>
+<hr />
+<h2>️ Matrix Factorization (Advanced Collaborative Filtering)</h2><hr>
+<p>Traditional CF can struggle with sparse data. Matrix factorization techniques like <strong>Singular Value Decomposition (SVD)</strong> or <strong>Alternating Least Squares (ALS)</strong> are used to decompose the user-item matrix into lower-dimensional representations.</p>
+<h3>Formula:</h3><hr>
+<p>If <code>R</code> is the original matrix, we aim to find:</p>
+<pre class="codehilite"><code>R ≈ U × Vᵗ
+</code></pre>
+
+<p>Where:</p>
+<ul>
+<li><code>U</code>: User-feature matrix</li>
+<li><code>V</code>: Item-feature matrix</li>
+</ul>
+<p>These latent features capture user preferences and item characteristics.</p>
+<hr />
+<h2>Tools &amp; Libraries</h2><hr>
+<ul>
+<li><strong>Surprise (Python)</strong> – Scikit-learn-like framework for building CF models.</li>
+<li><strong>Implicit</strong> – Library for ALS-based recommendation engines using implicit feedback.</li>
+<li><strong>Spark MLlib</strong> – Scalable recommendation with ALS on big data.</li>
+<li><strong>LensKit</strong> – Research toolkit for recommender systems.</li>
+</ul>
+<hr />
+<h2>️ Challenges</h2><hr>
+<ul>
+<li><strong>Cold Start</strong>: New users/items with no history.</li>
+<li><strong>Scalability</strong>: CF becomes slow with large matrices.</li>
+<li><strong>Sparsity</strong>: Most real-world data is sparse (few ratings per user).</li>
+<li><strong>Bias &amp; Privacy</strong>: User preferences can be sensitive.</li>
+</ul>
+<hr />
+<h2>Real-World Applications</h2><hr>
+<ul>
+<li><strong>E-commerce</strong>: Product recommendations (Amazon)</li>
+<li><strong>Streaming Services</strong>: Content recommendations (Netflix, Spotify)</li>
+<li><strong>Social Networks</strong>: Friend suggestions (Facebook, LinkedIn)</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Collaborative Filtering is a powerful and widely-used approach to build recommendation engines. Whether through user similarity or matrix factorization, it enables personalized experiences without needing detailed item descriptions. For large-scale applications, combining CF with content-based filtering (Hybrid models) yields even better results.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

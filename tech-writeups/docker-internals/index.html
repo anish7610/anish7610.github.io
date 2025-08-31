@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - docker-internals</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>docker-internals</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/docker-internals/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Docker Internals: Layers, Volumes, and Networking</h1><hr>
+<p>Docker revolutionized how developers build, ship, and run applications by using containers to encapsulate environments. Understanding Docker internals like layers, volumes, and networking is essential for optimizing container performance, managing persistent data, and ensuring smooth communication across containers.</p>
+<hr />
+<h2>1. Docker Image Layers: Union Filesystems</h2><hr>
+<h3>What are Layers?</h3><hr>
+<p>Docker images are built in layers using a <strong>union filesystem</strong> (like AUFS, OverlayFS, or Btrfs). Each instruction in a Dockerfile (e.g., <code>RUN</code>, <code>COPY</code>, <code>ADD</code>) creates a new layer. Layers are <strong>read-only</strong> and <strong>cached</strong>, allowing for:</p>
+<ul>
+<li>Efficient reuse</li>
+<li>Faster builds</li>
+<li>Smaller storage footprint</li>
+</ul>
+<h3>Layer Composition</h3><hr>
+<ul>
+<li><strong>Base image layer</strong>: Starts from an OS like <code>ubuntu</code>, <code>alpine</code>, etc.</li>
+<li><strong>Intermediate layers</strong>: Commands like <code>RUN apt-get update</code>.</li>
+<li><strong>Top layer</strong>: Container writable layer — changes during container runtime live here.</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">docker history &lt;image-name&gt;
+</code></pre>
+
+<h3>Example:</h3><hr>
+<pre class="codehilite"><code class="language-Dockerfile">FROM python:3.9
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+COPY . .
+CMD [&quot;python&quot;, &quot;app.py&quot;]
+</code></pre>
+
+<p>Each of these commands creates a new immutable layer.</p>
+<hr />
+<h2>2. Docker Volumes: Persistent Storage</h2><hr>
+<h3>Why Volumes?</h3><hr>
+<p>Containers are <strong>ephemeral</strong> — once destroyed, data in them is lost. Volumes provide a <strong>persistent storage mechanism</strong>.</p>
+<h3>Types of Mounts:</h3><hr>
+<ul>
+<li><strong>Volumes</strong>: Managed by Docker (<code>/var/lib/docker/volumes/</code>)</li>
+<li><strong>Bind Mounts</strong>: Maps host path to container path</li>
+<li><strong>tmpfs Mounts</strong>: RAM-only storage, useful for sensitive data</li>
+</ul>
+<h3>Use Cases:</h3><hr>
+<ul>
+<li>Database storage</li>
+<li>Sharing logs between containers</li>
+<li>Caching dependencies</li>
+</ul>
+<pre class="codehilite"><code class="language-bash"># Create and mount volume
+docker volume create mydata
+docker run -v mydata:/data myimage
+</code></pre>
+
+<h3>Volume Lifecycle:</h3><hr>
+<p>Volumes persist beyond the life of a container unless manually removed:</p>
+<pre class="codehilite"><code class="language-bash">docker volume rm mydata
+</code></pre>
+
+<hr />
+<h2>3. Docker Networking: Bridging Communication</h2><hr>
+<p>Docker provides multiple <strong>network drivers</strong> to allow containers to communicate internally or with the outside world.</p>
+<h3>Common Network Drivers:</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Driver</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bridge</td>
+<td>Default driver for standalone containers</td>
+</tr>
+<tr>
+<td>host</td>
+<td>Shares the host network stack</td>
+</tr>
+<tr>
+<td>overlay</td>
+<td>Used for multi-host swarm setups</td>
+</tr>
+<tr>
+<td>none</td>
+<td>Isolated container, no networking</td>
+</tr>
+<tr>
+<td>macvlan</td>
+<td>Assigns MAC to container for LAN visibility</td>
+</tr>
+</tbody>
+</table>
+<h3>Bridge Network (Default):</h3><hr>
+<ul>
+<li>Each container gets a virtual NIC (veth pair)</li>
+<li>Docker manages a bridge (e.g., <code>docker0</code>) for internal communication</li>
+<li>Containers can talk to each other via <strong>container names</strong> as DNS names</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">docker network inspect bridge
+</code></pre>
+
+<h3>Creating Custom Networks:</h3><hr>
+<p>Useful for service discovery and isolated communication.</p>
+<pre class="codehilite"><code class="language-bash">docker network create my_net
+docker run -d --name web --network my_net nginx
+docker run -it --name busybox --network my_net busybox
+</code></pre>
+
+<p>Now, <code>busybox</code> can ping <code>web</code>.</p>
+<hr />
+<h2>4. Advanced Concepts</h2><hr>
+<h3>Copy-on-Write (COW)</h3><hr>
+<p>When a container writes to a file, it's copied from the underlying image layer to the writable container layer. This is how Docker maintains immutability of base image layers.</p>
+<h3>️ Debugging:</h3><hr>
+<pre class="codehilite"><code class="language-bash">docker inspect &lt;container-name&gt;
+</code></pre>
+
+<p>Useful to understand:</p>
+<ul>
+<li>Network settings</li>
+<li>Volume mounts</li>
+<li>Layer diffs</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Understanding Docker's internal workings — how it builds images with layers, manages persistent state with volumes, and connects containers through networks — empowers developers to write efficient, scalable, and secure containerized applications. Mastery of these concepts also helps in debugging complex container orchestration setups in tools like Docker Compose and Kubernetes.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - api-contract-testing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>api-contract-testing</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/api-contract-testing/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1><strong>API Contract Testing with Postman/Newman or Pact</strong></h1><hr>
+<p>API contract testing ensures that the communication between different components of a system (e.g., client and server) follows a defined structure or "contract." This becomes crucial in distributed systems and microservice architectures where breaking a contract can cause downstream failures.</p>
+<hr />
+<h2><strong>What is API Contract Testing?</strong></h2><hr>
+<p>Unlike traditional API tests that check <strong>functionality</strong>, contract testing verifies the <strong>structure, semantics, and validity</strong> of the API request and response payloads. It ensures that the provider (API server) and consumer (client) agree on:</p>
+<ul>
+<li>Endpoints</li>
+<li>Methods (GET, POST, etc.)</li>
+<li>Request parameters and headers</li>
+<li>Response schema (status codes, body structure)</li>
+</ul>
+<hr />
+<h2><strong>Why API Contract Testing?</strong></h2><hr>
+<ul>
+<li>Prevents breaking changes in APIs</li>
+<li>Improves collaboration between frontend and backend teams</li>
+<li>Fast and lightweight compared to full end-to-end tests</li>
+<li>Helps enable CI/CD by validating integration points</li>
+</ul>
+<hr />
+<h2>️ <strong>Tooling Options</strong></h2><hr>
+<h3><strong>1. Postman + Newman</strong></h3><hr>
+<p><strong>Postman</strong> is a GUI tool for developing and testing APIs. <strong>Newman</strong> is the CLI runner that allows these collections to be run in CI/CD.</p>
+<h4>Pros:</h4>
+<ul>
+<li>Easy to set up and use</li>
+<li>Supports schema validation with JSON schema</li>
+<li>Large ecosystem and GUI-based testing</li>
+</ul>
+<h4>Example: JSON Schema Validation in Postman</h4>
+<pre class="codehilite"><code class="language-javascript">pm.test(&quot;Contract test: response matches schema&quot;, function () {
+  var schema = {
+    &quot;type&quot;: &quot;object&quot;,
+    &quot;properties&quot;: {
+      &quot;id&quot;: {&quot;type&quot;: &quot;number&quot;},
+      &quot;name&quot;: {&quot;type&quot;: &quot;string&quot;},
+      &quot;email&quot;: {&quot;type&quot;: &quot;string&quot;}
+    },
+    &quot;required&quot;: [&quot;id&quot;, &quot;name&quot;, &quot;email&quot;]
+  };
+  pm.response.to.have.jsonSchema(schema);
+});
+</code></pre>
+
+<h4>Integration with Newman</h4>
+<pre class="codehilite"><code class="language-bash">newman run collection.json -e environment.json
+</code></pre>
+
+<p>Can be run in CI pipelines to fail builds on schema mismatches.</p>
+<hr />
+<h3><strong>2. Pact (Consumer-Driven Contract Testing)</strong></h3><hr>
+<p><strong>Pact</strong> is a powerful framework based on <strong>consumer-driven contracts</strong>. It allows consumers to define their expectations, which providers must then fulfill.</p>
+<h4>Pros:</h4>
+<ul>
+<li>Strong versioning and contract negotiation</li>
+<li>Supports multiple languages (JS, Java, Python, Go)</li>
+<li>CI/CD friendly with Pact Broker for sharing contracts</li>
+</ul>
+<h4>Workflow:</h4>
+<ol>
+<li><strong>Consumer</strong> writes a test that generates a pact file (JSON).</li>
+<li>Pact file is shared with <strong>provider</strong>.</li>
+<li><strong>Provider</strong> runs tests to ensure it satisfies the consumer’s expectations.</li>
+</ol>
+<h4>Example (Node.js):</h4>
+<pre class="codehilite"><code class="language-javascript">const { Pact } = require('@pact-foundation/pact');
+const provider = new Pact({
+  port: 1234,
+  consumer: 'FrontendApp',
+  provider: 'UserService',
+});
+
+describe('Contract Test', () =&gt; {
+  before(() =&gt; provider.setup());
+
+  it('should return a user', async () =&gt; {
+    await provider.addInteraction({
+      uponReceiving: 'a request for user data',
+      withRequest: {
+        method: 'GET',
+        path: '/user/1',
+      },
+      willRespondWith: {
+        status: 200,
+        body: { id: 1, name: 'Alice' },
+      },
+    });
+
+    // call your API client here
+  });
+
+  after(() =&gt; provider.finalize());
+});
+</code></pre>
+
+<hr />
+<h2>🆚 <strong>Postman vs Pact</strong></h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Postman/Newman</th>
+<th>Pact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Approach</td>
+<td>Test-based</td>
+<td>Contract-based (Consumer-driven)</td>
+</tr>
+<tr>
+<td>Tooling</td>
+<td>GUI + CLI</td>
+<td>CLI + Language SDKs</td>
+</tr>
+<tr>
+<td>Schema Validation</td>
+<td>JSON Schema</td>
+<td>Pact DSL</td>
+</tr>
+<tr>
+<td>Use in Microservices</td>
+<td>Good</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>Contract Versioning</td>
+<td>No</td>
+<td>Yes (via Pact Broker)</td>
+</tr>
+<tr>
+<td>Learning Curve</td>
+<td>Low</td>
+<td>Medium</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2><strong>CI/CD Integration Example</strong></h2><hr>
+<ul>
+<li>Run <strong>Newman</strong> collections post-deployment in your Jenkins or GitHub Actions workflow.</li>
+<li>Use <strong>Pact</strong> to verify contract compatibility during pull requests before merging to main.</li>
+</ul>
+<hr />
+<h2><strong>Best Practices</strong></h2><hr>
+<ul>
+<li>Keep your contracts in version control</li>
+<li>Run contract tests early in the pipeline</li>
+<li>Use shared schemas to avoid duplication</li>
+<li>Treat contracts as code: review, approve, evolve</li>
+</ul>
+<hr />
+<h2><strong>Conclusion</strong></h2><hr>
+<p>API contract testing is a critical part of ensuring stable and reliable communication between services. Whether you're using Postman for quick validation or Pact for full-blown consumer-driven contracts, integrating these practices helps catch issues early and streamline development in modern, service-oriented architectures.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - Layer 2 Protocols</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>Layer 2 Protocols</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/layer-2-protocols/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1><strong>L2 Networking Protocols - Technical Writeup</strong></h1><hr>
+<h2><strong>1. What is Layer 2?</strong></h2><hr>
+<p>Layer 2 of the OSI model is the <strong>Data Link Layer</strong>. It ensures reliable <strong>node-to-node</strong> delivery and works <strong>locally</strong> (within the same broadcast domain). It includes MAC addressing and defines how devices on the same LAN communicate.</p>
+<hr />
+<h2><strong>2. Layer 2 Protocols and Their Functionality</strong></h2><hr>
+<h3><strong>2.1 Ethernet (IEEE 802.3)</strong></h3><hr>
+<ul>
+<li>Standard for wired LANs.</li>
+<li>Uses MAC addresses to identify hosts.</li>
+<li>Transmits frames using a specific frame format.</li>
+</ul>
+<h4>Example: Ethernet Frame</h4>
+<pre class="codehilite"><code>+--------+-------------+-------------+---------+----------+-----+
+|Preamble| Dest MAC    | Src MAC     | Type    | Payload  | CRC |
++--------+-------------+-------------+---------+----------+-----+
+</code></pre>
+
+<h4>Example: MAC address lookup in Linux</h4>
+<pre class="codehilite"><code class="language-bash">ip link show
+ip neigh  # shows IP to MAC mapping (ARP table)
+</code></pre>
+
+<hr />
+<h3><strong>2.2 ARP (Address Resolution Protocol)</strong></h3><hr>
+<ul>
+<li>Resolves IP → MAC within the same LAN.</li>
+<li>ARP Request is a broadcast (<code>ff:ff:ff:ff:ff:ff</code>), ARP Reply is unicast.</li>
+</ul>
+<h4>Example: Using ARP in Linux</h4>
+<pre class="codehilite"><code class="language-bash">arping 192.168.1.1
+</code></pre>
+
+<h4>Output:</h4>
+<pre class="codehilite"><code>ARPING 192.168.1.1
+60 bytes from 192.168.1.1 (xx:xx:xx:xx:xx:xx): arp reply ...
+</code></pre>
+
+<hr />
+<h3><strong>2.3 VLAN (IEEE 802.1Q)</strong></h3><hr>
+<ul>
+<li>Segments Layer 2 traffic virtually.</li>
+<li>Adds a 4-byte tag in the Ethernet frame.</li>
+<li>Provides isolation and better traffic control.</li>
+</ul>
+<h4>Example: VLAN Frame Tag</h4>
+<pre class="codehilite"><code>+---+------+--------+--------+--------+--------+-----+
+|DMAC| SMAC | 802.1Q Tag | EtherType | Payload | CRC |
++---+------+--------+--------+--------+--------+-----+
+</code></pre>
+
+<h4>Example: Create VLAN on Linux</h4>
+<pre class="codehilite"><code class="language-bash">ip link add link eth0 name eth0.10 type vlan id 10
+ip addr add 192.168.10.1/24 dev eth0.10
+ip link set dev eth0.10 up
+</code></pre>
+
+<hr />
+<h3><strong>2.4 Spanning Tree Protocol (STP - IEEE 802.1D)</strong></h3><hr>
+<ul>
+<li>Prevents Layer 2 loops.</li>
+<li>Elects a <strong>Root Bridge</strong>, blocks redundant paths.</li>
+<li>Convergence may take 30–50 seconds.</li>
+</ul>
+<h4>Example: Cisco STP Configuration</h4>
+<pre class="codehilite"><code class="language-bash">Switch(config)# spanning-tree vlan 10 priority 4096
+Switch(config)# show spanning-tree
+</code></pre>
+
+<h4>Output:</h4>
+<pre class="codehilite"><code>Root ID: 32778 (priority 32768 + VLAN ID 10)
+Root Bridge: 00:11:22:33:44:55
+Cost: 19    Port: FastEthernet0/1
+</code></pre>
+
+<hr />
+<h3><strong>2.5 LACP (Link Aggregation Control Protocol - IEEE 802.3ad)</strong></h3><hr>
+<ul>
+<li>Bundles multiple physical links into a logical link.</li>
+<li>Increases throughput and provides redundancy.</li>
+</ul>
+<h4>Example: LACP on Linux (using <code>bonding</code>)</h4>
+<pre class="codehilite"><code class="language-bash">modprobe bonding mode=4 miimon=100 lacp_rate=1
+ip link set eth0 down
+ip link set eth1 down
+ip link add bond0 type bond
+echo +eth0 &gt; /sys/class/net/bond0/bonding/slaves
+echo +eth1 &gt; /sys/class/net/bond0/bonding/slaves
+ip addr add 192.168.1.10/24 dev bond0
+ip link set bond0 up
+</code></pre>
+
+<hr />
+<h3><strong>2.6 CSMA/CD (Carrier Sense Multiple Access / Collision Detection)</strong></h3><hr>
+<ul>
+<li>Used in legacy half-duplex Ethernet.</li>
+<li>Detects collisions and waits random time before retransmitting.</li>
+</ul>
+<h4>ℹ️ Note:</h4>
+<p>Not used in full-duplex modern Ethernet; now replaced by switching infrastructure.</p>
+<hr />
+<h2><strong>3. Layer 2 Switching Example (Real Network Scenario)</strong></h2><hr>
+<h3>Scenario: 3 PCs connected via a Layer 2 Switch</h3><hr>
+<ul>
+<li><strong>PC1</strong>: 192.168.1.10 / MAC: <code>AA:BB:CC:11:22:33</code></li>
+<li><strong>PC2</strong>: 192.168.1.20 / MAC: <code>AA:BB:CC:22:33:44</code></li>
+<li><strong>PC3</strong>: 192.168.1.30 / MAC: <code>AA:BB:CC:33:44:55</code></li>
+</ul>
+<p>When PC1 pings PC2:</p>
+<ol>
+<li>PC1 checks ARP table → no entry</li>
+<li>Sends <strong>ARP Request</strong>: “Who has 192.168.1.20?”</li>
+<li>PC2 replies with its MAC address.</li>
+<li>PC1 now sends ICMP Echo to MAC of PC2.</li>
+</ol>
+<p>The <strong>switch</strong> learns MAC addresses by inspecting source MAC in frames and builds a MAC table.</p>
+<h4>Switch MAC Table:</h4>
+<pre class="codehilite"><code>Port 1: AA:BB:CC:11:22:33 (PC1)
+Port 2: AA:BB:CC:22:33:44 (PC2)
+Port 3: AA:BB:CC:33:44:55 (PC3)
+</code></pre>
+
+<hr />
+<h2><strong>4. Layer 2 Security Features</strong></h2><hr>
+<h3>Common Threats:</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ARP Spoofing</td>
+<td>Attacker sends forged ARP replies</td>
+</tr>
+<tr>
+<td>MAC Flooding</td>
+<td>Overflows MAC table, causes broadcast</td>
+</tr>
+<tr>
+<td>VLAN Hopping</td>
+<td>Attacker gains access to other VLANs</td>
+</tr>
+</tbody>
+</table>
+<h3>Defenses:</h3><hr>
+<ul>
+<li><strong>Port Security</strong>: Limit MACs per port.</li>
+<li><strong>Dynamic ARP Inspection (DAI)</strong>: Drops invalid ARP.</li>
+<li><strong>BPDU Guard</strong>: Protects STP topology.</li>
+</ul>
+<h4>Cisco Example:</h4>
+<pre class="codehilite"><code class="language-bash">Switch(config)# interface fa0/1
+Switch(config-if)# switchport port-security
+Switch(config-if)# switchport port-security maximum 1
+Switch(config-if)# switchport port-security violation shutdown
+</code></pre>
+
+<hr />
+<h2><strong>5. Summary Table of Layer 2 Protocols</strong></h2><hr>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Purpose</th>
+<th>Key Feature</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ethernet</td>
+<td>LAN communication</td>
+<td>MAC-based addressing</td>
+</tr>
+<tr>
+<td>ARP</td>
+<td>IP → MAC resolution</td>
+<td>Broadcast + reply</td>
+</tr>
+<tr>
+<td>VLAN</td>
+<td>Logical segmentation</td>
+<td>Tagged frames</td>
+</tr>
+<tr>
+<td>STP</td>
+<td>Loop prevention</td>
+<td>Root Bridge election</td>
+</tr>
+<tr>
+<td>LACP</td>
+<td>Link bundling</td>
+<td>Active/Passive modes</td>
+</tr>
+<tr>
+<td>CSMA/CD</td>
+<td>Medium access</td>
+<td>Collision detection</td>
+</tr>
+</tbody>
+</table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

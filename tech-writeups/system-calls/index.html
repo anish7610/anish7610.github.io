@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - system-calls</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>system-calls</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/system-calls/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>System Calls in Linux and How They Work</h1><hr>
+<p>In Linux (and Unix-like systems), <strong>system calls</strong> are the <strong>primary interface between user-space applications and the kernel</strong>. When a program wants to perform a privileged operation—like reading a file, allocating memory, or creating a process—it uses a system call.</p>
+<hr />
+<h2>What is a System Call?</h2><hr>
+<p>A <strong>system call</strong> (or syscall) is a <strong>controlled entry point into the operating system kernel</strong>. It allows user applications to request services from the kernel securely.</p>
+<blockquote>
+<p>For example, calling <code>read()</code> in C doesn't directly access hardware—it triggers a system call to the kernel to read from a file descriptor.</p>
+</blockquote>
+<hr />
+<h2>User Space vs Kernel Space</h2><hr>
+<ul>
+<li><strong>User Space</strong>: Where applications like editors, browsers, and your shell run.</li>
+<li><strong>Kernel Space</strong>: Privileged mode with direct access to hardware and core system resources.</li>
+</ul>
+<p>System calls act as the <strong>gateway between these two spaces</strong>. Direct access is not allowed for security and stability reasons.</p>
+<hr />
+<h2>How a System Call Works (Simplified Flow)</h2><hr>
+<pre class="codehilite"><code class="language-c">// C code:
+write(1, &quot;Hello\n&quot;, 6);
+</code></pre>
+
+<ol>
+<li><strong>Library Call (glibc)</strong>: <code>write()</code> is a function in the C standard library (<code>glibc</code>), which internally prepares the syscall.</li>
+<li>
+<p><strong>Syscall Invocation</strong>:</p>
+</li>
+<li>
+<p>The syscall number for <code>write</code> (e.g., <code>__NR_write</code>) is placed in a CPU register (<code>rax</code> on x86_64).</p>
+</li>
+<li>Arguments (file descriptor, buffer, length) go into other registers (<code>rdi</code>, <code>rsi</code>, <code>rdx</code>).</li>
+<li>
+<p><strong>Software Interrupt / Trap</strong>:</p>
+</li>
+<li>
+<p>CPU executes the <code>syscall</code> instruction (or <code>int 0x80</code> on 32-bit systems).</p>
+</li>
+<li>Switches from <strong>user mode</strong> to <strong>kernel mode</strong>.</li>
+<li>
+<p><strong>Kernel Handler</strong>:</p>
+</li>
+<li>
+<p>The kernel dispatches the syscall based on its number.</p>
+</li>
+<li>It performs the requested operation (e.g., writing to a file descriptor).</li>
+<li>
+<p><strong>Return to User Mode</strong>:</p>
+</li>
+<li>
+<p>Result (e.g., bytes written or error code) is placed in <code>rax</code>.</p>
+</li>
+<li>CPU switches back to user mode and returns control to the program.</li>
+</ol>
+<hr />
+<h2>Registers Used in x86-64 Syscalls</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Register</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Syscall number</td>
+<td><code>rax</code></td>
+</tr>
+<tr>
+<td>arg1</td>
+<td><code>rdi</code></td>
+</tr>
+<tr>
+<td>arg2</td>
+<td><code>rsi</code></td>
+</tr>
+<tr>
+<td>arg3</td>
+<td><code>rdx</code></td>
+</tr>
+<tr>
+<td>arg4</td>
+<td><code>r10</code></td>
+</tr>
+<tr>
+<td>arg5</td>
+<td><code>r8</code></td>
+</tr>
+<tr>
+<td>arg6</td>
+<td><code>r9</code></td>
+</tr>
+<tr>
+<td>Return value</td>
+<td><code>rax</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Common Linux System Calls</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Syscall</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>read()</code></td>
+<td>Reads data from a file descriptor</td>
+</tr>
+<tr>
+<td><code>write()</code></td>
+<td>Writes data to a file descriptor</td>
+</tr>
+<tr>
+<td><code>open()</code></td>
+<td>Opens a file</td>
+</tr>
+<tr>
+<td><code>close()</code></td>
+<td>Closes a file descriptor</td>
+</tr>
+<tr>
+<td><code>fork()</code></td>
+<td>Creates a new process</td>
+</tr>
+<tr>
+<td><code>execve()</code></td>
+<td>Executes a new program</td>
+</tr>
+<tr>
+<td><code>wait()</code></td>
+<td>Waits for process termination</td>
+</tr>
+<tr>
+<td><code>mmap()</code></td>
+<td>Maps files or devices into memory</td>
+</tr>
+<tr>
+<td><code>ioctl()</code></td>
+<td>Device-specific input/output operations</td>
+</tr>
+<tr>
+<td><code>clone()</code></td>
+<td>Low-level thread creation (used in <code>pthread</code>)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>To see all system calls:
+<code>man 2 syscalls</code>
+<code>ausyscall --dump</code> (if <code>auditd</code> tools are installed)</p>
+</blockquote>
+<hr />
+<h2>Example: Raw syscall in Assembly (x86-64)</h2><hr>
+<pre class="codehilite"><code class="language-asm">section .data
+    msg db &quot;Hello, world!&quot;, 0xA
+    len equ $ - msg
+
+section .text
+    global _start
+
+_start:
+    mov rax, 1          ; syscall number for write
+    mov rdi, 1          ; file descriptor: stdout
+    mov rsi, msg        ; message to write
+    mov rdx, len        ; message length
+    syscall             ; make the syscall
+
+    mov rax, 60         ; syscall: exit
+    xor rdi, rdi        ; exit code 0
+    syscall
+</code></pre>
+
+<p>Assembled and run with:</p>
+<pre class="codehilite"><code class="language-bash">nasm -f elf64 hello.asm &amp;&amp; ld -o hello hello.o &amp;&amp; ./hello
+</code></pre>
+
+<hr />
+<h2>Viewing System Calls in Action</h2><hr>
+<h3><code>strace</code> – Trace System Calls</h3><hr>
+<pre class="codehilite"><code class="language-bash">strace ls
+</code></pre>
+
+<p>Example output:</p>
+<pre class="codehilite"><code>openat(AT_FDCWD, &quot;.&quot;, O_RDONLY|O_NONBLOCK|O_CLOEXEC|O_DIRECTORY) = 3
+read(3, ...
+write(1, &quot;file.txt\n&quot;, 9) = 9
+</code></pre>
+
+<h3><code>perf</code> – Performance analysis of syscalls</h3><hr>
+<pre class="codehilite"><code class="language-bash">perf stat -e syscalls:sys_enter_* ls
+</code></pre>
+
+<hr />
+<h2>System Call Filtering: seccomp</h2><hr>
+<p>Linux provides <strong>seccomp</strong> (Secure Computing Mode) to restrict the system calls a process can make.</p>
+<p>Example: Block everything except <code>read</code>, <code>write</code>, and <code>exit</code>.</p>
+<p>Used in:</p>
+<ul>
+<li>Containers (e.g., Docker)</li>
+<li>Sandboxing tools (e.g., Firejail)</li>
+<li>Browser and VM isolation</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td>Gateway from user space to kernel</td>
+</tr>
+<tr>
+<td>Mechanism</td>
+<td>Registers + <code>syscall</code>/<code>int 0x80</code></td>
+</tr>
+<tr>
+<td>Controlled by</td>
+<td>Kernel syscall table</td>
+</tr>
+<tr>
+<td>Observable via</td>
+<td><code>strace</code>, <code>perf</code>, <code>/proc/&lt;pid&gt;/syscall</code></td>
+</tr>
+<tr>
+<td>Secure handling via</td>
+<td>seccomp, AppArmor, SELinux</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Bonus: System Call vs Function Call</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Function Call</th>
+<th>System Call</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context Switch</td>
+<td>No</td>
+<td>Yes (user → kernel → user)</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Within the process</td>
+<td>Into the kernel</td>
+</tr>
+<tr>
+<td>Overhead</td>
+<td>Low</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Example</td>
+<td><code>strlen("abc")</code></td>
+<td><code>write(1, "abc", 3)</code></td>
+</tr>
+</tbody>
+</table>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

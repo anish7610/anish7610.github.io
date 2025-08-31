@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - visual-regression-testing-percy-playwright</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>visual-regression-testing-percy-playwright</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/visual-regression-testing-percy-playwright/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Visual Regression Testing with Percy or Playwright</h2><hr>
+<p>Visual regression testing ensures that the <strong>UI doesn’t break unexpectedly</strong> by comparing current screenshots with known-good "baselines". It catches layout shifts, missing elements, font issues, and styling regressions that traditional assertions miss.</p>
+<p>Two of the most popular tools in this domain are <strong>Percy</strong> (by BrowserStack) and <strong>Playwright</strong> (with built-in screenshot comparison support). Let’s explore how they work and when to use each.</p>
+<hr />
+<h3>What Is Visual Regression Testing?</h3><hr>
+<p>Visual regression testing takes screenshots of web pages or components and compares them pixel-by-pixel (or via smarter algorithms) against a previously approved baseline.</p>
+<p>Typical use cases:</p>
+<ul>
+<li>Detecting unintended UI changes after code updates</li>
+<li>Validating responsive layouts across devices</li>
+<li>Testing theming or dark/light mode styles</li>
+<li>Ensuring CSS refactors don’t break design</li>
+</ul>
+<hr />
+<h2>🟢 Option 1: Visual Testing with <strong>Percy</strong></h2><hr>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Works with multiple test frameworks (Selenium, Cypress, Playwright)</li>
+<li>Handles parallelization and responsive testing</li>
+<li>Offers web dashboard for reviewing diffs</li>
+<li>Integrates well with CI/CD (GitHub Actions, GitLab, Jenkins)</li>
+</ul>
+<h3>Example: Percy with Playwright</h3><hr>
+<p><strong>Install Percy CLI and SDK:</strong></p>
+<pre class="codehilite"><code class="language-bash">npm install --save-dev @percy/cli @percy/playwright
+</code></pre>
+
+<p><strong>Run Percy with Playwright:</strong></p>
+<pre class="codehilite"><code class="language-javascript">// tests/visual.spec.js
+const { test } = require('@playwright/test');
+const percySnapshot = require('@percy/playwright');
+
+test('homepage visual test', async ({ page }) =&gt; {
+  await page.goto('http://localhost:3000');
+  await percySnapshot(page, 'Homepage Snapshot');
+});
+</code></pre>
+
+<p><strong>Run test with Percy:</strong></p>
+<pre class="codehilite"><code class="language-bash">npx percy exec -- npx playwright test
+</code></pre>
+
+<p>Percy will upload screenshots to your Percy dashboard, where you can <strong>review and approve</strong> or <strong>reject</strong> changes.</p>
+<hr />
+<h2>🟣 Option 2: Visual Testing with <strong>Playwright Built-in Tools</strong></h2><hr>
+<p>Playwright has native support for visual diffs using <code>expect(page).toHaveScreenshot()</code>.</p>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Fully open-source</li>
+<li>No external dependencies</li>
+<li>Fast and local</li>
+<li>Can be integrated into CI easily</li>
+</ul>
+<h3>️ Limitations:</h3><hr>
+<ul>
+<li>No visual UI for snapshot approval (unless you build your own)</li>
+<li>Lacks Percy’s multi-browser/device parallelism and history</li>
+</ul>
+<h3>Example: Playwright Native Screenshot Comparison</h3><hr>
+<pre class="codehilite"><code class="language-javascript">// tests/visual.spec.js
+const { test, expect } = require('@playwright/test');
+
+test('homepage visual regression', async ({ page }) =&gt; {
+  await page.goto('http://localhost:3000');
+  await expect(page).toHaveScreenshot('homepage.png');
+});
+</code></pre>
+
+<p>When you first run the test, it creates a baseline. Future runs compare the current UI to the baseline, and fail the test if a visual diff is found.</p>
+<p>You can also use:</p>
+<pre class="codehilite"><code class="language-js">await expect(locator).toHaveScreenshot('button.png');
+</code></pre>
+
+<p>To test specific components.</p>
+<hr />
+<h2>CI/CD Integration</h2><hr>
+<p>Both Percy and Playwright can run in CI:</p>
+<ul>
+<li><strong>Percy</strong> uses <code>PERCY_TOKEN</code> to securely upload screenshots to their dashboard.</li>
+<li><strong>Playwright</strong> works with any CI tool (e.g., GitHub Actions), and stores screenshots in <code>test-results</code> by default.</li>
+</ul>
+<hr />
+<h3>Best Practices</h3><hr>
+<ul>
+<li>Use <strong>stable selectors and consistent data</strong> to avoid false positives.</li>
+<li><strong>Mask dynamic content</strong> like timestamps or ads using CSS or cropping.</li>
+<li>For Percy, <strong>review and approve diffs</strong> as part of the pull request process.</li>
+<li>Keep <strong>snapshots per resolution</strong> if you test responsiveness (Percy handles this well).</li>
+</ul>
+<hr />
+<h3>Summary</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best For</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Percy</td>
+<td>Teams needing review UI, responsive testing</td>
+<td>Powerful, polished, requires a cloud token</td>
+</tr>
+<tr>
+<td>Playwright (native)</td>
+<td>Lightweight local workflows</td>
+<td>Fast, minimal setup, best for smaller teams</td>
+</tr>
+</tbody>
+</table>
+<p>Visual regression testing is essential for frontend stability and user confidence. Whether you choose Percy for rich dashboards or Playwright for speed and simplicity, integrating these into your test suite pays off in catching UI bugs before they reach users.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

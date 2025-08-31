@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - multithreaded-scheduling-and-context-switches</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>multithreaded-scheduling-and-context-switches</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/multithreaded-scheduling-and-context-switches/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Multi-threaded Process Scheduling and Context Switch Metrics</h2><hr>
+<p>Modern operating systems handle multiple processes and threads by interleaving their execution on available CPUs. This is done through <strong>scheduling</strong> and results in <strong>context switching</strong>, especially in multi-threaded applications. Here's a deep dive into how multi-threaded scheduling works and how to observe and measure context switches in Linux.</p>
+<hr />
+<h2>Overview of Multi-threaded Process Scheduling</h2><hr>
+<p>A <strong>multi-threaded process</strong> consists of multiple threads of execution within the same process space. Threads share memory but have separate registers and stacks.</p>
+<p>The OS scheduler must:</p>
+<ul>
+<li>Allocate CPU time to each thread fairly or based on priority.</li>
+<li>Perform context switches between threads (both within the same process and across processes).</li>
+<li>Keep track of thread states (running, ready, blocked, etc.)</li>
+</ul>
+<h3>Scheduler Policies in Linux:</h3><hr>
+<ul>
+<li><code>SCHED_OTHER</code> – Default time-sharing policy.</li>
+<li><code>SCHED_FIFO</code>, <code>SCHED_RR</code> – Real-time policies.</li>
+<li><code>SCHED_BATCH</code> – For CPU-intensive but non-interactive tasks.</li>
+<li><code>SCHED_IDLE</code> – For very low-priority background jobs.</li>
+</ul>
+<p>Each thread is treated as a separate "task" by the Linux scheduler, identified by its <strong>Thread ID (TID)</strong>.</p>
+<hr />
+<h2>Context Switching: What Happens?</h2><hr>
+<p><strong>Context Switch</strong> is the process where the CPU switches from one task (process/thread) to another. This involves:</p>
+<ul>
+<li>Saving the state (registers, stack pointer, program counter) of the currently running thread.</li>
+<li>Loading the state of the next thread to be scheduled.</li>
+</ul>
+<p>Types of context switches:</p>
+<ul>
+<li><strong>Voluntary:</strong> When a thread sleeps or yields.</li>
+<li><strong>Involuntary:</strong> When the scheduler preempts a thread due to time slice expiration or higher-priority thread.</li>
+</ul>
+<p>Context switching is <strong>CPU-intensive</strong> and too many context switches can lead to performance degradation (thrashing).</p>
+<hr />
+<h2>Tools to Observe Thread Scheduling and Context Switches</h2><hr>
+<h3>1. <code>top</code> or <code>htop</code></h3><hr>
+<ul>
+<li>Shows number of context switches per process.</li>
+<li>Look under <code>CSWCH</code> (context switches) or <code>S</code> column (state).</li>
+</ul>
+<h3>2. <code>pidstat -w -p &lt;PID&gt;</code></h3><hr>
+<pre class="codehilite"><code class="language-bash">sudo apt install sysstat
+pidstat -w -p &lt;PID&gt; 1
+</code></pre>
+
+<p>Displays:</p>
+<ul>
+<li>voluntary and involuntary context switches per second.</li>
+</ul>
+<h3>3. <code>perf stat</code></h3><hr>
+<pre class="codehilite"><code class="language-bash">perf stat -p &lt;PID&gt;
+</code></pre>
+
+<ul>
+<li>Measures total context switches and CPU cycles.</li>
+</ul>
+<h3>4. <code>strace -c -f -e trace=none -e context=1 &lt;cmd&gt;</code></h3><hr>
+<pre class="codehilite"><code class="language-bash">strace -c -f ./multi_threaded_app
+</code></pre>
+
+<ul>
+<li>Captures syscall and context switch info.</li>
+</ul>
+<h3>5. <code>vmstat</code></h3><hr>
+<pre class="codehilite"><code class="language-bash">vmstat 1
+</code></pre>
+
+<ul>
+<li>Shows <code>cs</code> (context switch) column globally.</li>
+</ul>
+<hr />
+<h2>Multi-threaded Programming Impact</h2><hr>
+<ul>
+<li>Threads that block frequently (I/O-bound) may result in many <strong>voluntary context switches</strong>.</li>
+<li>CPU-bound threads may face <strong>involuntary context switches</strong> due to time-sharing.</li>
+</ul>
+<p>High thread count apps (like Nginx, JVM apps) must balance between concurrency and switch overhead.</p>
+<hr />
+<h2>Tuning &amp; Mitigation</h2><hr>
+<ul>
+<li><strong>Thread Affinity (CPU pinning):</strong> Bind threads to specific cores using <code>taskset</code> or <code>pthread_setaffinity_np</code>.</li>
+<li><strong>Reduce Thread Count:</strong> Avoid oversubscribing cores.</li>
+<li><strong>Lock-Free Programming:</strong> Minimizes blocking, reducing voluntary switches.</li>
+<li><strong>Use Real-time Scheduling</strong> (with care) for latency-sensitive threads.</li>
+</ul>
+<hr />
+<h2>Example</h2><hr>
+<pre class="codehilite"><code class="language-c">// multithreaded.c
+#include &lt;pthread.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+void* busy_loop(void* arg) {
+    while (1);
+}
+
+int main() {
+    pthread_t tid[4];
+    for (int i = 0; i &lt; 4; ++i)
+        pthread_create(&amp;tid[i], NULL, busy_loop, NULL);
+    sleep(30);
+    return 0;
+}
+</code></pre>
+
+<p>Run with:</p>
+<pre class="codehilite"><code class="language-bash">gcc multithreaded.c -o mt -lpthread
+./mt &amp;
+pidstat -w -p $(pidof mt) 1
+</code></pre>
+
+<p>You’ll observe high context switch counts due to constant thread competition.</p>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Vol/Invol switches</td>
+<td><code>pidstat</code>, <code>perf</code></td>
+</tr>
+<tr>
+<td>Scheduler behavior</td>
+<td><code>schedtool</code>, <code>chrt</code></td>
+</tr>
+<tr>
+<td>Global switch rate</td>
+<td><code>vmstat</code></td>
+</tr>
+<tr>
+<td>Thread view</td>
+<td><code>htop</code>, <code>top -H</code></td>
+</tr>
+</tbody>
+</table>
+<p>Understanding thread scheduling and context switching is crucial for building <strong>scalable</strong>, <strong>real-time</strong>, or <strong>low-latency</strong> applications in Linux environments.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

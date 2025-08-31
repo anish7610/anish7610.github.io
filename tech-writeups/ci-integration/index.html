@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - ci-integration</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>ci-integration</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ci-integration/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>CI Integration for Test Result Reporting (e.g., TestRail)</h1><hr>
+<p>Continuous Integration (CI) is a fundamental part of modern software development, enabling automated build, test, and deployment pipelines. A critical component of this pipeline is <strong>test result reporting</strong>—tracking and analyzing test outcomes in a centralized system like <strong>TestRail</strong>. Integrating your CI/CD pipeline with TestRail allows teams to maintain visibility into test coverage, detect regressions early, and ensure accountability across automated and manual QA processes.</p>
+<hr />
+<h2>Benefits of CI-TestRail Integration</h2><hr>
+<ul>
+<li><strong>Automated Result Publishing</strong>: Avoid manual updates by pushing results directly from your CI jobs.</li>
+<li><strong>Centralized Reporting</strong>: View manual and automated test runs together in one dashboard.</li>
+<li><strong>Traceability</strong>: Link test results to user stories, test cases, builds, and defects (e.g., Jira).</li>
+<li><strong>Live Feedback</strong>: Monitor test run status in real-time with each CI/CD trigger.</li>
+</ul>
+<hr />
+<h2>Architecture Overview</h2><hr>
+<pre class="codehilite"><code>CI/CD Tool (GitHub Actions / GitLab CI / Jenkins / CircleCI)
+        |
+        |---&gt; Run automated tests (e.g., Pytest, JUnit, TestNG)
+        |
+        |---&gt; Parse results (XML/JSON/HTML)
+        |
+        |---&gt; Push results to TestRail using TestRail API
+</code></pre>
+
+<hr />
+<h2>Prerequisites</h2><hr>
+<ul>
+<li>TestRail account with API access enabled</li>
+<li>Project and test cases already created in TestRail</li>
+<li>API credentials: <code>username</code> (or API key) and <code>password</code></li>
+<li>A CI pipeline configured to run your test suite</li>
+<li>Tests annotated or tagged with TestRail Case IDs (e.g., <code>C1234</code>)</li>
+</ul>
+<hr />
+<h2>️ Integration Steps</h2><hr>
+<h3>1. <strong>Tag Test Cases with TestRail IDs</strong></h3><hr>
+<p>Use a consistent naming pattern like <code>C1234</code> in your test case names, docstrings, or comments.</p>
+<pre class="codehilite"><code class="language-python"># test_login.py
+def test_valid_login():
+    &quot;&quot;&quot;C1010 Verify user can login with valid credentials&quot;&quot;&quot;
+    ...
+</code></pre>
+
+<hr />
+<h3>2. <strong>Export Test Results</strong></h3><hr>
+<p>Most test frameworks support result output formats:</p>
+<ul>
+<li><code>Pytest</code> → <code>pytest --junitxml=result.xml</code></li>
+<li><code>JUnit/TestNG</code> → <code>results.xml</code></li>
+<li><code>Cypress</code> → <code>--reporter junit</code></li>
+</ul>
+<hr />
+<h3>3. <strong>Parse the Results in CI Pipeline</strong></h3><hr>
+<p>Use a test parser to extract case IDs and status.</p>
+<p>Sample Python snippet to parse Pytest output:</p>
+<pre class="codehilite"><code class="language-python">import xml.etree.ElementTree as ET
+
+def parse_pytest_results(xml_path):
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    results = []
+    for testcase in root.iter(&quot;testcase&quot;):
+        case_id = extract_case_id(testcase.attrib[&quot;name&quot;])  # Cxxxx
+        status = &quot;passed&quot;
+        if testcase.find(&quot;failure&quot;) is not None:
+            status = &quot;failed&quot;
+        results.append((case_id, status))
+    return results
+</code></pre>
+
+<hr />
+<h3>4. <strong>Push Results to TestRail</strong></h3><hr>
+<p>Use the <a href="https://www.gurock.com/testrail/docs/api/reference/results/">TestRail API</a> to:</p>
+<ul>
+<li>Create a test run</li>
+<li>Add results to test cases</li>
+</ul>
+<p>Example using <code>testrail-api</code> Python client or raw HTTP:</p>
+<pre class="codehilite"><code class="language-python">import requests
+
+testrail_url = &quot;https://yourcompany.testrail.io&quot;
+username = &quot;your@email.com&quot;
+password = &quot;your_api_key&quot;
+project_id = 5
+suite_id = 2
+
+# Create a test run
+resp = requests.post(
+    f&quot;{testrail_url}/index.php?/api/v2/add_run/{project_id}&quot;,
+    auth=(username, password),
+    json={
+        &quot;suite_id&quot;: suite_id,
+        &quot;name&quot;: &quot;CI Run - Build #123&quot;,
+        &quot;include_all&quot;: False,
+        &quot;case_ids&quot;: [1010, 1012, 1020]
+    }
+)
+run_id = resp.json()[&quot;id&quot;]
+
+# Add results to the test run
+for case_id, status in parsed_results:
+    status_id = 1 if status == &quot;passed&quot; else 5  # 1 = Passed, 5 = Failed
+    requests.post(
+        f&quot;{testrail_url}/index.php?/api/v2/add_result_for_case/{run_id}/{case_id}&quot;,
+        auth=(username, password),
+        json={&quot;status_id&quot;: status_id}
+    )
+</code></pre>
+
+<hr />
+<h2>️ CI Pipeline Example – GitHub Actions</h2><hr>
+<pre class="codehilite"><code class="language-yaml">name: Test and Report
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Pytest
+        run: pytest --junitxml=result.xml
+
+      - name: Push to TestRail
+        run: python scripts/report_to_testrail.py
+        env:
+          TESTRAIL_USER: ${{ secrets.TESTRAIL_USER }}
+          TESTRAIL_PASS: ${{ secrets.TESTRAIL_PASS }}
+</code></pre>
+
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li><strong>Mark all automated test cases with Case IDs</strong>.</li>
+<li><strong>Fail fast</strong>: Stop the pipeline if critical tests fail.</li>
+<li><strong>Add logging</strong> in the integration script for debug and audit.</li>
+<li><strong>Trigger test run creation dynamically</strong>, using the build number or timestamp.</li>
+<li><strong>Use environment variables</strong> for TestRail credentials and URLs.</li>
+<li><strong>Optionally push results to Jira</strong> if integrated with TestRail.</li>
+</ul>
+<hr />
+<h2>Sample TestRail Status IDs</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Status</th>
+<th>ID</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Passed</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Blocked</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Untested</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Retest</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Failed</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Advanced Features</h2><hr>
+<ul>
+<li><strong>Custom Fields</strong>: Add automation run metadata like environment, branch, etc.</li>
+<li><strong>Update existing test runs</strong> instead of creating new ones</li>
+<li><strong>Integrate with TestRail Milestones</strong></li>
+<li><strong>Parallel test execution tracking</strong></li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<p>CI-TestRail integration ensures real-time, traceable, and accurate test reporting across automated test pipelines. By pushing test results directly to TestRail, teams gain visibility and control over release readiness and can make informed decisions with confidence.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - kubernetes</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>kubernetes</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/kubernetes/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Kubernetes Concepts: Pods, Services, Deployments, and CRDs</h1><hr>
+<p>Kubernetes (K8s) is a powerful container orchestration platform designed to automate the deployment, scaling, and management of containerized applications. While Kubernetes offers a wide range of features, understanding its core building blocks is essential to effectively working with it. This write-up focuses on four fundamental concepts: <strong>Pods</strong>, <strong>Services</strong>, <strong>Deployments</strong>, and <strong>Custom Resource Definitions (CRDs)</strong>.</p>
+<hr />
+<h2>1. Pods</h2><hr>
+<p><strong>Definition</strong>: A Pod is the smallest deployable unit in Kubernetes. It encapsulates one or more containers that share the same network namespace and storage.</p>
+<h3>Key Characteristics:</h3><hr>
+<ul>
+<li><strong>Shared Resources</strong>: Containers in a Pod share IP address, port space, and volume mounts.</li>
+<li><strong>Use Case</strong>: Useful for co-located helper containers (e.g., log shippers, proxies).</li>
+<li><strong>Lifecycle</strong>: Managed as a single unit. If one container fails, the entire Pod is typically restarted.</li>
+</ul>
+<h3>Example YAML:</h3><hr>
+<pre class="codehilite"><code class="language-yaml">apiVersion: v1
+kind: Pod
+metadata:
+  name: my-pod
+spec:
+  containers:
+    - name: my-app
+      image: nginx
+</code></pre>
+
+<hr />
+<h2>2. Services</h2><hr>
+<p><strong>Definition</strong>: A Service is an abstraction that exposes a set of Pods as a network service.</p>
+<h3>Types of Services:</h3><hr>
+<ul>
+<li><strong>ClusterIP</strong>: Exposes the service internally within the cluster (default).</li>
+<li><strong>NodePort</strong>: Exposes the service on each Node’s IP at a static port.</li>
+<li><strong>LoadBalancer</strong>: Provisions an external load balancer (cloud environments).</li>
+<li><strong>ExternalName</strong>: Maps the service to an external DNS name.</li>
+</ul>
+<h3>Benefits:</h3><hr>
+<ul>
+<li>Provides a stable endpoint for a set of ephemeral Pods.</li>
+<li>Performs basic load balancing.</li>
+</ul>
+<h3>Example YAML:</h3><hr>
+<pre class="codehilite"><code class="language-yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app: my-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+  type: ClusterIP
+</code></pre>
+
+<hr />
+<h2>3. Deployments</h2><hr>
+<p><strong>Definition</strong>: A Deployment manages the creation and scaling of Pods. It ensures a specified number of Pods are always running.</p>
+<h3>Features:</h3><hr>
+<ul>
+<li><strong>Declarative Updates</strong>: Specify the desired state and let Kubernetes maintain it.</li>
+<li><strong>Rollouts and Rollbacks</strong>: Support for updating applications with zero downtime and reverting if needed.</li>
+<li><strong>Scaling</strong>: Horizontal scaling based on replica count or metrics (with HPA).</li>
+</ul>
+<h3>Example YAML:</h3><hr>
+<pre class="codehilite"><code class="language-yaml">apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+        - name: my-container
+          image: nginx
+</code></pre>
+
+<hr />
+<h2>️ 4. Custom Resource Definitions (CRDs)</h2><hr>
+<p><strong>Definition</strong>: CRDs allow users to extend Kubernetes by defining their own resource types.</p>
+<h3>Use Case:</h3><hr>
+<ul>
+<li>Build custom controllers/operators.</li>
+<li>Add domain-specific APIs (e.g., <code>MySQLCluster</code>, <code>KafkaTopic</code>).</li>
+</ul>
+<h3>Workflow:</h3><hr>
+<ol>
+<li>Define a CRD.</li>
+<li>Deploy a controller to manage the lifecycle of the custom resource.</li>
+<li>Use <code>kubectl</code> and the Kubernetes API to create/manage these new types.</li>
+</ol>
+<h3>Example YAML:</h3><hr>
+<pre class="codehilite"><code class="language-yaml">apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: crontabs.stable.example.com
+spec:
+  group: stable.example.com
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                cronSpec:
+                  type: string
+                image:
+                  type: string
+  scope: Namespaced
+  names:
+    plural: crontabs
+    singular: crontab
+    kind: CronTab
+    shortNames:
+    - ct
+</code></pre>
+
+<hr />
+<h2>Summary Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Purpose</th>
+<th>Key Resource Type</th>
+<th>Managed By</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pod</strong></td>
+<td>Runs one or more containers</td>
+<td><code>Pod</code></td>
+<td>Kubernetes (via kubelet)</td>
+</tr>
+<tr>
+<td><strong>Service</strong></td>
+<td>Exposes and balances network traffic</td>
+<td><code>Service</code></td>
+<td>kube-proxy</td>
+</tr>
+<tr>
+<td><strong>Deployment</strong></td>
+<td>Manages Pod replicas and rollouts</td>
+<td><code>Deployment</code></td>
+<td>Controller Manager</td>
+</tr>
+<tr>
+<td><strong>CRD</strong></td>
+<td>Defines custom APIs and resources</td>
+<td><code>CustomResourceDefinition</code></td>
+<td>Custom Controller</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Kubernetes provides a modular and extensible system through these primitives. Understanding <strong>Pods</strong> for container execution, <strong>Services</strong> for networking, <strong>Deployments</strong> for declarative management, and <strong>CRDs</strong> for custom workflows equips you to build robust, scalable systems on Kubernetes.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - mounting-filesystems-with-mount-and-loop-devices</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>mounting-filesystems-with-mount-and-loop-devices</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/mounting-filesystems-with-mount-and-loop-devices/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Mounting File Systems Manually with <code>mount</code> and Loop Devices</h2><hr>
+<p>Mounting file systems manually is a core task in Linux system administration. It allows a system to access storage devices or filesystems not automatically mounted at boot time. One powerful but less commonly discussed capability is mounting <strong>loop devices</strong>, which lets you mount disk images as if they were physical devices.</p>
+<hr />
+<h2>What is Mounting in Linux?</h2><hr>
+<p>In Linux, everything is treated as a file—including disks and partitions. The <code>mount</code> command links a storage device (like <code>/dev/sda1</code>) or file (like an <code>.iso</code>) to a directory (called a <strong>mount point</strong>) so its contents can be accessed.</p>
+<p><strong>Syntax:</strong></p>
+<pre class="codehilite"><code class="language-bash">mount &lt;device&gt; &lt;mount_point&gt;
+</code></pre>
+
+<hr />
+<h2>Loop Devices: Mounting Disk Images</h2><hr>
+<p>A <strong>loop device</strong> is a pseudo-device that allows a file to be accessed as a block device. This is useful for mounting ISO files or raw disk images.</p>
+<h3>Use Case: Mounting an ISO File</h3><hr>
+<ol>
+<li><strong>Create a mount point:</strong></li>
+</ol>
+<p><code>bash
+   sudo mkdir /mnt/iso</code></p>
+<ol>
+<li><strong>Mount using <code>mount</code> with <code>-o loop</code>:</strong></li>
+</ol>
+<p><code>bash
+   sudo mount -o loop file.iso /mnt/iso</code></p>
+<ul>
+<li><code>-o loop</code> tells the kernel to treat the file as a block device using a loop device.</li>
+<li>
+<p>Contents of <code>file.iso</code> can now be accessed at <code>/mnt/iso</code>.</p>
+</li>
+<li>
+<p><strong>Unmount when done:</strong></p>
+</li>
+</ul>
+<p><code>bash
+   sudo umount /mnt/iso</code></p>
+<hr />
+<h2>Mounting a Raw Disk Image (e.g., <code>.img</code> from <code>dd</code>)</h2><hr>
+<p>If you're working with full disk images (e.g., Raspberry Pi OS image), you can mount partitions inside the image:</p>
+<ol>
+<li><strong>Find partition offsets using <code>fdisk</code>:</strong></li>
+</ol>
+<p><code>bash
+   fdisk -l disk.img</code></p>
+<ol>
+<li><strong>Mount the partition (e.g., if offset is 8192 sectors, sector size is 512):</strong></li>
+</ol>
+<p><code>bash
+   sudo mount -o loop,offset=$((8192 * 512)) disk.img /mnt/image</code></p>
+<hr />
+<h2>Mounting File Systems Manually</h2><hr>
+<h3>Mounting a USB drive (e.g., <code>/dev/sdb1</code>):</h3><hr>
+<pre class="codehilite"><code class="language-bash">sudo mkdir /mnt/usb
+sudo mount /dev/sdb1 /mnt/usb
+</code></pre>
+
+<p>To <strong>specify file system type</strong> (optional):</p>
+<pre class="codehilite"><code class="language-bash">sudo mount -t vfat /dev/sdb1 /mnt/usb  # For FAT32
+</code></pre>
+
+<h3>Unmount:</h3><hr>
+<pre class="codehilite"><code class="language-bash">sudo umount /mnt/usb
+</code></pre>
+
+<hr />
+<h2>Useful Options with <code>mount</code></h2><hr>
+<table>
+<thead>
+<tr>
+<th>Option</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-t &lt;fstype&gt;</code></td>
+<td>Specify file system type (e.g., ext4, vfat)</td>
+</tr>
+<tr>
+<td><code>-o loop</code></td>
+<td>Use loopback device for mounting a file</td>
+</tr>
+<tr>
+<td><code>-o ro</code></td>
+<td>Mount as read-only</td>
+</tr>
+<tr>
+<td><code>-o rw</code></td>
+<td>Mount as read-write</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Task</th>
+<th>Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mount ISO using loop</td>
+<td><code>mount -o loop file.iso /mnt/iso</code></td>
+</tr>
+<tr>
+<td>Mount USB drive</td>
+<td><code>mount /dev/sdb1 /mnt/usb</code></td>
+</tr>
+<tr>
+<td>Mount specific partition in <code>.img</code></td>
+<td><code>mount -o loop,offset=... disk.img /mnt</code></td>
+</tr>
+<tr>
+<td>Unmount any mount point</td>
+<td><code>umount /mnt/...</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>Loop mounting is particularly useful for:</p>
+<ul>
+<li>Mounting OS images for inspection.</li>
+<li>Testing ISO contents before burning.</li>
+<li>Performing forensic analysis on disk images.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

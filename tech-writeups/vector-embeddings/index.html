@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - vector-embeddings</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>vector-embeddings</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/vector-embeddings/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Vector Embeddings and ANN Search: FAISS, Pinecone Explained</h2><hr>
+<h3>Introduction</h3><hr>
+<p>In modern AI applications like semantic search, recommendation systems, and fraud detection, we often need to <strong>compare complex, high-dimensional data</strong> (e.g., text, images, or user behaviors). Instead of matching raw input, we use <strong>vector embeddings</strong> to represent data in a numerical form that captures its semantic meaning.</p>
+<p>Once you have embeddings, the next challenge is finding <strong>similar vectors efficiently</strong>—this is where <strong>Approximate Nearest Neighbor (ANN)</strong> search comes in. Libraries like <strong>FAISS</strong> (by Facebook) and platforms like <strong>Pinecone</strong> enable scalable vector search across millions or billions of items.</p>
+<hr />
+<h3>Vector Embeddings: Core Concept</h3><hr>
+<p><strong>Embeddings</strong> are fixed-length, dense numerical vectors generated by machine learning models that preserve the semantic similarity of inputs.</p>
+<ul>
+<li><strong>Text</strong>: Models like BERT or Sentence Transformers convert sentences into vectors.</li>
+<li><strong>Images</strong>: CNNs (e.g., ResNet) convert images into embeddings.</li>
+<li><strong>Structured data</strong>: Learned representations of user or item features.</li>
+</ul>
+<p>A good embedding ensures:</p>
+<ul>
+<li>Similar inputs → nearby vectors in the vector space.</li>
+<li>Dissimilar inputs → vectors far apart.</li>
+</ul>
+<hr />
+<h3>Why Use ANN Search?</h3><hr>
+<p>A brute-force nearest neighbor search is <strong>O(n)</strong> for each query. For large datasets, this is prohibitively slow.</p>
+<p><strong>Approximate Nearest Neighbor (ANN)</strong> algorithms aim to find a “close-enough” neighbor <strong>much faster</strong>, often in sublinear time, using indexing and partitioning strategies.</p>
+<p>Use cases:</p>
+<ul>
+<li><strong>Semantic search</strong> (text similarity)</li>
+<li><strong>Recommendation engines</strong></li>
+<li><strong>Duplicate detection</strong></li>
+<li><strong>Biometric identification</strong></li>
+</ul>
+<hr />
+<h3>FAISS: Facebook AI Similarity Search</h3><hr>
+<p><strong>FAISS</strong> is a high-performance library for ANN search in <strong>CPU and GPU environments</strong>.</p>
+<h4>Key Features:</h4>
+<ul>
+<li>Efficient for billions of vectors</li>
+<li>Supports float32 and int8</li>
+<li>In-memory indexing with quantization</li>
+<li>Clustering + inverted file index (IVF)</li>
+<li>GPU acceleration</li>
+</ul>
+<h4>Index Types:</h4>
+<ul>
+<li><code>IndexFlatL2</code>: Brute-force (exact search)</li>
+<li><code>IndexIVFFlat</code>: IVF with exact inner search</li>
+<li><code>IndexIVFPQ</code>: IVF with Product Quantization</li>
+<li><code>IndexHNSW</code>: Graph-based ANN</li>
+</ul>
+<h4>️ Example:</h4>
+<pre class="codehilite"><code class="language-python">import faiss
+import numpy as np
+
+# Create sample embeddings
+d = 128  # dimension
+nb = 10000  # database size
+query = np.random.random((1, d)).astype('float32')
+database = np.random.random((nb, d)).astype('float32')
+
+# Index and search
+index = faiss.IndexFlatL2(d)
+index.add(database)
+D, I = index.search(query, k=5)  # Find 5 nearest neighbors
+</code></pre>
+
+<hr />
+<h3>️ Pinecone: Managed Vector Database</h3><hr>
+<p><strong>Pinecone</strong> is a fully managed <strong>cloud-native vector database</strong> built for production-grade ANN search.</p>
+<h4>Benefits:</h4>
+<ul>
+<li>No infrastructure to manage</li>
+<li>Persistent storage</li>
+<li>Horizontal scaling</li>
+<li>Real-time updates and inserts</li>
+<li>REST and gRPC APIs</li>
+</ul>
+<h4>Use Cases:</h4>
+<ul>
+<li>Semantic search APIs (e.g., OpenAI + Pinecone)</li>
+<li>Personalized recommendations</li>
+<li>Hybrid search (vector + keyword)</li>
+</ul>
+<h4>️ Sample Workflow:</h4>
+<pre class="codehilite"><code class="language-python">import pinecone
+import openai
+
+# Init Pinecone
+pinecone.init(api_key=&quot;YOUR_KEY&quot;, environment=&quot;us-west1-gcp&quot;)
+index = pinecone.Index(&quot;semantic-search&quot;)
+
+# Embed query
+query = &quot;Find similar documents to quantum computing&quot;
+query_vector = openai.embeddings.create(input=query)[&quot;data&quot;][0][&quot;embedding&quot;]
+
+# Query Pinecone
+results = index.query(vector=query_vector, top_k=5, include_metadata=True)
+</code></pre>
+
+<hr />
+<h3>FAISS vs Pinecone</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>FAISS</th>
+<th>Pinecone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hosting</td>
+<td>Local (self-managed)</td>
+<td>Cloud (managed)</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Manual</td>
+<td>Auto-scaled</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>RAM / disk</td>
+<td>Persistent (cloud-based)</td>
+</tr>
+<tr>
+<td>Query Latency</td>
+<td>Very low (especially with GPU)</td>
+<td>Slightly higher (API overhead)</td>
+</tr>
+<tr>
+<td>Flexibility</td>
+<td>Fully customizable</td>
+<td>Easy-to-use, production-ready</td>
+</tr>
+<tr>
+<td>Best For</td>
+<td>R\&amp;D, experimentation</td>
+<td>Deploying vector search at scale</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Summary</h3><hr>
+<ul>
+<li><strong>Vector embeddings</strong> are the backbone of semantic AI applications.</li>
+<li><strong>ANN search</strong> enables efficient similarity lookups in high-dimensional spaces.</li>
+<li><strong>FAISS</strong> offers maximum control and performance for custom environments.</li>
+<li><strong>Pinecone</strong> is ideal for teams that want quick, scalable deployment without managing infra.</li>
+</ul>
+<p>Understanding and combining these tools gives you the power to build <strong>fast, intelligent, and scalable</strong> vector-based systems.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

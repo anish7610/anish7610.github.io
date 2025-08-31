@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - interrupt-driven-vs-polling</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>interrupt-driven-vs-polling</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/interrupt-driven-vs-polling/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Interrupt-Driven vs Polling in Embedded Design</h1><hr>
+<p>Embedded systems often need to respond to external events—such as user input, sensor readings, or communication data. The choice between <strong>interrupt-driven</strong> and <strong>polling-based</strong> mechanisms to handle these events is fundamental to system performance, power consumption, and responsiveness.</p>
+<h2>What is Polling?</h2><hr>
+<p>Polling is a <strong>synchronous</strong> method where the processor continuously checks (or "polls") a device or register to see if an event has occurred.</p>
+<h3>How It Works</h3><hr>
+<ul>
+<li>CPU repeatedly reads a status register in a loop.</li>
+<li>If the event hasn't occurred, the CPU keeps checking.</li>
+<li>When the event occurs (e.g., data ready), the CPU handles it.</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>Simple to implement.</li>
+<li>Predictable timing.</li>
+<li>No concurrency issues; all logic is in a single thread/loop.</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>Inefficient for low-frequency events (wastes CPU cycles).</li>
+<li>Higher power consumption.</li>
+<li>Reduces processor availability for other tasks.</li>
+</ul>
+<h3>Example:</h3><hr>
+<pre class="codehilite"><code class="language-c">while (1) {
+    if (UART_DataReady()) {
+        char c = UART_Read();
+        process_char(c);
+    }
+}
+</code></pre>
+
+<hr />
+<h2>What is Interrupt-Driven Handling?</h2><hr>
+<p>Interrupt-driven design allows a peripheral to <strong>asynchronously notify</strong> the processor when it requires attention, suspending the current flow to handle the event.</p>
+<h3>How It Works</h3><hr>
+<ul>
+<li>The CPU performs normal operations.</li>
+<li>When an event occurs (e.g., button press), an <strong>interrupt request (IRQ)</strong> is triggered.</li>
+<li>CPU stops current execution, saves context, and jumps to an <strong>Interrupt Service Routine (ISR)</strong>.</li>
+<li>After the ISR executes, normal execution resumes.</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>Efficient: CPU only acts when needed.</li>
+<li>Ideal for low-frequency or unpredictable events.</li>
+<li>Allows multitasking or power-saving modes.</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>More complex to implement (needs ISRs, priorities, etc.).</li>
+<li>Risk of race conditions or re-entrancy bugs if not handled properly.</li>
+<li>Harder to debug.</li>
+</ul>
+<h3>Example:</h3><hr>
+<pre class="codehilite"><code class="language-c">void UART_ISR() {
+    char c = UART_Read();
+    process_char(c);
+}
+
+// Somewhere in init:
+enable_UART_interrupts();
+</code></pre>
+
+<hr />
+<h2>Choosing Between the Two</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Criteria</th>
+<th>Polling</th>
+<th>Interrupt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Event Frequency</td>
+<td>High and consistent</td>
+<td>Low or sporadic</td>
+</tr>
+<tr>
+<td>Power Sensitivity</td>
+<td>Not ideal</td>
+<td>More efficient</td>
+</tr>
+<tr>
+<td>Code Simplicity</td>
+<td>Simple</td>
+<td>Complex</td>
+</tr>
+<tr>
+<td>CPU Usage</td>
+<td>Constant</td>
+<td>Only on event</td>
+</tr>
+<tr>
+<td>Real-Time Responsiveness</td>
+<td>Poor</td>
+<td>Excellent (with priorities)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>️ Real-World Embedded Example</h2><hr>
+<p><strong>Scenario</strong>: A temperature sensor sends data every 1 second.</p>
+<ul>
+<li><strong>Polling</strong>: Good if the system does nothing else and sensor timing is regular.</li>
+<li><strong>Interrupt</strong>: Better if the system is multitasking or in sleep mode.</li>
+</ul>
+<p><strong>Scenario</strong>: A user button press.</p>
+<ul>
+<li><strong>Polling</strong>: Bad, wastes cycles checking the button.</li>
+<li><strong>Interrupt</strong>: Best—respond only when button is pressed.</li>
+</ul>
+<hr />
+<h2>Hybrid Approach</h2><hr>
+<p>Some systems use a <strong>hybrid</strong> model:</p>
+<ul>
+<li>Use interrupts to wake the CPU.</li>
+<li>Use polling in tight timing loops (e.g., reading multiple bytes from SPI quickly).</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Polling</th>
+<th>Interrupt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU Efficiency</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Simplicity</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Real-Time Use</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Power Saving</td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Choose <strong>interrupts</strong> when:</p>
+<ul>
+<li>Events are asynchronous.</li>
+<li>You want better power/performance efficiency.</li>
+<li>You have limited CPU resources.</li>
+</ul>
+<p>Choose <strong>polling</strong> when:</p>
+<ul>
+<li>You need deterministic timing.</li>
+<li>The system has a simple loop and no multitasking.</li>
+<li>Peripheral access is fast and frequent.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

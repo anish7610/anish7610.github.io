@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - arp-spoofing-and-detection</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>arp-spoofing-and-detection</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/arp-spoofing-and-detection/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h3>Deep Dive into ARP Spoofing and Detection Mechanisms</h3><hr>
+<h3>What is ARP?</h3><hr>
+<p>The Address Resolution Protocol (ARP) is used to map IP addresses to MAC (Media Access Control) addresses in a local area network. When a device wants to communicate with another device on the same network, it sends a broadcast ARP request asking, “Who has this IP?” The device with the matching IP replies with its MAC address.</p>
+<p>Example:</p>
+<ul>
+<li>Host A sends: “Who has 192.168.0.1? Tell 192.168.0.5”</li>
+<li>Gateway (192.168.0.1) replies: “192.168.0.1 is at 00:11:22:33:44:55”</li>
+</ul>
+<h3>What is ARP Spoofing?</h3><hr>
+<p>ARP spoofing, also known as ARP poisoning, is an attack where a malicious actor sends fake ARP replies to associate their MAC address with the IP address of another node on the network (commonly the default gateway or another host). This causes traffic intended for the legitimate device to be redirected to the attacker.</p>
+<p>By poisoning the ARP cache of other machines:</p>
+<ul>
+<li>The attacker can perform Man-in-the-Middle (MitM) attacks.</li>
+<li>They can intercept, modify, or drop packets.</li>
+<li>In some cases, denial-of-service (DoS) attacks can be carried out.</li>
+</ul>
+<h3>How It Works (Step-by-Step)</h3><hr>
+<ol>
+<li><strong>Target Discovery</strong>: The attacker scans the network to find active IP/MAC pairs (using <code>arp-scan</code>, <code>nmap</code>, etc.).</li>
+<li>
+<p><strong>Poisoning ARP Cache</strong>: The attacker sends forged ARP replies to both:</p>
+</li>
+<li>
+<p>The target: mapping the gateway IP to the attacker’s MAC.</p>
+</li>
+<li>The gateway: mapping the target’s IP to the attacker’s MAC.</li>
+<li><strong>Traffic Interception</strong>: Now the attacker sits in the middle of the communication flow.</li>
+<li><strong>Optional Forwarding</strong>: The attacker can forward packets to maintain network appearance using packet forwarding (<code>echo 1 &gt; /proc/sys/net/ipv4/ip_forward</code> in Linux).</li>
+</ol>
+<h3>Tools Commonly Used for ARP Spoofing</h3><hr>
+<ul>
+<li><code>arpspoof</code> (from dsniff)</li>
+<li><code>ettercap</code></li>
+<li><code>Bettercap</code></li>
+<li><code>mitmproxy</code> (in some configurations)</li>
+</ul>
+<h3>Real-World Impacts</h3><hr>
+<ul>
+<li>Credential theft (HTTP, FTP, Telnet)</li>
+<li>Session hijacking</li>
+<li>SSL stripping (if combined with downgrade attacks)</li>
+<li>DNS spoofing</li>
+<li>Network disruption</li>
+</ul>
+<h3>Detection Mechanisms</h3><hr>
+<ol>
+<li>
+<p><strong>Static ARP Entries</strong>:</p>
+</li>
+<li>
+<p>Manually configure IP-to-MAC mappings where applicable (limited scalability).</p>
+</li>
+<li>
+<p>Prevents dynamic updates to ARP cache.</p>
+</li>
+<li>
+<p><strong>ARP Inspection Tools</strong>:</p>
+</li>
+<li>
+<p>Use tools like <code>arpwatch</code>, <code>XArp</code>, <code>Wireshark</code> to monitor ARP traffic for inconsistencies.</p>
+</li>
+<li>
+<p>Alert if a MAC address suddenly maps to multiple IPs or vice versa.</p>
+</li>
+<li>
+<p><strong>Gratuitous ARP Alerts</strong>:</p>
+</li>
+<li>
+<p>Repeated unsolicited ARP replies could indicate spoofing.</p>
+</li>
+<li>
+<p>Some intrusion detection systems (e.g., Snort) can be configured to detect this.</p>
+</li>
+<li>
+<p><strong>Dynamic ARP Inspection (DAI)</strong>:</p>
+</li>
+<li>
+<p>Supported on enterprise-grade switches (e.g., Cisco).</p>
+</li>
+<li>
+<p>Validates ARP packets on the basis of a trusted DHCP snooping table.</p>
+</li>
+<li>
+<p><strong>Host-Based Defense</strong>:</p>
+</li>
+<li>
+<p>Tools like <code>arpalert</code>, <code>arping</code>, or ARP table monitoring scripts.</p>
+</li>
+<li>
+<p>Detect anomalies in local ARP cache.</p>
+</li>
+<li>
+<p><strong>Network Segmentation and Isolation</strong>:</p>
+</li>
+<li>
+<p>Reduce attack surface by isolating sensitive systems into VLANs.</p>
+</li>
+<li>Use VPNs or encrypted tunnels within the LAN.</li>
+</ol>
+<h3>Example of Detection with <code>arp -a</code></h3><hr>
+<pre class="codehilite"><code class="language-bash">$ arp -a
+? (192.168.0.1) at 00:11:22:33:44:55 [ether] on eth0
+? (192.168.0.1) at aa:bb:cc:dd:ee:ff [ether] on eth0   # Suspicious duplicate entry
+</code></pre>
+
+<h3>Mitigation Summary</h3><hr>
+<ul>
+<li>Enforce static ARP entries where feasible</li>
+<li>Use DAI on managed switches</li>
+<li>Implement network monitoring and alerts</li>
+<li>Prefer encrypted protocols (HTTPS, SSH)</li>
+<li>Avoid insecure legacy protocols on LAN (Telnet, FTP)</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

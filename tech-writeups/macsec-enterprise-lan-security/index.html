@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - macsec-enterprise-lan-security</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>macsec-enterprise-lan-security</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/macsec-enterprise-lan-security/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Role of MACSec in Enterprise LAN Security</h2><hr>
+<p><strong>Overview:</strong>
+Media Access Control Security (MACSec) is a Layer 2 security protocol defined in IEEE 802.1AE that provides point-to-point encryption and authentication for Ethernet frames. Unlike traditional IPsec, which operates at Layer 3, MACSec is focused on securing Ethernet links directly and is particularly suited for protecting traffic inside LANs and data center networks.</p>
+<hr />
+<h3><strong>Why MACSec?</strong></h3><hr>
+<p>LANs, despite being internal, are not inherently secure. Malicious insiders or attackers gaining access to a switch port can sniff traffic or launch man-in-the-middle attacks. MACSec addresses:</p>
+<ul>
+<li><strong>Eavesdropping</strong>: Encrypts frame payloads to prevent passive attacks.</li>
+<li><strong>Replay attacks</strong>: Includes packet numbering and replay protection.</li>
+<li><strong>Man-in-the-middle</strong>: Authenticates peer devices before allowing traffic.</li>
+<li><strong>Tampering</strong>: Adds integrity checks (ICV) to detect any modifications.</li>
+</ul>
+<hr />
+<h3><strong>How MACSec Works</strong></h3><hr>
+<p>MACSec secures each Ethernet frame between directly connected devices (hop-by-hop). The process includes:</p>
+<ol>
+<li>
+<p><strong>Key Exchange (via MKA)</strong>:</p>
+</li>
+<li>
+<p>MACSec uses the MACsec Key Agreement protocol (MKA), part of IEEE 802.1X-2010.</p>
+</li>
+<li>Authentication is typically handled with 802.1X using EAP-TLS or certificates.</li>
+<li>
+<p>MKA exchanges Secure Association Keys (SAKs) between peers.</p>
+</li>
+<li>
+<p><strong>Frame Protection</strong>:</p>
+</li>
+<li>
+<p>Each Ethernet frame is encrypted and authenticated before transmission.</p>
+</li>
+<li>Only the payload (not the MAC addresses or 802.1Q VLAN tags) is encrypted.</li>
+<li>
+<p>It adds a 16-byte Security Tag and 16-byte Integrity Check Value (ICV).</p>
+</li>
+<li>
+<p><strong>Secure Associations (SAs)</strong>:</p>
+</li>
+<li>
+<p>Unidirectional flows where each direction uses a unique SA.</p>
+</li>
+<li>Multiple SAs can coexist to enable secure re-keying without disrupting traffic.</li>
+</ol>
+<hr />
+<h3><strong>MACSec Frame Format</strong></h3><hr>
+<p>A typical MACSec frame includes:</p>
+<ul>
+<li><strong>EtherType</strong>: <code>0x88E5</code> for MACSec.</li>
+<li><strong>SecTAG</strong>: Includes SCI (secure channel identifier), packet number, and control bits.</li>
+<li><strong>Encrypted payload</strong>: The actual protected Ethernet payload.</li>
+<li><strong>ICV</strong>: Ensures message integrity.</li>
+</ul>
+<hr />
+<h3><strong>Use Cases</strong></h3><hr>
+<ul>
+<li><strong>Data Center Interconnects</strong>: Prevents lateral movement in east-west traffic.</li>
+<li><strong>Campus Networks</strong>: Protects sensitive internal communications on switch uplinks.</li>
+<li><strong>Service Provider Networks</strong>: Used in customer-premise-to-core transport.</li>
+</ul>
+<hr />
+<h3><strong>MACSec vs Other Security Options</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>MACSec</th>
+<th>IPsec</th>
+<th>802.1X</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OSI Layer</td>
+<td>Layer 2</td>
+<td>Layer 3</td>
+<td>Layer 2 (control)</td>
+</tr>
+<tr>
+<td>Encryption Scope</td>
+<td>Link-level</td>
+<td>End-to-end</td>
+<td>Auth only</td>
+</tr>
+<tr>
+<td>Transparency</td>
+<td>Transparent</td>
+<td>Needs config</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Hardware Offload</td>
+<td>Supported</td>
+<td>Sometimes</td>
+<td>N/A</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3><strong>Hardware Support</strong></h3><hr>
+<p>MACSec requires NICs, switches, or routers that support IEEE 802.1AE. Popular vendors like Cisco, Arista, and Juniper offer MACSec-capable hardware, especially on enterprise or data center gear.</p>
+<hr />
+<h3><strong>Challenges and Considerations</strong></h3><hr>
+<ul>
+<li><strong>Interoperability</strong>: Requires both ends to support MACSec.</li>
+<li><strong>Configuration Complexity</strong>: Certificate-based 802.1X setups can be non-trivial.</li>
+<li><strong>Limited to L2</strong>: Doesn't offer end-to-end security—only protects links between MACSec peers.</li>
+<li><strong>Performance</strong>: Minimal latency added with hardware offloading; software-based MACSec may impact throughput.</li>
+</ul>
+<hr />
+<h3><strong>Conclusion</strong></h3><hr>
+<p>MACSec is an essential Layer 2 security solution that closes a longstanding gap in Ethernet security. For enterprise LANs and data centers, it ensures that internal traffic is no longer an easy target for passive or active attacks. When combined with 802.1X and robust key management, MACSec provides strong confidentiality, integrity, and authenticity on the wire—without needing to overhaul network topology.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

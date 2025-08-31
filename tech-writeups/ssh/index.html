@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - SSH</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>SSH</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ssh/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>SSH (Secure Shell) – Technical Writeup</h1><hr>
+<h2>Introduction</h2><hr>
+<p><strong>SSH (Secure Shell)</strong> is a cryptographic network protocol used for secure communication over an unsecured network. It enables users to securely access remote systems, execute commands, transfer files, and manage services. SSH replaces older protocols like <strong>Telnet</strong>, <strong>FTP</strong>, and <strong>rlogin</strong>, which transmit data in plaintext.</p>
+<hr />
+<h2>Key Features</h2><hr>
+<ul>
+<li><strong>End-to-end encryption</strong> of traffic (including passwords and session data).</li>
+<li><strong>Authentication mechanisms</strong>: Password-based, public-key-based, GSSAPI, etc.</li>
+<li><strong>Port forwarding / Tunneling</strong>: Securely forward ports through encrypted channels.</li>
+<li><strong>File transfer support</strong>: via <code>scp</code>, <code>sftp</code>.</li>
+<li><strong>Remote command execution</strong>.</li>
+<li><strong>Secure proxy (jump hosts)</strong> and agent forwarding.</li>
+</ul>
+<hr />
+<h2>SSH Protocol Stack</h2><hr>
+<p>SSH operates at the <strong>application layer</strong> of the OSI model and comprises three major components:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Transport Layer Protocol</strong></td>
+<td>Provides server authentication, confidentiality, integrity via encryption and MACs.</td>
+</tr>
+<tr>
+<td><strong>User Authentication Protocol</strong></td>
+<td>Handles client authentication (e.g., password, public key).</td>
+</tr>
+<tr>
+<td><strong>Connection Protocol</strong></td>
+<td>Multiplexes encrypted tunnel into channels for terminal sessions, file transfers, etc.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Authentication Mechanisms</h2><hr>
+<h3>1. <strong>Password-Based Authentication</strong></h3><hr>
+<ul>
+<li>User is prompted to enter their password.</li>
+<li>Simple but less secure.</li>
+</ul>
+<h3>2. <strong>Public Key Authentication (Asymmetric)</strong></h3><hr>
+<ul>
+<li>
+<p>User generates a key pair (<code>ssh-keygen</code>):</p>
+</li>
+<li>
+<p><strong>Private Key</strong>: Stored securely on the client.</p>
+</li>
+<li><strong>Public Key</strong>: Placed in <code>~/.ssh/authorized_keys</code> on the server.</li>
+<li>Offers better security and can be automated for scripts.</li>
+</ul>
+<h3>3. <strong>GSSAPI / Kerberos</strong></h3><hr>
+<ul>
+<li>Used in enterprise environments for single sign-on (SSO).</li>
+</ul>
+<hr />
+<h2>SSH Key Generation</h2><hr>
+<pre class="codehilite"><code class="language-bash"># Generate key pair (RSA 4096 bits)
+ssh-keygen -t rsa -b 4096 -C &quot;your_email@example.com&quot;
+</code></pre>
+
+<p>Files generated:</p>
+<ul>
+<li><code>~/.ssh/id_rsa</code> → Private key</li>
+<li><code>~/.ssh/id_rsa.pub</code> → Public key</li>
+</ul>
+<p>To copy public key to server:</p>
+<pre class="codehilite"><code class="language-bash">ssh-copy-id user@hostname
+</code></pre>
+
+<hr />
+<h2>SSH Commands and Usage</h2><hr>
+<h3>1. <strong>Remote Login</strong></h3><hr>
+<pre class="codehilite"><code class="language-bash">ssh user@host
+</code></pre>
+
+<h3>2. <strong>Remote Command Execution</strong></h3><hr>
+<pre class="codehilite"><code class="language-bash">ssh user@host 'uptime'
+</code></pre>
+
+<h3>3. <strong>Port Forwarding</strong></h3><hr>
+<ul>
+<li><strong>Local Port Forwarding</strong></li>
+</ul>
+<p><code>bash
+  ssh -L 8080:targethost:80 user@sshgateway</code>
+* <strong>Remote Port Forwarding</strong></p>
+<p><code>bash
+  ssh -R 2222:localhost:22 user@host</code></p>
+<h3>4. <strong>SCP – Secure Copy</strong></h3><hr>
+<pre class="codehilite"><code class="language-bash">scp file.txt user@remote:/path/
+scp user@remote:/path/file.txt .
+</code></pre>
+
+<h3>5. <strong>SFTP – SSH File Transfer</strong></h3><hr>
+<pre class="codehilite"><code class="language-bash">sftp user@remote
+# or
+sftp&gt; get file.txt
+sftp&gt; put file.txt
+</code></pre>
+
+<hr />
+<h2>️ SSH Configuration</h2><hr>
+<p>Global: <code>/etc/ssh/ssh_config</code>
+User-specific: <code>~/.ssh/config</code></p>
+<p>Example <code>~/.ssh/config</code>:</p>
+<pre class="codehilite"><code class="language-ini">Host devserver
+    HostName dev.example.com
+    User anish
+    Port 2222
+    IdentityFile ~/.ssh/id_rsa
+</code></pre>
+
+<p>Usage:</p>
+<pre class="codehilite"><code class="language-bash">ssh devserver
+</code></pre>
+
+<hr />
+<h2>Security Best Practices</h2><hr>
+<ul>
+<li>Disable root login (<code>PermitRootLogin no</code>)</li>
+<li>Use only public key authentication (<code>PasswordAuthentication no</code>)</li>
+<li>Use fail2ban or similar to block brute-force attacks</li>
+<li>Limit user access using <code>AllowUsers</code> or <code>Match</code> blocks in <code>sshd_config</code></li>
+<li>Use a strong key length (<code>4096</code> bits or <code>ed25519</code>)</li>
+<li>Keep <code>OpenSSH</code> updated</li>
+</ul>
+<hr />
+<h2>SSH Agent and Agent Forwarding</h2><hr>
+<ul>
+<li><code>ssh-agent</code> stores decrypted private keys in memory.</li>
+<li><code>ssh-add</code> adds keys to agent.</li>
+<li><code>ForwardAgent yes</code> allows key forwarding across jump hosts.</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">eval &quot;$(ssh-agent -s)&quot;
+ssh-add ~/.ssh/id_rsa
+</code></pre>
+
+<hr />
+<h2>SSH Tunneling (Use Case: Secure Database Access)</h2><hr>
+<p>To forward a remote MySQL database port:</p>
+<pre class="codehilite"><code class="language-bash">ssh -L 3306:localhost:3306 user@remote-db
+</code></pre>
+
+<p>Then connect locally to <code>localhost:3306</code> as if the DB were local.</p>
+<hr />
+<h2>Advanced Tools</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>autossh</code></td>
+<td>Auto-reconnect dropped SSH sessions</td>
+</tr>
+<tr>
+<td><code>sshuttle</code></td>
+<td>VPN-like tunneling using SSH</td>
+</tr>
+<tr>
+<td><code>mosh</code></td>
+<td>UDP-based remote shell over SSH</td>
+</tr>
+<tr>
+<td><code>paramiko</code></td>
+<td>Python SSH automation library</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Example Python Code Using <code>paramiko</code></h2><hr>
+<pre class="codehilite"><code class="language-python">import paramiko
+
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect('hostname', username='user', key_filename='~/.ssh/id_rsa')
+
+stdin, stdout, stderr = ssh.exec_command('ls -l')
+print(stdout.read().decode())
+
+ssh.close()
+</code></pre>
+
+<hr />
+<h2>SSH Log Location</h2><hr>
+<ul>
+<li>Ubuntu/Debian: <code>/var/log/auth.log</code></li>
+<li>Red Hat/CentOS: <code>/var/log/secure</code></li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>SSH is a fundamental tool for secure remote administration, scripting, and file transfer in Unix-like systems. Mastering its full capabilities, including tunneling, key management, and secure configurations, significantly enhances your system security posture and operational efficiency.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

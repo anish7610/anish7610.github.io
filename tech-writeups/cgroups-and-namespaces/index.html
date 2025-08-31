@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - cgroups-and-namespaces</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>cgroups-and-namespaces</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/cgroups-and-namespaces/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Understanding cgroups and namespaces in Docker/Containers</h1><hr>
+<p>Modern container technologies like <strong>Docker</strong> are made possible by two key Linux kernel features:</p>
+<ol>
+<li><strong>Namespaces</strong> – provide <em>isolation</em></li>
+<li><strong>Control Groups (cgroups)</strong> – provide <em>resource control</em></li>
+</ol>
+<p>Together, they form the foundation of container security, performance, and independence — without the need for a full-blown virtual machine.</p>
+<hr />
+<h2>1. What Are Linux Namespaces?</h2><hr>
+<h3>Definition:</h3><hr>
+<p><strong>Namespaces</strong> allow a process (or group of processes) to have its own isolated instance of certain kernel resources.</p>
+<p>Each namespace type isolates a different part of the system, ensuring containers don’t interfere with each other or the host.</p>
+<h3>Types of Namespaces:</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Namespace</th>
+<th>Isolates</th>
+<th>CLI flag</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>pid</code></td>
+<td>Process IDs</td>
+<td><code>--pid</code></td>
+</tr>
+<tr>
+<td><code>mnt</code></td>
+<td>Mount points (filesystems)</td>
+<td><code>--mount</code></td>
+</tr>
+<tr>
+<td><code>net</code></td>
+<td>Network interfaces, routing tables, ports</td>
+<td><code>--net</code></td>
+</tr>
+<tr>
+<td><code>ipc</code></td>
+<td>System V IPC, POSIX message queues</td>
+<td><code>--ipc</code></td>
+</tr>
+<tr>
+<td><code>uts</code></td>
+<td>Hostname and domain name</td>
+<td><code>--uts</code></td>
+</tr>
+<tr>
+<td><code>user</code></td>
+<td>User and group ID mapping</td>
+<td><code>--user</code></td>
+</tr>
+<tr>
+<td><code>cgroup</code></td>
+<td>Cgroup root visibility</td>
+<td><code>--cgroupns</code></td>
+</tr>
+</tbody>
+</table>
+<h3>Example:</h3><hr>
+<p>When a Docker container is run, it gets its <strong>own PID namespace</strong>. That means:</p>
+<ul>
+<li>Inside the container, <code>ps</code> or <code>top</code> only shows processes from within that container.</li>
+<li>PID 1 is assigned to the container’s main process, even if the host has hundreds of processes running.</li>
+</ul>
+<hr />
+<h2>️ 2. What Are cgroups (Control Groups)?</h2><hr>
+<h3>Definition:</h3><hr>
+<p><strong>cgroups</strong> (short for control groups) limit, prioritize, and account for resource usage (CPU, memory, disk I/O, etc.) among process groups.</p>
+<p>cgroups ensure that one container can't starve others or the host of system resources.</p>
+<h3>Key Features:</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU limits</strong></td>
+<td>Restrict container to 2 CPU cores</td>
+</tr>
+<tr>
+<td><strong>Memory limits</strong></td>
+<td>Enforce 512MB memory cap</td>
+</tr>
+<tr>
+<td><strong>BlkIO control</strong></td>
+<td>Limit disk I/O read/write speeds</td>
+</tr>
+<tr>
+<td><strong>PIDs limit</strong></td>
+<td>Max number of processes per container</td>
+</tr>
+<tr>
+<td><strong>Accounting</strong></td>
+<td>Monitor per-container usage statistics</td>
+</tr>
+</tbody>
+</table>
+<h3>Docker Example:</h3><hr>
+<pre class="codehilite"><code class="language-bash">docker run -m 256m --cpus=&quot;1.0&quot; ubuntu
+</code></pre>
+
+<ul>
+<li><code>-m 256m</code>: Limits memory usage to 256MB</li>
+<li><code>--cpus=1.0</code>: Restricts container to one logical CPU</li>
+</ul>
+<hr />
+<h2>How Docker Uses Namespaces + cgroups Together</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Uses</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process Isolation</td>
+<td>PID namespace</td>
+</tr>
+<tr>
+<td>File System View</td>
+<td>Mount (<code>mnt</code>) namespace + UnionFS</td>
+</tr>
+<tr>
+<td>Network Isolation</td>
+<td>NET namespace</td>
+</tr>
+<tr>
+<td>Hostname</td>
+<td>UTS namespace</td>
+</tr>
+<tr>
+<td>Resource Limits</td>
+<td>Cgroups</td>
+</tr>
+</tbody>
+</table>
+<h3>Diagram:</h3><hr>
+<pre class="codehilite"><code>       +-------------------+
+       |  Host Kernel      |
+       |                   |
+       |  +------------+   |
+       |  | Container  |   |
+       |  | Namespaces |&lt;-- Isolates view of system
+       |  +------------+   |
+       |  +------------+   |
+       |  |  cgroups   |&lt;-- Limits access to system resources
+       |  +------------+   |
+       +-------------------+
+</code></pre>
+
+<hr />
+<h2>️ Benefits for Containers</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Enabled By</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Process isolation</td>
+<td>PID namespace</td>
+<td>Each container sees only its own processes</td>
+</tr>
+<tr>
+<td>Filesystem separation</td>
+<td>MNT namespace</td>
+<td>Unique root filesystem per container</td>
+</tr>
+<tr>
+<td>Network independence</td>
+<td>NET namespace</td>
+<td>Independent IP stack, ports</td>
+</tr>
+<tr>
+<td>Resource fairness</td>
+<td>cgroups</td>
+<td>Prevent resource hogging</td>
+</tr>
+<tr>
+<td>Secure multi-tenancy</td>
+<td>user namespace</td>
+<td>UID/GID remapping for safety</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Inspecting from the Host</h2><hr>
+<h3>View namespaces:</h3><hr>
+<pre class="codehilite"><code class="language-bash">lsns
+</code></pre>
+
+<h3>View cgroups:</h3><hr>
+<pre class="codehilite"><code class="language-bash">cat /proc/$(pidof containerd)/cgroup
+</code></pre>
+
+<h3>View resource limits:</h3><hr>
+<pre class="codehilite"><code class="language-bash">docker inspect &lt;container_id&gt; | grep -A5 &quot;HostConfig&quot;
+</code></pre>
+
+<hr />
+<h2>Manual Namespace (Example)</h2><hr>
+<pre class="codehilite"><code class="language-bash">unshare --pid --mount --uts --ipc --net --user --fork bash
+</code></pre>
+
+<p>This launches a shell with isolated namespaces — similar to a minimal container environment.</p>
+<hr />
+<h2>Summary Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Namespaces</th>
+<th>cgroups</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td>Isolation of system resources</td>
+<td>Limiting and accounting of resources</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Per process or process group</td>
+<td>Per control group (cgroup)</td>
+</tr>
+<tr>
+<td>Granularity</td>
+<td>Type-specific (e.g., net, pid, etc.)</td>
+<td>Per resource (cpu, mem, io)</td>
+</tr>
+<tr>
+<td>Used by</td>
+<td>Docker, LXC, Podman, systemd</td>
+<td>Docker, LXC, Kubernetes, systemd</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<ul>
+<li><strong>Namespaces</strong> isolate containers from each other and the host.</li>
+<li><strong>Cgroups</strong> control and limit how much a container can use.</li>
+<li>Together, they provide the foundational mechanisms that make containerization secure, efficient, and scalable.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

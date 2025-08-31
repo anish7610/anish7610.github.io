@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .back-link {
+            color: #4ecdc4;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+        }
+
+        .section-list {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .section-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .prompt {
+            color: #00ff41;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 60px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 65, 0.6); }
+        }
+
+        h2 {
+            color: #00ff41;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #00ff41;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        .links-list {
+            list-style: none;
+            margin-left: 20px;
+        }
+
+        .links-list li {
+            margin: 10px 0;
+        }
+
+        .links-list a {
+            color: #4ecdc4;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .links-list a:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+        }
+
+        .links-list li::before {
+            content: "$ ";
+            color: #00ff41;
+            margin-right: 10px;
+        }
+
+        .typing-animation {
+            border-right: 2px solid #00ff41;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff41; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .glitch {
+            color: #00ff41;
+            position: relative;
+            display: inline-block;
+        }
+
+        .glitch::before,
+        .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
+        }
+
+        .glitch::before {
+            animation: glitch1 0.5s infinite;
+            color: #ff00ff;
+            z-index: -1;
+        }
+
+        .glitch::after {
+            animation: glitch2 0.5s infinite;
+            color: #00ffff;
+            z-index: -2;
+        }
+
+        @keyframes glitch1 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+
+        @keyframes glitch2 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(-2px, -2px); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #00ff41;
+            margin-top: 50px;
+            color: #666;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+                margin-bottom: 40px;
+            }
+            
+            h2 {
+                font-size: 1.3em;
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .section-list {
+                width: 100%;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #00ff41;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(-100vh);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/" class="back-link">← Back</a>
+        
+        <h1 class="glitch" data-text="Resources">Resources</h1>
+
+        <div class="section-list">
+            <div class="section-content">
+                <div class="prompt">root@links:~$ <span class="command">ls -la /links/</span></div>
+                <h2>Links</h2>
+                <hr>
+                <ul class="links-list">
+                    <li><a href="https://www.learncpp.com/">Learn C++</a></li>
+                    <li><a href="https://tldp.org/guides.html">Linux Guides (TLDP)</a></li>
+                    <li><a href="http://www.tcpipguide.com/toc.htm">TCP/IP Guide</a></li>
+                    <li><a href="https://www.youtube.com/playlist?list=PLE4462C1C306E2EB2">Embedded Systems (YouTube Playlist)</a></li>
+                    <li><a href="https://www.youtube.com/playlist?list=PL-osiE80TeTt2d9bfVyTiXJA-UTHn6WwU">Python Programming (YouTube Playlist)</a></li>
+                    <li><a href="https://runestone.academy/ns/books/published/pythonds/index.html">Data Structures and Algorithms (Python DS)</a></li>
+                    <li><a href="https://www.youtube.com/@CodingWithVerrol/playlists">Golang Programming (YouTube Channel)</a></li>
+                    <li><a href="https://www.youtube.com/playlist?list=PL6gx4Cwl9DGBsvRxJJOzG4r4k_zLKrnxl">Android App Development (YouTube Playlist)</a></li>
+                    <li><a href="https://www.youtube.com/playlist?list=PLF23494E2820B442B">Metasploit Framework (YouTube Playlist)</a></li>
+                    <li><a href="https://www.youtube.com/playlist?list=PL6qa4C74KbMDH6db6_qvQsZunMkMK6PFs">Assembly Language Primer (YouTube Playlist)</a></li>
+                    <li><a href="https://www.youtube.com/playlist?list=PL9gza8iek1hKu56dQmMXTR4AcK70Yv0LI">Assembly for Windows Primer (YouTube Playlist)</a></li>
+                    <li><a href="https://www.youtube.com/@HakanKaya-pt9gu/videos">Exploit Research (YouTube Channel)</a></li>
+                    <li><a href="https://www.corelan.be/">Corelan Cybersecurity Research</a></li>
+                    <li><a href="https://www.pluralsight.com/cloud-guru">AWS Cert Prep</a></li>
+                    <li><a href="https://code.tools/">Code Tools</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@links:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        // Matrix rain effect - Enhanced version from portfolio
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+        const charArray = chars.split('');
+
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff41';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = charArray[Math.floor(Math.random() * charArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 35);
+
+        // Typing animation for main title
+        document.addEventListener('DOMContentLoaded', () => {
+            const title = document.querySelector('h1');
+            if (!title) return;
+            
+            const text = title.getAttribute('data-text') || '';
+            title.textContent = '';
+            title.classList.add('typing-animation');
+
+            let i = 0;
+            function typeWriter() {
+                if (i < text.length) {
+                    title.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                } else {
+                    title.classList.remove('typing-animation');
+                }
+            }
+
+            setTimeout(typeWriter, 1000);
+
+            // Animate prompts
+            const prompts = document.querySelectorAll('.prompt');
+            prompts.forEach((prompt, index) => {
+                if (prompt) {
+                    setTimeout(() => {
+                        prompt.style.opacity = '0';
+                        prompt.style.animation = 'fadeIn 0.5s ease forwards';
+                    }, index * 200);
+                }
+            });
+        });
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        // Add fadeIn animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - tcp-fragmentation</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>tcp-fragmentation</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/tcp-fragmentation/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>️ TCP Fragmentation</h2><hr>
+<hr />
+<h3>1. TCP Segmentation vs. IP Fragmentation</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Action</th>
+<th>What Happens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>TCP Layer</strong></td>
+<td><strong>Segmentation</strong></td>
+<td>Application sends data → TCP breaks it into segments ≤ MSS</td>
+</tr>
+<tr>
+<td><strong>IP Layer</strong></td>
+<td><strong>Fragmentation</strong></td>
+<td>If segment &gt; MTU → IP splits it into <strong>fragments</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>️ <strong>TCP does not fragment data</strong> — it segments data. Fragmentation only occurs at the IP layer.</p>
+</blockquote>
+<hr />
+<h3>2. Path MTU and Fragmentation Trigger</h3><hr>
+<ul>
+<li><strong>MTU (Maximum Transmission Unit)</strong>: Largest IP packet size (typically 1500 bytes for Ethernet).</li>
+<li><strong>MSS (Maximum Segment Size)</strong>: Largest segment TCP can send (MTU - 40 bytes).</li>
+<li>
+<p><strong>Fragmentation occurs</strong> if an IP packet exceeds the MTU and:</p>
+</li>
+<li>
+<p>PMTUD is disabled or fails</p>
+</li>
+<li>DF (Don't Fragment) bit is <strong>not set</strong></li>
+<li>Underlying path contains small-MTU links (VPNs, tunnels, MPLS)</li>
+</ul>
+<h4>Diagram:</h4>
+<pre class="codehilite"><code>App Layer       ─────────────────────&gt; Sends 16KB data
+TCP Layer       ─────────────────────&gt; Breaks into 1460B segments (MSS)
+IP Layer        ─────────────────────&gt; Each segment + headers (~1500B)
+↓
+Router detects MTU = 1200
+→ Fragments each 1500B packet into:
+    - Fragment 1: 1200 bytes
+    - Fragment 2: 300 bytes
+</code></pre>
+
+<hr />
+<h3>3. Packet Structure in Fragmentation</h3><hr>
+<p>Let’s take an example: A TCP segment of 1400 bytes, but the path MTU is 1000 bytes. IP fragments it:</p>
+<table>
+<thead>
+<tr>
+<th>Fragment</th>
+<th>Offset</th>
+<th>More Fragments (MF)</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Frag 1</td>
+<td>0</td>
+<td>1</td>
+<td>1000</td>
+</tr>
+<tr>
+<td>Frag 2</td>
+<td>985</td>
+<td>0</td>
+<td>420</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Offset in 8-byte blocks. Overlapping/incorrect offsets can be used to bypass firewalls or confuse IDS.</p>
+</blockquote>
+<hr />
+<h3>4. Path MTU Discovery (PMTUD)</h3><hr>
+<ul>
+<li>TCP uses PMTUD to avoid IP fragmentation.</li>
+<li>Works by sending packets with the <strong>DF</strong> (Don’t Fragment) bit set.</li>
+<li>If a router can’t forward due to MTU, it sends an ICMP type 3 code 4 message:
+  <strong>"Fragmentation needed and DF set"</strong></li>
+</ul>
+<h4>PMTUD Failure: "Black Hole" Symptoms</h4>
+<ul>
+<li>ICMP blocked by firewall (common in enterprises)</li>
+<li>Large packets mysteriously disappear</li>
+<li>Connections hang during TLS handshakes, file transfers, etc.</li>
+</ul>
+<hr />
+<h3>5. Consequences of Fragmentation</h3><hr>
+<h4>a. Performance</h4>
+<ul>
+<li>Increases processing overhead on sender and receiver.</li>
+<li>Causes <strong>head-of-line blocking</strong> if fragments arrive out of order.</li>
+</ul>
+<h4>b. Reliability</h4>
+<ul>
+<li>IP fragments are individually unreliable.</li>
+<li><strong>Loss of one fragment = retransmission of entire TCP segment</strong>.</li>
+<li>No per-fragment retransmission in IP.</li>
+</ul>
+<h4>c. Security</h4>
+<ul>
+<li>
+<p><strong>Fragmentation attacks:</strong></p>
+</li>
+<li>
+<p><strong>Teardrop attack</strong>: Malformed overlapping fragments crash systems.</p>
+</li>
+<li><strong>Tiny fragment attack</strong>: Evade IDS by splitting malicious payload across fragments.</li>
+<li>IDS/IPS must <strong>reassemble</strong> fragments, which is expensive and error-prone.</li>
+</ul>
+<hr />
+<h3>6. Fragmentation and TCP Performance Tuning</h3><hr>
+<h4>Tunneling Protocols</h4>
+<ul>
+<li>IP-in-IP, GRE, IPSec add 20-60 bytes of headers.</li>
+<li>Reduces effective MTU, often to <strong>\~1400 or lower</strong>.</li>
+<li>Neglecting this causes fragmentation or black holes.</li>
+</ul>
+<h4>MSS Clamping</h4>
+<p>Ensures TCP doesn't try to send segments larger than the path can carry:</p>
+<pre class="codehilite"><code class="language-bash"># Example: Clamp MSS to 1360
+iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN \
+         -j TCPMSS --clamp-mss-to-pmtu
+</code></pre>
+
+<blockquote>
+<p>MSS clamping is especially important on <strong>edge routers</strong>, <strong>VPN concentrators</strong>, and <strong>cloud VPC gateways</strong>.</p>
+</blockquote>
+<hr />
+<h3>7. Detecting and Debugging Fragmentation</h3><hr>
+<h4>Tools and Methods</h4>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tcpdump</code> or <code>Wireshark</code></td>
+<td>Look for "Fragmented IP Protocol (proto=6, off=X)"</td>
+</tr>
+<tr>
+<td><code>ping -M do -s SIZE host</code></td>
+<td>Sends ping with DF bit. Helps determine PMTU.</td>
+</tr>
+<tr>
+<td><code>traceroute -F</code></td>
+<td>Sends traceroute with DF bit to trace fragmentation point</td>
+</tr>
+<tr>
+<td><code>iptables -A INPUT -f</code></td>
+<td>Match (and optionally log) all fragmented packets</td>
+</tr>
+<tr>
+<td><code>netstat -s</code></td>
+<td>Look for IP statistics under “fragments created/successful failures”</td>
+</tr>
+</tbody>
+</table>
+<h4>Example: Detecting PMTUD Failure</h4>
+<pre class="codehilite"><code class="language-bash">ping -M do -s 1472 &lt;host&gt;    # 1472 + 28 (ICMP/IP header) = 1500
+# If it fails, try:
+ping -M do -s 1400 &lt;host&gt;
+</code></pre>
+
+<hr />
+<h3>8. Kernel Internals and Fragmentation</h3><hr>
+<h4>Fragmentation Logic in Linux</h4>
+<ul>
+<li>Linux fragments <strong>before</strong> queuing to NIC.</li>
+<li>Uses <strong>skb (socket buffer)</strong> structure.</li>
+<li>Fragment queues tracked via <code>/proc/net/ip_frag</code> (on older kernels).</li>
+<li>Reassembly timeout is \~30 seconds (<code>/proc/sys/net/ipv4/ipfrag_time</code>)</li>
+</ul>
+<h4>Netfilter Hooks</h4>
+<ul>
+<li>Fragmented packets hit the <code>PREROUTING</code> chain.</li>
+<li>Fragments do <strong>not pass through</strong> <code>INPUT</code> in the same form.</li>
+<li>IDS must reassemble fragments <strong>before</strong> TCP stream reassembly.</li>
+</ul>
+<hr />
+<h3>9. Fragmentation in IPv6</h3><hr>
+<blockquote>
+<p><strong>IPv6 routers do not fragment packets.</strong>
+Only <strong>end hosts</strong> may do so using <strong>IPv6 Fragment Header</strong>.</p>
+</blockquote>
+<ul>
+<li>No PMTUD = guaranteed black holes.</li>
+<li>End-hosts must use PMTUD or fall back to <strong>PLPMTUD</strong> (Probing variant).</li>
+<li>MTU is at least <strong>1280 bytes</strong> in IPv6.</li>
+</ul>
+<hr />
+<h2>Best Practices Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Recommendation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Security</strong></td>
+<td>Drop or limit fragmented traffic unless necessary</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Enable MSS clamping on tunnels, VPNs</td>
+</tr>
+<tr>
+<td><strong>Debugging</strong></td>
+<td>Use <code>ping -M do</code>, <code>tcpdump</code>, <code>traceroute -F</code></td>
+</tr>
+<tr>
+<td><strong>PMTUD</strong></td>
+<td>Allow ICMP type 3 code 4 messages through firewalls</td>
+</tr>
+<tr>
+<td><strong>IPv6</strong></td>
+<td>Don’t rely on fragmentation; use PMTUD or PLPMTUD</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Real-World Scenarios</h3><hr>
+<ol>
+<li>
+<p><strong>VPN tunnel breaks large TCP transfers</strong>
+   → Fix: Clamp MSS to \~1350</p>
+</li>
+<li>
+<p><strong>TLS handshake fails intermittently</strong>
+   → Root cause: PMTUD broken, fragmentation blocked by intermediate device</p>
+</li>
+<li>
+<p><strong>IDS/IPS fails to detect attack</strong>
+   → Attacker used fragmented payloads to evade deep packet inspection</p>
+</li>
+</ol>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

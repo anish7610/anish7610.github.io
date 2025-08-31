@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - kafka</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>kafka</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/kafka/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Real-Time Stream Processing with Kafka and Spark Streaming</h1><hr>
+<p>Modern applications—especially those involving fraud detection, user behavior analytics, monitoring, or IoT—require processing data as it arrives. <strong>Apache Kafka</strong> and <strong>Apache Spark Streaming</strong> are two complementary technologies that enable <strong>real-time stream processing</strong> at scale. This write-up explains their architecture, integration, and how they facilitate real-time data pipelines.</p>
+<hr />
+<h2>What is Stream Processing?</h2><hr>
+<p><strong>Stream processing</strong> refers to the continuous processing of data as it flows through a system. Unlike batch processing (which processes data in chunks), stream processing operates on data item by item or micro-batches.</p>
+<hr />
+<h2>Kafka Overview</h2><hr>
+<p><strong>Apache Kafka</strong> is a distributed event streaming platform used for high-throughput, low-latency messaging.</p>
+<h3>Core Concepts:</h3><hr>
+<ul>
+<li><strong>Producer</strong>: Sends data (events) to Kafka topics.</li>
+<li><strong>Broker</strong>: Kafka server that holds the topics and partitions.</li>
+<li><strong>Topic</strong>: Logical channel to which producers write and consumers subscribe.</li>
+<li><strong>Partition</strong>: Sub-division of a topic to parallelize processing.</li>
+<li><strong>Consumer</strong>: Reads data from Kafka topics.</li>
+</ul>
+<p>Kafka stores messages durably and can retain them for a configurable period, allowing consumers to read at their own pace.</p>
+<hr />
+<h2>️ Spark Streaming Overview</h2><hr>
+<p><strong>Apache Spark Streaming</strong> is a real-time processing extension of Apache Spark.</p>
+<ul>
+<li>Uses a <strong>micro-batch model</strong> (mini-batches every few seconds).</li>
+<li>Supports integration with Kafka, HDFS, S3, Cassandra, etc.</li>
+<li>Runs transformations (map, filter, reduce) on streaming data using the familiar Spark API.</li>
+</ul>
+<hr />
+<h2>Kafka + Spark Streaming Integration</h2><hr>
+<p>Spark provides a <strong>Kafka connector</strong> to consume messages from Kafka topics and process them.</p>
+<h3>Architecture:</h3><hr>
+<pre class="codehilite"><code>Kafka Producers → Kafka Topics → Spark Streaming → Data Sink (DB, Dashboard, etc.)
+</code></pre>
+
+<h3>Data Flow Steps:</h3><hr>
+<ol>
+<li><strong>Producers</strong> send messages to Kafka topics.</li>
+<li><strong>Kafka</strong> stores messages and partitions them.</li>
+<li><strong>Spark Streaming</strong> reads messages using a direct or receiver-based approach.</li>
+<li>Spark processes each micro-batch (e.g., windowing, aggregation).</li>
+<li>Processed data is written to a sink (e.g., HDFS, database, dashboard).</li>
+</ol>
+<hr />
+<h2>Code Example (PySpark)</h2><hr>
+<pre class="codehilite"><code class="language-python">from pyspark.sql import SparkSession
+from pyspark.sql.functions import from_json, col
+from pyspark.sql.types import StructType, StringType
+
+# 1. Create Spark session with Kafka support
+spark = SparkSession.builder \
+    .appName(&quot;KafkaSparkStream&quot;) \
+    .getOrCreate()
+
+# 2. Define Kafka source
+df = spark.readStream \
+    .format(&quot;kafka&quot;) \
+    .option(&quot;kafka.bootstrap.servers&quot;, &quot;localhost:9092&quot;) \
+    .option(&quot;subscribe&quot;, &quot;transactions&quot;) \
+    .load()
+
+# 3. Define schema and parse JSON
+schema = StructType().add(&quot;user&quot;, StringType()).add(&quot;amount&quot;, StringType())
+parsed = df.selectExpr(&quot;CAST(value AS STRING)&quot;) \
+    .select(from_json(col(&quot;value&quot;), schema).alias(&quot;data&quot;)) \
+    .select(&quot;data.*&quot;)
+
+# 4. Process and write to console
+query = parsed.writeStream \
+    .outputMode(&quot;append&quot;) \
+    .format(&quot;console&quot;) \
+    .start()
+
+query.awaitTermination()
+</code></pre>
+
+<hr />
+<h2>Key Features</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Kafka Features</th>
+<th>Spark Streaming Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>High-throughput, low-latency</td>
+<td>Distributed processing</td>
+</tr>
+<tr>
+<td>Horizontal scalability</td>
+<td>Windowed and stateful stream processing</td>
+</tr>
+<tr>
+<td>Persistent message storage</td>
+<td>Back-pressure and fault-tolerance</td>
+</tr>
+<tr>
+<td>Log-compacted and durable</td>
+<td>Easy integration with ML and SQL engines</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Use Cases</h2><hr>
+<ul>
+<li>Fraud detection (e.g., credit card transactions)</li>
+<li>Real-time dashboards (e.g., metrics, logs)</li>
+<li>Event-driven architectures</li>
+<li>Monitoring and alerting systems</li>
+<li>Clickstream analytics</li>
+</ul>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li>Tune Spark micro-batch intervals carefully.</li>
+<li>Use <strong>checkpointing</strong> for fault tolerance.</li>
+<li>Monitor Kafka lag to detect bottlenecks.</li>
+<li>Use <strong>schema registry</strong> for message format consistency.</li>
+</ul>
+<hr />
+<h2>Security Considerations</h2><hr>
+<ul>
+<li>Enable <strong>TLS encryption</strong> for Kafka brokers.</li>
+<li>Use <strong>SASL or Kerberos</strong> for Kafka authentication.</li>
+<li>Secure Spark with role-based access and encrypted shuffle.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Combining Kafka with Spark Streaming creates a robust, scalable real-time stream processing pipeline. Kafka handles ingestion and durability, while Spark processes and transforms the data efficiently. Together, they enable businesses to respond to events in real-time, making data instantly actionable.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

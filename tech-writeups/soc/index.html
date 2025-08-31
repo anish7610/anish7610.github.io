@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - SOC And SIEM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>SOC And SIEM</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/soc/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Security Operations Center (SOC) and SIEM Systems: Architecture and Log Analysis</h1><hr>
+<h2>Introduction</h2><hr>
+<p>Modern organizations face increasing cybersecurity threats. To monitor, detect, and respond to these threats in real time, two critical components are employed:</p>
+<ul>
+<li><strong>SOC (Security Operations Center)</strong> – A centralized facility where security professionals monitor, analyze, and respond to security incidents.</li>
+<li><strong>SIEM (Security Information and Event Management)</strong> – A software solution that collects and analyzes security logs from various sources to identify anomalies or attacks.</li>
+</ul>
+<p>Together, SOC and SIEM form the foundation of an organization’s cybersecurity monitoring and response strategy.</p>
+<hr />
+<h2>1. Security Operations Center (SOC): Overview</h2><hr>
+<h3>1.1 Definition</h3><hr>
+<p>A SOC is a <strong>dedicated team and infrastructure</strong> responsible for the <strong>continuous monitoring, assessment, and defense</strong> of IT infrastructure from cybersecurity threats.</p>
+<h3>1.2 Key Functions</h3><hr>
+<ul>
+<li><strong>Threat Detection</strong>: Using tools like SIEM, IDS/IPS, and EDR.</li>
+<li><strong>Incident Response</strong>: Coordinating containment and recovery.</li>
+<li><strong>Forensic Analysis</strong>: Investigating breach scope and root causes.</li>
+<li><strong>Compliance Monitoring</strong>: Ensuring adherence to regulations (e.g., PCI-DSS, HIPAA, GDPR).</li>
+<li><strong>Threat Hunting</strong>: Proactively searching for undetected threats.</li>
+</ul>
+<h3>1.3 SOC Team Roles</h3><hr>
+<ul>
+<li><strong>Tier 1 Analyst</strong>: Monitors dashboards, filters false positives.</li>
+<li><strong>Tier 2 Analyst</strong>: Investigates incidents, performs deeper analysis.</li>
+<li><strong>Tier 3 Analyst</strong>: Threat hunting, malware reverse engineering.</li>
+<li><strong>SOC Manager</strong>: Oversees operations, strategy, and coordination.</li>
+<li><strong>Incident Responder</strong>: Handles escalation, recovery, and reporting.</li>
+</ul>
+<hr />
+<h2>2. SIEM Systems: Architecture and Components</h2><hr>
+<h3>2.1 What is SIEM?</h3><hr>
+<p>SIEM (Security Information and Event Management) is a platform that provides:</p>
+<ul>
+<li><strong>Real-time analysis of security alerts</strong></li>
+<li><strong>Correlation of log data from multiple systems</strong></li>
+<li><strong>Historical data storage for compliance and investigation</strong></li>
+</ul>
+<h3>2.2 SIEM Architecture</h3><hr>
+<pre class="codehilite"><code class="language-plaintext">+------------------+      +------------------+      +-------------------+
+|  Log Sources     | ---&gt; |   Log Collector  | ---&gt; |   SIEM Engine     |
+|  (Firewalls, IDS)|      | (Syslog, Agents) |      | (Parser, Rules,   |
+|  Servers, Apps)  |      +------------------+      | Correlator, DB)   |
++------------------+                                 +--------+----------+
+                                                            |
+                                                            v
+                                                   +------------------+
+                                                   |   Dashboards,    |
+                                                   | Alerts &amp; Reports |
+                                                   +------------------+
+</code></pre>
+
+<h3>2.3 Components</h3><hr>
+<ul>
+<li><strong>Log Collectors</strong>: Agents or services that gather logs from endpoints, applications, and network devices.</li>
+<li><strong>Normalization/Parsing</strong>: Converts raw log formats into a consistent, structured format.</li>
+<li><strong>Correlation Engine</strong>: Applies rules or machine learning to detect suspicious patterns across multiple sources.</li>
+<li><strong>Data Store</strong>: Archives raw and processed logs for retention and forensic analysis.</li>
+<li><strong>Dashboards &amp; Alerts</strong>: Visualize security events and generate real-time alerts.</li>
+</ul>
+<hr />
+<h2>3. Common Log Sources for SIEM</h2><hr>
+<ul>
+<li><strong>Firewalls</strong>: Denied/allowed traffic, IP blocks.</li>
+<li><strong>Endpoint Detection &amp; Response (EDR)</strong>: File access, process creation, registry changes.</li>
+<li><strong>Web Servers</strong>: HTTP access logs, 404 errors.</li>
+<li><strong>Authentication Systems</strong>: Successful and failed logins (e.g., AD, LDAP).</li>
+<li><strong>Cloud Providers</strong>: AWS CloudTrail, Azure Activity Logs, GCP Audit Logs.</li>
+</ul>
+<hr />
+<h2>4. Log Analysis in SIEM</h2><hr>
+<h3>4.1 Parsing and Normalization</h3><hr>
+<p>Logs from different sources are parsed using regular expressions or parsing rules. The normalized format includes fields like:</p>
+<pre class="codehilite"><code class="language-json">{
+  &quot;timestamp&quot;: &quot;2025-07-21T01:00:00Z&quot;,
+  &quot;src_ip&quot;: &quot;10.0.0.5&quot;,
+  &quot;dst_ip&quot;: &quot;192.168.1.10&quot;,
+  &quot;event_type&quot;: &quot;login_failure&quot;,
+  &quot;username&quot;: &quot;admin&quot;
+}
+</code></pre>
+
+<h3>4.2 Correlation Rules</h3><hr>
+<p>Correlation links multiple log events into a meaningful alert:</p>
+<ul>
+<li><strong>Example 1</strong>: 5 failed logins followed by a successful login from the same IP → brute-force attack.</li>
+<li><strong>Example 2</strong>: User downloads &gt;500 MB of data outside business hours → potential data exfiltration.</li>
+</ul>
+<h3>4.3 Use Cases</h3><hr>
+<ul>
+<li><strong>Insider Threat Detection</strong>: Privileged users accessing restricted data.</li>
+<li><strong>Advanced Persistent Threats (APT)</strong>: Long dwell-time, multi-stage attacks.</li>
+<li><strong>Malware Outbreaks</strong>: Identifying lateral movement and command &amp; control (C2) traffic.</li>
+<li><strong>Compliance Violations</strong>: Logins from blacklisted IPs, disabled accounts used.</li>
+</ul>
+<hr />
+<h2>5. Advanced Capabilities</h2><hr>
+<h3>5.1 User and Entity Behavior Analytics (UEBA)</h3><hr>
+<p>Applies machine learning to baseline user behavior and flag anomalies (e.g., user downloads 10x more data than usual).</p>
+<h3>5.2 Threat Intelligence Integration</h3><hr>
+<p>Matches log indicators (e.g., IPs, hashes, URLs) with threat intel feeds for proactive detection.</p>
+<h3>5.3 SOAR Integration</h3><hr>
+<p><strong>Security Orchestration, Automation, and Response (SOAR)</strong> platforms integrate with SIEM to automate response workflows (e.g., isolate endpoint, disable user).</p>
+<hr />
+<h2>6. Challenges</h2><hr>
+<ul>
+<li><strong>False Positives</strong>: Alert fatigue due to noisy rules.</li>
+<li><strong>Log Volume</strong>: High ingestion costs and storage overhead.</li>
+<li><strong>Complex Configuration</strong>: Rules and normalization can be time-consuming.</li>
+<li><strong>Encrypted Traffic</strong>: Limits visibility without SSL interception.</li>
+</ul>
+<hr />
+<h2>7. Popular SIEM Tools</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Splunk</td>
+<td>Powerful search, customizable dashboards</td>
+</tr>
+<tr>
+<td>IBM QRadar</td>
+<td>Enterprise-grade with strong correlation</td>
+</tr>
+<tr>
+<td>ELK Stack</td>
+<td>Open-source; ElasticSearch + Logstash + Kibana</td>
+</tr>
+<tr>
+<td>Microsoft Sentinel</td>
+<td>Cloud-native SIEM on Azure</td>
+</tr>
+<tr>
+<td>ArcSight</td>
+<td>Legacy tool with extensive integrations</td>
+</tr>
+<tr>
+<td>Graylog</td>
+<td>Lightweight and open-source</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>The integration of a well-staffed SOC and a powerful SIEM system enables organizations to detect, investigate, and respond to cyber threats efficiently. By analyzing logs from across the IT landscape, SIEM tools offer invaluable insights, and with automated response through SOAR or threat intelligence enrichment, organizations can stay ahead of adversaries in today’s dynamic threat environment.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

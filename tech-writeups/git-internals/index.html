@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - git-internals</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>git-internals</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/git-internals/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Git Internals: How Commits, Trees, and Refs Work</h1><hr>
+<p>Git is not just a version control system; it's a content-addressable file system with a powerful graph-based history model. Understanding how Git works under the hood—how commits, trees, and refs operate—can demystify its seemingly complex behavior and empower developers to troubleshoot or optimize their workflows.</p>
+<hr />
+<h2>1. <strong>Content-Addressable Storage</strong></h2><hr>
+<p>At its core, Git stores everything in the <code>.git/objects/</code> directory as <strong>objects</strong>. Each object is identified by the SHA-1 hash of its contents. These objects are:</p>
+<ul>
+<li><strong>Blob</strong>: Stores the actual contents of a file.</li>
+<li><strong>Tree</strong>: Represents a directory and lists its contents (files and subdirectories).</li>
+<li><strong>Commit</strong>: Represents a snapshot of the project and metadata (author, timestamp, parent commit).</li>
+<li><strong>Tag</strong>: A named reference to a commit.</li>
+</ul>
+<hr />
+<h2>2. <strong>Blobs and Trees</strong></h2><hr>
+<h3>Blob</h3><hr>
+<p>A <code>blob</code> is a binary large object storing the contents of a file.</p>
+<pre class="codehilite"><code class="language-bash">echo &quot;hello&quot; | git hash-object --stdin
+</code></pre>
+
+<p>This generates a SHA-1 hash and stores it in <code>.git/objects/</code>.</p>
+<h3>Tree</h3><hr>
+<p>A <code>tree</code> represents a directory. It maps filenames to blob (file) or tree (subdirectory) objects.</p>
+<pre class="codehilite"><code class="language-bash">git cat-file -p &lt;tree-hash&gt;
+</code></pre>
+
+<p>This shows filenames, permissions, and associated object hashes.</p>
+<p>Example:</p>
+<pre class="codehilite"><code>100644 blob a1b2c3...    README.md
+040000 tree d4e5f6...    src
+</code></pre>
+
+<hr />
+<h2>3. <strong>Commits</strong></h2><hr>
+<p>A <code>commit</code> object points to a tree and optionally one or more parent commits (for merges).</p>
+<pre class="codehilite"><code class="language-bash">git cat-file -p &lt;commit-hash&gt;
+</code></pre>
+
+<p>You’ll see:</p>
+<pre class="codehilite"><code>tree &lt;tree-hash&gt;
+parent &lt;parent-hash&gt;
+author Anish &lt;anish@example.com&gt;
+committer Anish &lt;anish@example.com&gt;
+
+Commit message
+</code></pre>
+
+<p>A commit represents a snapshot of the project state, not a diff. This is why Git can easily traverse and re-apply entire states.</p>
+<hr />
+<h2>4. <strong>Refs and HEAD</strong></h2><hr>
+<p>Refs are human-readable names pointing to commit hashes:</p>
+<ul>
+<li><code>refs/heads/master</code> → current branch pointer</li>
+<li><code>refs/tags/v1.0</code> → tag pointer</li>
+<li><code>HEAD</code> → points to current branch (symbolic ref)</li>
+</ul>
+<pre class="codehilite"><code class="language-bash">cat .git/HEAD
+</code></pre>
+
+<p>Example:</p>
+<pre class="codehilite"><code>ref: refs/heads/main
+</code></pre>
+
+<p>Changing branches updates the <code>HEAD</code> pointer.</p>
+<hr />
+<h2>5. <strong>How a Commit Happens</strong></h2><hr>
+<p>When you run <code>git commit</code>:</p>
+<ol>
+<li>Git creates blobs for any changed files.</li>
+<li>It creates a tree reflecting the directory structure and file blobs.</li>
+<li>It creates a commit object pointing to the new tree and the previous commit.</li>
+<li>It updates the current branch (ref) to point to the new commit.</li>
+</ol>
+<hr />
+<h2>6. <strong>DAG and History</strong></h2><hr>
+<p>Commits form a <strong>Directed Acyclic Graph (DAG)</strong>. Each commit points to its parent(s). This allows Git to:</p>
+<ul>
+<li>Rebase: move a commit subtree elsewhere.</li>
+<li>Merge: combine histories from multiple parents.</li>
+<li>Cherry-pick: reapply changes elsewhere.</li>
+</ul>
+<hr />
+<h2>7. <strong>Conclusion</strong></h2><hr>
+<p>Understanding Git internals—objects, trees, commits, and references—helps explain Git's robustness and flexibility. It's why operations like branching, merging, and rebasing are fast and efficient: Git is simply rewriting or redirecting pointers to snapshots.</p>
+<p>For power users, tools like <code>git cat-file</code>, <code>git rev-parse</code>, and <code>git ls-tree</code> open a deeper understanding of what's going on behind the scenes.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

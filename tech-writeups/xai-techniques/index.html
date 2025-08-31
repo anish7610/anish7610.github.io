@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - xai-techniques</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>xai-techniques</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/xai-techniques/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Explainable AI (XAI) Techniques for Black-Box Models</h1><hr>
+<p>As machine learning (ML) models grow in complexity—ranging from random forests to deep neural networks—their decision-making processes become increasingly opaque. These models, often referred to as <strong>black boxes</strong>, can achieve high performance but offer little insight into how they arrive at predictions. <strong>Explainable AI (XAI)</strong> seeks to bridge this gap by providing transparency and interpretability without sacrificing accuracy.</p>
+<hr />
+<h2>️ Why Explainability Matters</h2><hr>
+<ul>
+<li><strong>Trust</strong>: Users and stakeholders need to understand model decisions, especially in high-stakes domains like healthcare, finance, and law.</li>
+<li><strong>Debugging</strong>: Developers can identify biases, spurious correlations, or data leakage.</li>
+<li><strong>Compliance</strong>: Regulatory frameworks (e.g., GDPR's “right to explanation”) require models to justify their predictions.</li>
+<li><strong>Ethics</strong>: Transparent systems reduce the risk of unfair or discriminatory behavior.</li>
+</ul>
+<hr />
+<h2>Types of Models</h2><hr>
+<ul>
+<li><strong>White-box models</strong>: Interpretable by design (e.g., decision trees, linear/logistic regression).</li>
+<li><strong>Black-box models</strong>: High-performing but opaque (e.g., deep learning, ensemble methods like XGBoost or random forests).</li>
+</ul>
+<p>XAI primarily targets <strong>black-box models</strong>.</p>
+<hr />
+<h2>️ Common XAI Techniques</h2><hr>
+<h3>1. <strong>LIME (Local Interpretable Model-Agnostic Explanations)</strong></h3><hr>
+<ul>
+<li>Perturbs input data locally and fits a simple, interpretable model (like linear regression) to explain individual predictions.</li>
+<li><strong>Use Case</strong>: Understanding why a specific transaction was flagged as fraud.</li>
+</ul>
+<pre class="codehilite"><code class="language-python">from lime.lime_tabular import LimeTabularExplainer
+explainer = LimeTabularExplainer(training_data, feature_names=features)
+explanation = explainer.explain_instance(data_point, model.predict_proba)
+</code></pre>
+
+<p><strong>Pros</strong>: Model-agnostic, simple to implement
+<strong>Cons</strong>: Unstable explanations, sensitive to input perturbation</p>
+<hr />
+<h3>2. <strong>SHAP (SHapley Additive exPlanations)</strong></h3><hr>
+<ul>
+<li>Based on cooperative game theory; assigns each feature an importance value for a particular prediction.</li>
+<li><strong>Additive</strong>: Contributions sum to the difference between the model's prediction and the baseline.</li>
+<li><strong>Visualizations</strong>: Summary plots, force plots, waterfall charts</li>
+</ul>
+<pre class="codehilite"><code class="language-python">import shap
+explainer = shap.Explainer(model)
+shap_values = explainer(X_test)
+shap.plots.waterfall(shap_values[0])
+</code></pre>
+
+<p><strong>Pros</strong>: Solid theoretical foundation, consistent
+<strong>Cons</strong>: Computationally expensive on large datasets</p>
+<hr />
+<h3>3. <strong>Feature Importance</strong></h3><hr>
+<ul>
+<li>Measures how much each feature contributes to the model's output.</li>
+<li>Can be model-specific (e.g., Gini importance in Random Forests) or model-agnostic (e.g., permutation importance).</li>
+</ul>
+<pre class="codehilite"><code class="language-python">from sklearn.inspection import permutation_importance
+importance = permutation_importance(model, X_test, y_test)
+</code></pre>
+
+<p><strong>Pros</strong>: Easy to compute, good for global insights
+<strong>Cons</strong>: May miss interactions or localized behaviors</p>
+<hr />
+<h3>4. <strong>Partial Dependence Plots (PDP)</strong></h3><hr>
+<ul>
+<li>Show the effect of a feature on the predicted outcome, marginalizing over other features.</li>
+</ul>
+<pre class="codehilite"><code class="language-python">from sklearn.inspection import plot_partial_dependence
+plot_partial_dependence(model, X, features=[0, 1])
+</code></pre>
+
+<p><strong>Pros</strong>: Good for visualizing non-linear relationships
+<strong>Cons</strong>: Assumes feature independence</p>
+<hr />
+<h3>5. <strong>Counterfactual Explanations</strong></h3><hr>
+<ul>
+<li>Answers the question: <em>What minimal change would alter the model's prediction?</em></li>
+</ul>
+<p>Example:</p>
+<blockquote>
+<p>“If the applicant had \$2,000 more in income, the loan would have been approved.”</p>
+</blockquote>
+<p>Useful in fairness and actionable insights.</p>
+<hr />
+<h3>6. <strong>Integrated Gradients (for Deep Learning)</strong></h3><hr>
+<ul>
+<li>Computes gradients of the output with respect to inputs while integrating along a path from a baseline input to the actual input.</li>
+</ul>
+<pre class="codehilite"><code class="language-python">import captum
+from captum.attr import IntegratedGradients
+</code></pre>
+
+<p><strong>Pros</strong>: More accurate than raw gradients
+<strong>Cons</strong>: Requires differentiable models (e.g., neural networks)</p>
+<hr />
+<h2>Choosing the Right Tool</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Technique</th>
+<th>Best For</th>
+<th>Scope</th>
+<th>Model Support</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LIME</td>
+<td>Local explanations</td>
+<td>Local</td>
+<td>Model-agnostic</td>
+</tr>
+<tr>
+<td>SHAP</td>
+<td>Global + local explanations</td>
+<td>Both</td>
+<td>Model-agnostic</td>
+</tr>
+<tr>
+<td>Feature Importance</td>
+<td>Global understanding</td>
+<td>Global</td>
+<td>Both</td>
+</tr>
+<tr>
+<td>PDP</td>
+<td>Feature effect visualization</td>
+<td>Global</td>
+<td>Model-agnostic</td>
+</tr>
+<tr>
+<td>Counterfactuals</td>
+<td>Decision boundaries</td>
+<td>Local</td>
+<td>Model-agnostic</td>
+</tr>
+<tr>
+<td>Integrated Gradients</td>
+<td>Neural networks</td>
+<td>Local</td>
+<td>Differentiable models only</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Challenges in XAI</h2><hr>
+<ul>
+<li><strong>Scalability</strong>: Many methods are slow for large datasets or complex models.</li>
+<li><strong>Faithfulness</strong>: Do explanations truly reflect what the model is doing?</li>
+<li><strong>Human interpretability</strong>: Technical explanations might not be understandable to non-experts.</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<p>Explainable AI techniques are crucial for understanding, trusting, and debugging complex black-box models. Tools like SHAP and LIME are powerful allies in demystifying model predictions, especially in domains where accountability and fairness are paramount.</p>
+<p>As the ML landscape continues to evolve, integrating explainability into the model development lifecycle is not just a best practice—it’s a necessity.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

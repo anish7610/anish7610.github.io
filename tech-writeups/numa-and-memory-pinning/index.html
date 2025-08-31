@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - numa-and-memory-pinning</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>numa-and-memory-pinning</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/numa-and-memory-pinning/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2><strong>NUMA (Non-Uniform Memory Access) and Memory Pinning</strong></h2><hr>
+<p>Modern multi-CPU systems increasingly rely on <strong>NUMA architectures</strong> to scale memory and compute performance. But performance gains are only realized when developers and operating systems are NUMA-aware. Memory pinning further fine-tunes control by locking memory to specific NUMA nodes.</p>
+<hr />
+<h3>1. What is NUMA?</h3><hr>
+<p><strong>NUMA (Non-Uniform Memory Access)</strong> is a memory architecture where:</p>
+<ul>
+<li>Each CPU (or socket) has <strong>local memory</strong> it can access <strong>quickly</strong>.</li>
+<li>CPUs can access <strong>remote memory</strong> (attached to other sockets), but with <strong>higher latency</strong> and <strong>lower bandwidth</strong>.</li>
+</ul>
+<h4>Example Layout:</h4>
+<pre class="codehilite"><code>+------------+       +------------+
+| CPU Socket 0|&lt;-----&gt;| Memory Node 0 |
+|            |       +------------+
+|            |
+|            |       +------------+
+|            |&lt;-----&gt;| Memory Node 1 |
++------------+       +------------+
+</code></pre>
+
+<p>Access to <strong>local memory</strong> is faster than to <strong>remote memory</strong>.</p>
+<hr />
+<h3>2. NUMA Implications on Performance</h3><hr>
+<ul>
+<li><strong>Local memory access</strong>: Low latency, high throughput.</li>
+<li><strong>Remote memory access</strong>: High latency, potential bottlenecks.</li>
+<li><strong>Memory bandwidth contention</strong>: May occur if many threads access a remote node’s memory.</li>
+</ul>
+<p>Poor NUMA locality leads to:</p>
+<ul>
+<li>Cache misses.</li>
+<li>Memory access delays.</li>
+<li>Reduced overall throughput.</li>
+</ul>
+<hr />
+<h3>3. What is Memory Pinning?</h3><hr>
+<p><strong>Memory Pinning</strong> (also called memory binding or affinity) is the act of:</p>
+<ul>
+<li><strong>Allocating memory on a specific NUMA node</strong>.</li>
+<li><strong>Ensuring a thread accesses memory from its local NUMA node</strong> to reduce latency.</li>
+</ul>
+<p>Pinned memory:</p>
+<ul>
+<li>Stays in RAM (not swapped out).</li>
+<li>Remains bound to a particular NUMA node or device (e.g., for DMA transfers).</li>
+</ul>
+<hr />
+<h3>4. Tools for NUMA Awareness</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>numactl</code></td>
+<td>Run programs with specific NUMA bindings.</td>
+</tr>
+<tr>
+<td><code>numastat</code></td>
+<td>Show memory usage per NUMA node.</td>
+</tr>
+<tr>
+<td><code>hwloc</code></td>
+<td>Visualize hardware layout (topology-aware).</td>
+</tr>
+<tr>
+<td><code>taskset</code></td>
+<td>Bind process to specific CPUs.</td>
+</tr>
+<tr>
+<td><code>libnuma</code></td>
+<td>C library to manage memory/node affinity.</td>
+</tr>
+</tbody>
+</table>
+<h4>Example using <code>numactl</code>:</h4>
+<pre class="codehilite"><code class="language-bash"># Run a process on CPU node 0 and allocate memory from node 0
+numactl --cpunodebind=0 --membind=0 ./my_app
+</code></pre>
+
+<hr />
+<h3>5. Programming with libnuma (C API)</h3><hr>
+<pre class="codehilite"><code class="language-c">#include &lt;numa.h&gt;
+
+if (numa_available() != -1) {
+    struct bitmask *nodes = numa_allocate_nodemask();
+    numa_bitmask_setbit(nodes, 0);  // bind to NUMA node 0
+    numa_set_membind(nodes);
+}
+</code></pre>
+
+<p>This ensures memory allocations go to NUMA node 0.</p>
+<hr />
+<h3>6. NUMA and Multi-threading</h3><hr>
+<p>In multithreaded applications (e.g., using <code>pthread</code>, OpenMP):</p>
+<ul>
+<li>Threads should be <strong>affinitized to cores</strong>.</li>
+<li>Memory allocations should be <strong>localized to the threads’ NUMA nodes</strong>.</li>
+</ul>
+<h4>Example:</h4>
+<ul>
+<li>Bind threads in a worker pool to separate NUMA nodes.</li>
+<li>Use per-node memory pools for data locality.</li>
+</ul>
+<hr />
+<h3>7. NUMA in High-Performance Computing (HPC) and Databases</h3><hr>
+<p><strong>HPC systems, databases, and low-latency applications</strong> like:</p>
+<ul>
+<li>In-memory DBs (e.g., Redis, Memcached)</li>
+<li>Scientific simulations</li>
+<li>Machine learning inference engines</li>
+</ul>
+<p>... all benefit from NUMA-aware memory allocation.</p>
+<p>Memory pinning also matters in:</p>
+<ul>
+<li><strong>RDMA (Remote Direct Memory Access)</strong>, where memory must be fixed for zero-copy data transfers.</li>
+<li><strong>GPU programming</strong>, where pinned host memory improves PCIe transfers.</li>
+</ul>
+<hr />
+<h3>8. Performance Tips</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Tip</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pin threads and memory to same NUMA node</td>
+<td>Reduced latency, increased cache hits</td>
+</tr>
+<tr>
+<td>Avoid cross-node memory access</td>
+<td>Prevents bus congestion and slowdowns</td>
+</tr>
+<tr>
+<td>Use per-node memory pools</td>
+<td>Better scaling with more cores/sockets</td>
+</tr>
+<tr>
+<td>Monitor with <code>numastat</code>, <code>perf</code>, <code>htop</code></td>
+<td>Detect imbalances or remote memory use</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>9. Conclusion</h3><hr>
+<p>NUMA and memory pinning are critical for performance on modern multicore/multisocket systems. Developers writing low-latency, high-throughput applications must:</p>
+<ul>
+<li>Be aware of the memory topology.</li>
+<li>Use tools and APIs to enforce memory locality.</li>
+<li>Align thread and memory placement for optimal performance.</li>
+</ul>
+<p>Failing to consider NUMA effects can result in underutilized hardware, memory stalls, and unnecessary cross-node traffic.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

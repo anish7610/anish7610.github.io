@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - kernel-bypass-networking-dpdk-netmap</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>kernel-bypass-networking-dpdk-netmap</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/kernel-bypass-networking-dpdk-netmap/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h3>Kernel Bypass Networking: DPDK and Netmap</h3><hr>
+<p>In traditional packet processing, every network packet must travel through the kernel network stack—incurring overhead from context switches, memory copies, and interrupt handling. This bottleneck significantly impacts latency and throughput in high-performance networking applications like firewalls, load balancers, and financial trading systems. Kernel bypass techniques aim to eliminate this bottleneck by allowing user-space applications to interact directly with the NIC (Network Interface Card), bypassing the kernel's networking stack.</p>
+<p>Two popular kernel bypass technologies are <strong>DPDK (Data Plane Development Kit)</strong> and <strong>Netmap</strong>.</p>
+<hr />
+<h3>1. <strong>Why Kernel Bypass?</strong></h3><hr>
+<ul>
+<li><strong>Latency Reduction</strong>: Direct access to NIC memory buffers reduces interrupt overhead and system calls.</li>
+<li><strong>Throughput Improvement</strong>: Kernel bypass techniques enable millions of packets per second per core.</li>
+<li><strong>CPU Efficiency</strong>: Avoid context switches and redundant memory copies.</li>
+</ul>
+<hr />
+<h3>2. <strong>DPDK (Data Plane Development Kit)</strong></h3><hr>
+<h4>Overview:</h4>
+<p>DPDK is a set of libraries and drivers for fast packet processing in user-space. It uses poll-mode drivers (PMDs) to interface directly with supported NICs using PCIe.</p>
+<h4>Key Features:</h4>
+<ul>
+<li><strong>Zero-copy packet processing</strong> using hugepages.</li>
+<li><strong>Poll Mode Drivers</strong> eliminate interrupts.</li>
+<li><strong>Multi-core scalability</strong> via CPU affinity and thread pinning.</li>
+<li>Supports <strong>batch processing</strong> for higher efficiency.</li>
+</ul>
+<h4>Architecture:</h4>
+<ul>
+<li>Initializes hugepage memory using <code>hugeadm</code> or <code>dpdk-hugepages</code>.</li>
+<li>NICs are bound to user-space I/O drivers like <code>vfio-pci</code>.</li>
+<li>Applications use DPDK APIs to send/receive packets directly from the hardware.</li>
+</ul>
+<h4>Example Use Case:</h4>
+<pre class="codehilite"><code class="language-c">struct rte_mbuf *pkts[BURST_SIZE];
+nb_rx = rte_eth_rx_burst(port_id, queue_id, pkts, BURST_SIZE);
+</code></pre>
+
+<h4>Performance:</h4>
+<p>DPDK can process <strong>10+ million packets per second (PPS)</strong> per core with modern hardware.</p>
+<hr />
+<h3>3. <strong>Netmap</strong></h3><hr>
+<h4>Overview:</h4>
+<p>Netmap provides a simple API and kernel module that reuses the kernel driver but gives user-space applications direct access to NIC ring buffers.</p>
+<h4>Key Features:</h4>
+<ul>
+<li>Works with unmodified device drivers.</li>
+<li>Requires less reconfiguration than DPDK.</li>
+<li>Easier to integrate with existing socket-based applications.</li>
+</ul>
+<h4>Architecture:</h4>
+<ul>
+<li>The <code>netmap</code> kernel module sets up memory-mapped NIC ring buffers.</li>
+<li>Applications read/write directly to the buffer through mmap'd file descriptors.</li>
+</ul>
+<h4>Example Use Case:</h4>
+<pre class="codehilite"><code class="language-c">struct netmap_if *nifp = nm_open(&quot;netmap:eth0&quot;, NULL, 0, NULL);
+for (;;) {
+   struct netmap_ring *ring = NETMAP_RXRING(nifp-&gt;rx_rings, ring_id);
+   // Process packets
+}
+</code></pre>
+
+<hr />
+<h3>4. <strong>Comparison: DPDK vs Netmap</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>DPDK</th>
+<th>Netmap</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Performance</td>
+<td>Very high (optimized)</td>
+<td>High, but less than DPDK</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>High</td>
+<td>Low to Medium</td>
+</tr>
+<tr>
+<td>Driver Replacement</td>
+<td>Yes (binds to vfio/uio)</td>
+<td>No (uses existing drivers)</td>
+</tr>
+<tr>
+<td>Learning Curve</td>
+<td>Steep</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td>Use Cases</td>
+<td>NFV, load balancers</td>
+<td>Packet sniffers, firewalls</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>5. <strong>Use Cases and Ecosystem</strong></h3><hr>
+<ul>
+<li><strong>DPDK</strong>: Used in Open vSwitch, FD.io/VPP, Tungsten Fabric, etc.</li>
+<li><strong>Netmap</strong>: Powers tools like VALE (a software switch), Snabb, and modified versions of <code>tcpdump</code>.</li>
+</ul>
+<hr />
+<h3>6. <strong>Limitations and Considerations</strong></h3><hr>
+<ul>
+<li>Kernel bypass requires careful handling of <strong>security</strong> (direct NIC access) and <strong>isolation</strong>.</li>
+<li>DPDK apps can <strong>starve the CPU</strong> due to busy-polling if not tuned properly.</li>
+<li>System integration is complex; you must manage CPU pinning, NUMA awareness, and interrupt isolation.</li>
+</ul>
+<hr />
+<h3>7. <strong>Conclusion</strong></h3><hr>
+<p>Kernel bypass networking offers massive performance improvements for packet processing by eliminating the kernel from the data path. While <strong>DPDK</strong> offers peak performance and flexibility, <strong>Netmap</strong> is simpler to integrate for moderate performance gains. Understanding your system constraints and application architecture is key to choosing between them.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

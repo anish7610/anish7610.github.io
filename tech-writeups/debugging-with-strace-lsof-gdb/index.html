@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - debugging-with-strace-lsof-gdb</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>debugging-with-strace-lsof-gdb</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/debugging-with-strace-lsof-gdb/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Debugging with <code>strace</code>, <code>lsof</code>, and <code>gdb</code> for System-Level Errors</h2><hr>
+<p>When programs fail silently or behave unexpectedly at the system level—such as crashing, hanging, or failing to open files—<strong>system-level debugging tools</strong> become invaluable. Tools like <code>strace</code>, <code>lsof</code>, and <code>gdb</code> let you inspect program behavior from the kernel interaction level up to memory and symbol resolution.</p>
+<hr />
+<h2>1. <code>strace</code>: Trace System Calls and Signals</h2><hr>
+<p><code>strace</code> intercepts and logs <strong>system calls</strong> and <strong>signals</strong> made by a process. It's useful for tracking failures related to file access, permissions, segmentation faults, and more.</p>
+<h3>Use Case: Program Fails to Open a File</h3><hr>
+<pre class="codehilite"><code class="language-bash">strace ./my_program
+</code></pre>
+
+<p>Example output:</p>
+<pre class="codehilite"><code>open(&quot;config.json&quot;, O_RDONLY) = -1 ENOENT (No such file or directory)
+</code></pre>
+
+<p>Fix:</p>
+<blockquote>
+<p>The file <code>config.json</code> is missing or mislocated.</p>
+</blockquote>
+<h3>Use Case: Tracing a Running Process</h3><hr>
+<pre class="codehilite"><code class="language-bash">strace -p &lt;pid&gt;
+</code></pre>
+
+<blockquote>
+<p>Use this to attach to a hung or live-running process and watch system calls in real-time.</p>
+</blockquote>
+<h3>Filter Specific Calls (e.g., file operations):</h3><hr>
+<pre class="codehilite"><code class="language-bash">strace -e open,read,write ./my_program
+</code></pre>
+
+<hr />
+<h2>2. <code>lsof</code>: List Open Files</h2><hr>
+<p>Every file, socket, pipe, and device in Unix is a file descriptor. <code>lsof</code> shows which files a process has open.</p>
+<h3>Use Case: Check if a File or Port is in Use</h3><hr>
+<pre class="codehilite"><code class="language-bash">lsof /path/to/file
+</code></pre>
+
+<pre class="codehilite"><code class="language-bash">lsof -i :8080
+</code></pre>
+
+<p>Shows which process is using port 8080.</p>
+<h3>Use Case: See What Files a Process Has Open</h3><hr>
+<pre class="codehilite"><code class="language-bash">lsof -p &lt;pid&gt;
+</code></pre>
+
+<p>Helpful for debugging leaks, unclosed descriptors, or resource locks.</p>
+<hr />
+<h2>3. <code>gdb</code>: GNU Debugger</h2><hr>
+<p><code>gdb</code> is a powerful source-level debugger for compiled programs. It allows inspecting memory, variables, call stacks, and performing line-by-line execution.</p>
+<h3>Use Case: Debug a Crash (Segmentation Fault)</h3><hr>
+<ol>
+<li>Compile with debug symbols:</li>
+</ol>
+<p><code>bash
+   gcc -g -o my_program my_program.c</code></p>
+<ol>
+<li>Run under gdb:</li>
+</ol>
+<p><code>bash
+   gdb ./my_program</code></p>
+<ol>
+<li>Start execution:</li>
+</ol>
+<p><code>(gdb) run</code></p>
+<ol>
+<li>On crash (e.g., segmentation fault), inspect:</li>
+</ol>
+<p><code>(gdb) bt        # Show backtrace (call stack)
+   (gdb) info locals</code></p>
+<h3>Use Case: Attach to a Running Process</h3><hr>
+<pre class="codehilite"><code class="language-bash">gdb -p &lt;pid&gt;
+</code></pre>
+
+<p>Inspect live memory, break on functions, or debug stuck processes.</p>
+<hr />
+<h2>Combine Tools for Power Debugging</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Tool(s)</th>
+<th>Example Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>File not found / permission issue</td>
+<td><code>strace</code></td>
+<td><code>strace ./myapp</code></td>
+</tr>
+<tr>
+<td>Process hangs</td>
+<td><code>strace</code>, <code>gdb</code></td>
+<td><code>strace -p &lt;pid&gt;</code>, <code>gdb -p &lt;pid&gt;</code></td>
+</tr>
+<tr>
+<td>Port/file already in use</td>
+<td><code>lsof</code></td>
+<td><code>lsof -i :8080</code>, <code>lsof /tmp/some.lock</code></td>
+</tr>
+<tr>
+<td>Inspect call stack / variables</td>
+<td><code>gdb</code></td>
+<td><code>gdb ./app</code>, <code>(gdb) bt</code></td>
+</tr>
+<tr>
+<td>Memory access violation</td>
+<td><code>gdb</code></td>
+<td>Run with debug symbols, trigger crash</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Bonus: Integrating with Core Dumps</h2><hr>
+<ol>
+<li>Enable core dumps:</li>
+</ol>
+<p><code>bash
+   ulimit -c unlimited</code></p>
+<ol>
+<li>On crash, load core file:</li>
+</ol>
+<p><code>bash
+   gdb ./my_program core</code></p>
+<p>Then:</p>
+<p><code>(gdb) bt</code></p>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best For</th>
+<th>One-Liner Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>strace</code></td>
+<td>Tracing system calls and errors</td>
+<td><code>strace ./myapp</code></td>
+</tr>
+<tr>
+<td><code>lsof</code></td>
+<td>Listing open files/ports by process</td>
+<td><code>lsof -p &lt;pid&gt;</code></td>
+</tr>
+<tr>
+<td><code>gdb</code></td>
+<td>Full debugger: crashes, memory, stack</td>
+<td><code>gdb ./myapp</code></td>
+</tr>
+</tbody>
+</table>
+<p>These tools together help uncover system-level issues fast—whether it's a missing file, a permission error, a deadlock, or a segmentation fault.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

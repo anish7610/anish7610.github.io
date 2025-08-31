@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - linux-process-lifecycle</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>linux-process-lifecycle</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/linux-process-lifecycle/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Linux Process Lifecycle: <code>fork</code>–<code>exec</code>–<code>wait</code> Mechanics</h2><hr>
+<hr />
+<h3>Introduction</h3><hr>
+<p>The Linux process lifecycle revolves around the creation, execution, and termination of processes. The core system calls that manage this lifecycle are:</p>
+<ul>
+<li><code>fork()</code> — to create a new process (a copy of the parent)</li>
+<li><code>exec()</code> family — to replace the current process image with a new program</li>
+<li><code>wait()</code> / <code>waitpid()</code> — to wait for child process termination and collect its exit status</li>
+</ul>
+<p>Together, these implement the <strong>parent-child process</strong> model used by shells, daemons, and service supervisors in Unix-like systems.</p>
+<hr />
+<h3>1. <code>fork()</code> — Cloning a Process</h3><hr>
+<h4>Purpose:</h4>
+<p><code>fork()</code> creates a <strong>new child process</strong> by duplicating the <strong>parent's memory space</strong>, file descriptors, and execution context.</p>
+<h4>Key Characteristics:</h4>
+<ul>
+<li>Returns <strong>0</strong> in the child process</li>
+<li>Returns <strong>child PID</strong> in the parent process</li>
+<li>Returns <strong>-1</strong> on error</li>
+</ul>
+<pre class="codehilite"><code class="language-c">pid_t pid = fork();
+if (pid == 0) {
+    // Child process
+} else if (pid &gt; 0) {
+    // Parent process
+} else {
+    // Error
+}
+</code></pre>
+
+<h4>Behind the Scenes:</h4>
+<ul>
+<li><strong>Copy-on-write (COW)</strong> is used — memory is not physically copied unless modified.</li>
+<li>The child gets a new PID, but shares open file descriptors initially.</li>
+</ul>
+<hr />
+<h3>2. <code>exec()</code> — Replacing the Process Image</h3><hr>
+<h4>Purpose:</h4>
+<p><code>exec()</code> replaces the <strong>current process</strong> image with a <strong>new program</strong>, preserving the same PID.</p>
+<h4>Variants:</h4>
+<pre class="codehilite"><code class="language-c">execl(path, arg0, arg1, ..., NULL);
+execp(file, arg0, arg1, ..., NULL);   // searches in $PATH
+execv(path, argv);                    // argv is a vector
+execvp(file, argv);                   // vector + $PATH
+execve(path, argv, envp);             // low-level
+</code></pre>
+
+<h4>Example:</h4>
+<pre class="codehilite"><code class="language-c">execl(&quot;/bin/ls&quot;, &quot;ls&quot;, &quot;-l&quot;, NULL);
+// Replaces current process with /bin/ls
+</code></pre>
+
+<h4>Behavior:</h4>
+<ul>
+<li>If <code>exec()</code> is successful, <strong>it never returns</strong>.</li>
+<li>If it returns, an error occurred (e.g., file not found).</li>
+</ul>
+<hr />
+<h3>⏳ 3. <code>wait()</code> / <code>waitpid()</code> — Synchronizing with Child Termination</h3><hr>
+<h4>Purpose:</h4>
+<p>Allows a parent process to <strong>pause</strong> until its child process <strong>exits</strong>, so it can collect the <strong>exit status</strong> and prevent <strong>zombie processes</strong>.</p>
+<h4>Example:</h4>
+<pre class="codehilite"><code class="language-c">pid_t pid = wait(&amp;status);  // blocks until any child exits
+</code></pre>
+
+<pre class="codehilite"><code class="language-c">pid_t pid = waitpid(child_pid, &amp;status, 0);  // wait for a specific child
+</code></pre>
+
+<ul>
+<li>Macros like <code>WIFEXITED(status)</code> and <code>WEXITSTATUS(status)</code> extract exit codes.</li>
+</ul>
+<hr />
+<h3>Process Lifecycle Summary</h3><hr>
+<pre class="codehilite"><code class="language-txt">+-------------------+         fork()         +--------------------+
+|   Parent Process  |-----------------------&gt;|   Child Process    |
++-------------------+                        +--------------------+
+                                                |
+                                                |  exec(&quot;/bin/ls&quot;)
+                                                v
+                                           +--------------------+
+                                           | Replaced Process   |
+                                           | (e.g., /bin/ls)    |
+                                           +--------------------+
+                                                |
+                                                | exits (status)
+                                                v
+                                      Parent calls wait() / waitpid()
+</code></pre>
+
+<hr />
+<h3>️ Zombie and Orphan Processes</h3><hr>
+<ul>
+<li><strong>Zombie</strong>: A child that has exited but has not been waited on; still occupies an entry in the process table.</li>
+<li><strong>Orphan</strong>: A child whose parent exited before it; reparented to <code>init</code> (<code>PID 1</code>) which will reap it.</li>
+</ul>
+<hr />
+<h3>Example: A Simple Shell</h3><hr>
+<pre class="codehilite"><code class="language-c">int main() {
+    char *argv[] = {&quot;/bin/ls&quot;, &quot;-l&quot;, NULL};
+    pid_t pid = fork();
+
+    if (pid == 0) {
+        execvp(argv[0], argv);  // Replace with ls
+        perror(&quot;exec failed&quot;);  // Only if exec fails
+    } else {
+        wait(NULL);             // Parent waits for child to finish
+    }
+}
+</code></pre>
+
+<hr />
+<h3>Tools to Observe This Lifecycle</h3><hr>
+<ul>
+<li><code>strace ./a.out</code> — trace system calls like <code>fork</code>, <code>execve</code>, <code>wait</code></li>
+<li><code>ps -ef</code> — view process hierarchy</li>
+<li><code>top</code> or <code>htop</code> — live process info</li>
+</ul>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Understanding <code>fork()</code>, <code>exec()</code>, and <code>wait()</code> is crucial for:</p>
+<ul>
+<li>Writing custom shells or process supervisors</li>
+<li>Building daemons and services</li>
+<li>Handling concurrency and job control</li>
+</ul>
+<p>This trio defines how processes are spawned, programs are executed, and resources are released — forming the backbone of Unix/Linux multitasking.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

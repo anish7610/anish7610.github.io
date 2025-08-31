@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - unix-domain-sockets</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>unix-domain-sockets</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/unix-domain-sockets/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Unix Domain Sockets: Local IPC with File System-Based Endpoints</h2><hr>
+<p><strong>Unix Domain Sockets (UDS)</strong> are a powerful form of <strong>inter-process communication (IPC)</strong> available on Unix-like operating systems. Unlike TCP/IP sockets that communicate over a network, UDS operates <strong>locally</strong> between processes on the same host, using the <strong>file system as the addressing namespace</strong>.</p>
+<hr />
+<h3>Key Concepts</h3><hr>
+<ul>
+<li>
+<p><strong>UDS vs TCP/IP</strong>:</p>
+</li>
+<li>
+<p>UDS: Path-based communication via the file system (e.g., <code>/tmp/mysocket</code>).</p>
+</li>
+<li>TCP/IP: Port-based communication using IP addresses and ports.</li>
+<li>
+<p><strong>Types</strong>:</p>
+</li>
+<li>
+<p><strong>SOCK_STREAM</strong>: Like TCP – reliable, byte-oriented.</p>
+</li>
+<li><strong>SOCK_DGRAM</strong>: Like UDP – message-oriented.</li>
+<li><strong>SOCK_SEQPACKET</strong>: Reliable message delivery with message boundaries preserved.</li>
+</ul>
+<hr />
+<h3>How It Works</h3><hr>
+<ol>
+<li><strong>Server process</strong> creates a socket and binds it to a pathname.</li>
+<li><strong>Client process</strong> connects to that path to initiate communication.</li>
+<li>They exchange data via <code>read/write</code>, <code>send/recv</code>.</li>
+</ol>
+<p>The kernel mediates all interactions without going through the network stack.</p>
+<hr />
+<h3>️ Example: Stream Socket</h3><hr>
+<h4>Server</h4>
+<pre class="codehilite"><code class="language-c">int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+struct sockaddr_un addr;
+memset(&amp;addr, 0, sizeof(struct sockaddr_un));
+addr.sun_family = AF_UNIX;
+strcpy(addr.sun_path, &quot;/tmp/mysocket&quot;);
+
+bind(sockfd, (struct sockaddr *)&amp;addr, sizeof(struct sockaddr_un));
+listen(sockfd, 5);
+
+int client_fd = accept(sockfd, NULL, NULL);
+write(client_fd, &quot;Hello from server&quot;, 18);
+</code></pre>
+
+<h4>Client</h4>
+<pre class="codehilite"><code class="language-c">int sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+struct sockaddr_un addr;
+memset(&amp;addr, 0, sizeof(struct sockaddr_un));
+addr.sun_family = AF_UNIX;
+strcpy(addr.sun_path, &quot;/tmp/mysocket&quot;);
+
+connect(sockfd, (struct sockaddr *)&amp;addr, sizeof(struct sockaddr_un));
+char buf[100];
+read(sockfd, buf, 100);
+</code></pre>
+
+<hr />
+<h3>Advantages</h3><hr>
+<ul>
+<li><strong>Faster than TCP/IP</strong>: No overhead of IP stack, no checksum/fragmentation.</li>
+<li><strong>Secure</strong>: Access controlled via file system permissions (<code>chmod</code>, <code>chown</code>).</li>
+<li><strong>No Port Conflicts</strong>: Uses file paths instead of numeric ports.</li>
+<li><strong>Pass File Descriptors</strong>: Can send open file descriptors using <code>sendmsg()</code> and <code>SCM_RIGHTS</code>.</li>
+</ul>
+<hr />
+<h3>Use Cases</h3><hr>
+<ul>
+<li><strong>Local daemons</strong>: e.g., systemd’s communication with journald.</li>
+<li><strong>Docker / Podman API socket</strong>: <code>/var/run/docker.sock</code>.</li>
+<li><strong>Nginx ↔ PHP-FPM</strong>: PHP-FPM listens on a Unix socket for fast IPC.</li>
+<li><strong>Browser sandboxing</strong>: Isolated processes in Chromium communicate via UDS.</li>
+</ul>
+<hr />
+<h3>️ Real-World Integration Example</h3><hr>
+<h4>Nginx Configuration</h4>
+<pre class="codehilite"><code class="language-nginx">upstream php_backend {
+    server unix:/run/php/php7.4-fpm.sock;
+}
+</code></pre>
+
+<p>This avoids TCP overhead by communicating over a Unix socket instead of localhost TCP.</p>
+<hr />
+<h3>Debugging Tips</h3><hr>
+<ul>
+<li>Use <code>lsof | grep mysocket</code> to check who has the socket open.</li>
+<li>Use <code>netstat -a | grep unix</code> or <code>ss -x</code> to inspect active Unix sockets.</li>
+<li>Remove stale sockets (<code>rm /tmp/mysocket</code>) before restarting servers.</li>
+</ul>
+<hr />
+<h3>️ Considerations</h3><hr>
+<ul>
+<li>Path length limit (often 108 bytes for <code>sun_path</code>).</li>
+<li>Must manually clean up the socket file on shutdown.</li>
+<li>Only usable on the same host – no cross-network communication.</li>
+</ul>
+<hr />
+<h3>Summary</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Unix Domain Socket</th>
+<th>TCP/IP Socket</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Performance</td>
+<td>Faster (in-memory)</td>
+<td>Slower (network stack)</td>
+</tr>
+<tr>
+<td>Scope</td>
+<td>Local only</td>
+<td>Local and remote</td>
+</tr>
+<tr>
+<td>Addressing</td>
+<td>File path (<code>/tmp/app.sock</code>)</td>
+<td>IP\:Port</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>IPC between services on same machine</td>
+<td>Remote communication</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p>Unix Domain Sockets are an ideal choice when building fast, secure, and local IPC mechanisms. They’re widely used across system-level applications and container ecosystems.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

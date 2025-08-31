@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - VPN</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>VPN</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/vpn/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Technical Writeup: VPN Protocols (IPSec, OpenVPN, WireGuard)</h1><hr>
+<h2>Introduction</h2><hr>
+<p>A <strong>Virtual Private Network (VPN)</strong> extends a private network across a public one, allowing users to securely send and receive data as if their devices were directly connected to the private network. VPN protocols define the standards and rules used to establish secure connections and protect data in transit.</p>
+<p>Three of the most widely used VPN protocols are:</p>
+<ul>
+<li><strong>IPSec</strong> – an older but highly secure standard protocol suite.</li>
+<li><strong>OpenVPN</strong> – an open-source, SSL/TLS-based VPN protocol.</li>
+<li><strong>WireGuard</strong> – a modern, minimal, and high-performance VPN protocol.</li>
+</ul>
+<hr />
+<h2>1️⃣ <strong>IPSec (Internet Protocol Security)</strong></h2><hr>
+<h3>Overview:</h3><hr>
+<ul>
+<li><strong>Type</strong>: Network-layer protocol suite</li>
+<li><strong>Encryption</strong>: AES, 3DES, Blowfish, etc.</li>
+<li><strong>Use case</strong>: Site-to-site or remote-access VPNs</li>
+<li><strong>RFCs</strong>: 2401 (now obsoleted by newer RFCs like 4301)</li>
+</ul>
+<h3>Key Features:</h3><hr>
+<ul>
+<li>Operates at <strong>Layer 3</strong> of the OSI model</li>
+<li>Encrypts and authenticates IP packets</li>
+<li>Can run in <strong>Tunnel Mode</strong> (entire packet encrypted) or <strong>Transport Mode</strong> (only payload encrypted)</li>
+</ul>
+<h3>Phases:</h3><hr>
+<ol>
+<li>
+<p><strong>IKE Phase 1 (Internet Key Exchange)</strong>:</p>
+</li>
+<li>
+<p>Establishes a secure channel (ISAKMP SA)</p>
+</li>
+<li>Negotiates authentication and encryption parameters</li>
+<li>
+<p><strong>IKE Phase 2</strong>:</p>
+</li>
+<li>
+<p>Sets up the actual IPSec tunnel (IPSec SA)</p>
+</li>
+</ol>
+<h3>Components:</h3><hr>
+<ul>
+<li><strong>AH (Authentication Header)</strong>: Ensures integrity and origin authenticity (no encryption)</li>
+<li><strong>ESP (Encapsulating Security Payload)</strong>: Ensures confidentiality, integrity, and authenticity</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Widely supported and standardized</li>
+<li>Strong security with proper configuration</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Complex configuration</li>
+<li>NAT traversal issues (fixed with NAT-T)</li>
+</ul>
+<hr />
+<h2>2️⃣ <strong>OpenVPN</strong></h2><hr>
+<h3>Overview:</h3><hr>
+<ul>
+<li><strong>Type</strong>: Application-layer protocol</li>
+<li><strong>Encryption</strong>: AES-256, ChaCha20, etc.</li>
+<li><strong>Use case</strong>: Remote-access VPNs, cross-platform VPN clients</li>
+</ul>
+<h3>Transport:</h3><hr>
+<ul>
+<li>Uses <strong>SSL/TLS</strong> for key exchange</li>
+<li>Runs over <strong>UDP</strong> (preferred) or <strong>TCP</strong></li>
+<li>Can use <strong>port 443</strong> to bypass firewalls</li>
+</ul>
+<h3>Security:</h3><hr>
+<ul>
+<li>Authenticated with X.509 certificates or pre-shared keys</li>
+<li>Supports Perfect Forward Secrecy (PFS)</li>
+<li>Optional <strong>TLS Auth (HMAC)</strong> for additional security</li>
+</ul>
+<h3>Tunnel Types:</h3><hr>
+<ul>
+<li><strong>TUN</strong> (layer 3 IP tunneling)</li>
+<li><strong>TAP</strong> (layer 2 Ethernet bridging)</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Highly configurable and robust</li>
+<li>Open-source with large community support</li>
+<li>Works well in restrictive network environments</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Slightly slower than WireGuard</li>
+<li>More overhead and configuration complexity</li>
+</ul>
+<hr />
+<h2>3️⃣ <strong>WireGuard</strong></h2><hr>
+<h3>Overview:</h3><hr>
+<ul>
+<li><strong>Type</strong>: Layer 3 VPN protocol</li>
+<li><strong>Encryption</strong>: ChaCha20-Poly1305, Curve25519</li>
+<li><strong>Use case</strong>: Lightweight, fast VPNs with modern cryptography</li>
+<li><strong>Kernel Integration</strong>: Built into Linux kernel since version 5.6</li>
+</ul>
+<h3>Security Model:</h3><hr>
+<ul>
+<li>Uses state-of-the-art cryptography (no cipher negotiation)</li>
+<li>Minimal attack surface due to smaller codebase (\~4,000 LOC vs \~100,000 in OpenVPN/IPSec)</li>
+<li>Keys: Static <strong>public/private key pairs</strong></li>
+</ul>
+<h3>️ Operation:</h3><hr>
+<ul>
+<li>Stateless and connectionless (no session negotiation)</li>
+<li>Relies on <strong>UDP only</strong></li>
+<li>Uses <strong>roaming</strong> (seamless IP address change without tunnel drop)</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Blazing fast performance (due to kernel-level support and minimal overhead)</li>
+<li>Simple configuration</li>
+<li>High security with modern algorithms</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Newer protocol (not yet widely adopted in enterprise)</li>
+<li>Lacks some features like dynamic IP allocation, username/password auth</li>
+<li>Not as configurable as OpenVPN</li>
+</ul>
+<hr />
+<h2>Comparison Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>IPSec</th>
+<th>OpenVPN</th>
+<th>WireGuard</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OSI Layer</td>
+<td>Network (L3)</td>
+<td>Application (L5)</td>
+<td>Network (L3)</td>
+</tr>
+<tr>
+<td>Encryption</td>
+<td>AES, 3DES</td>
+<td>AES, ChaCha20</td>
+<td>ChaCha20-Poly1305</td>
+</tr>
+<tr>
+<td>Protocol</td>
+<td>IP</td>
+<td>TCP/UDP</td>
+<td>UDP only</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>Moderate</td>
+<td>Moderate</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Configuration</td>
+<td>Complex</td>
+<td>Moderate</td>
+<td>Simple</td>
+</tr>
+<tr>
+<td>NAT Traversal</td>
+<td>Needs NAT-T</td>
+<td>Native Support</td>
+<td>Native Support</td>
+</tr>
+<tr>
+<td>Mobile Roaming</td>
+<td>Poor</td>
+<td>Moderate</td>
+<td>Excellent</td>
+</tr>
+<tr>
+<td>Codebase Size</td>
+<td>Large</td>
+<td>Large</td>
+<td>Small (\~4K LOC)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Each VPN protocol has its strengths and best-use scenarios:</p>
+<ul>
+<li><strong>IPSec</strong> is best for <strong>site-to-site</strong> corporate VPNs where security and compatibility are crucial.</li>
+<li><strong>OpenVPN</strong> is a versatile, widely supported option for both site-to-site and client VPNs, particularly in <strong>cross-platform</strong> environments.</li>
+<li><strong>WireGuard</strong> is emerging as the preferred choice for <strong>speed, simplicity, and modern cryptography</strong>, especially on <strong>mobile and embedded devices</strong>.</li>
+</ul>
+<p>For most modern applications, <strong>WireGuard</strong> is a compelling choice unless compatibility or fine-grained control requires OpenVPN or IPSec.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

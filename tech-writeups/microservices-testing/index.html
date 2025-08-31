@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - microservices-testing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>microservices-testing</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/microservices-testing/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Testing in Microservices with Contract Testing</h1><hr>
+<h2>Introduction</h2><hr>
+<p>Microservices architecture splits an application into small, loosely coupled services that communicate over APIs. While this enables scalability and flexibility, <strong>testing</strong> becomes more complex due to independent deployments, service versioning, and inter-service communication.</p>
+<p><strong>Contract Testing</strong> provides a solution to this complexity by ensuring that <strong>inter-service interactions</strong> are consistent and reliable without relying on full integration or end-to-end tests.</p>
+<hr />
+<h2>What is Contract Testing?</h2><hr>
+<p><strong>Contract Testing</strong> is a testing strategy that verifies that services (typically API consumers and providers) agree on the <strong>format and content of requests and responses</strong>—their "contract."</p>
+<p>It avoids the overhead of spinning up real services or environments by simulating interactions.</p>
+<h3>Roles in Contract Testing:</h3><hr>
+<ul>
+<li><strong>Consumer</strong>: Service making the API call.</li>
+<li><strong>Provider</strong>: Service receiving the API call.</li>
+<li><strong>Contract</strong>: JSON or YAML document describing the expected request-response interaction.</li>
+</ul>
+<hr />
+<h2>️ Why Contract Testing in Microservices?</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Challenge in Microservices</th>
+<th>How Contract Testing Helps</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tight Coupling</td>
+<td>Encourages clear API boundaries</td>
+</tr>
+<tr>
+<td>Independent Deployments</td>
+<td>Enables compatibility checks before releases</td>
+</tr>
+<tr>
+<td>Slow/Flaky End-to-End Tests</td>
+<td>Provides fast, reliable feedback loops</td>
+</tr>
+<tr>
+<td>Difficult Integration Setup</td>
+<td>Works without full environments or real services</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>How Contract Testing Works</h2><hr>
+<h3>1. <strong>Consumer Creates a Contract</strong></h3><hr>
+<p>The consumer defines the expected interactions with a provider (e.g., GET <code>/users/1</code> returns a user object). This is usually done in test code.</p>
+<h3>2. <strong>Contract is Shared with Provider</strong></h3><hr>
+<p>This contract is published to a <strong>contract broker</strong> (e.g., <a href="https://docs.pact.io/pact_broker">Pact Broker</a>).</p>
+<h3>3. <strong>Provider Verifies the Contract</strong></h3><hr>
+<p>The provider uses the contract to verify it can fulfill the requests defined by the consumer.</p>
+<hr />
+<h2>Example with Pact (Python + Flask)</h2><hr>
+<h3>Consumer Test</h3><hr>
+<pre class="codehilite"><code class="language-python">from pact import Consumer, Provider
+import requests
+
+pact = Consumer('user-service').has_pact_with(Provider('auth-service'))
+pact.start_service()
+
+def test_get_user():
+    expected = {'id': 1, 'name': 'Anish'}
+    pact.given('User with ID 1 exists').upon_receiving('a request for user 1')\
+        .with_request('get', '/users/1')\
+        .will_respond_with(200, body=expected)
+
+    with pact:
+        response = requests.get('http://localhost:1234/users/1')
+        assert response.json() == expected
+</code></pre>
+
+<p>This test generates a contract file describing this interaction.</p>
+<h3>Provider Verification</h3><hr>
+<p>The <code>auth-service</code> runs verification tests using this contract to ensure it can return the expected response.</p>
+<hr />
+<h2>Contract Broker</h2><hr>
+<p>A <strong>contract broker</strong> stores and shares contracts between services. It supports:</p>
+<ul>
+<li>Versioning</li>
+<li>Tags (e.g., <code>prod</code>, <code>dev</code>)</li>
+<li>CI/CD integration (e.g., verifying contract before deployment)</li>
+</ul>
+<p>Popular option: <a href="https://pact.io/pact_broker">Pact Broker</a></p>
+<hr />
+<h2>Workflow in CI/CD</h2><hr>
+<ol>
+<li>Consumer commits a contract → pushes to broker.</li>
+<li>Provider fetches and verifies contract.</li>
+<li>CI ensures contracts are valid before deployments.</li>
+</ol>
+<hr />
+<h2>Benefits of Contract Testing</h2><hr>
+<ul>
+<li><strong>Faster Feedback</strong>: Avoids costly E2E tests.</li>
+<li><strong>Reliable Deployments</strong>: Fewer integration failures.</li>
+<li><strong>Supports CI/CD</strong>: Shift-left testing of API compatibility.</li>
+<li><strong>Clear Ownership</strong>: Each team owns their API boundaries.</li>
+</ul>
+<hr />
+<h2>️ Limitations</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Limitation</th>
+<th>Workaround or Consideration</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Doesn’t test actual networks</td>
+<td>Combine with integration tests</td>
+</tr>
+<tr>
+<td>Can be brittle with schema changes</td>
+<td>Use versioning, backward compatibility</td>
+</tr>
+<tr>
+<td>Limited visibility into logic</td>
+<td>Use in combination with unit &amp; service tests</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Where Does It Fit in Test Strategy?</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Test Type</th>
+<th>Scope</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unit Tests</td>
+<td>Internal logic</td>
+<td>Fast, local validation</td>
+</tr>
+<tr>
+<td>Integration Tests</td>
+<td>Internal + Dependencies</td>
+<td>Validates service integration</td>
+</tr>
+<tr>
+<td><strong>Contract Tests</strong></td>
+<td>API boundaries</td>
+<td>Validates request/response</td>
+</tr>
+<tr>
+<td>E2E Tests</td>
+<td>Full system</td>
+<td>Validates business flows</td>
+</tr>
+</tbody>
+</table>
+<p>Use <strong>contract tests as a bridge</strong> between unit and integration tests.</p>
+<hr />
+<h2>Tools for Contract Testing</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Language Support</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Pact</strong></td>
+<td>JS, Python, Java, Go</td>
+<td>Widely used, Pact Broker support</td>
+</tr>
+<tr>
+<td><strong>Spring Cloud Contract</strong></td>
+<td>Java</td>
+<td>Great for Spring Boot microservices</td>
+</tr>
+<tr>
+<td><strong>Hoverfly</strong></td>
+<td>HTTP simulation</td>
+<td>Good for mocking over HTTP</td>
+</tr>
+<tr>
+<td><strong>Dredd</strong></td>
+<td>OpenAPI validator</td>
+<td>Validates API against OpenAPI docs</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Summary</h2><hr>
+<p>Contract Testing is essential for microservices to ensure communication is reliable, versioned, and testable. It reduces test complexity while increasing confidence in API interactions.</p>
+<h3>Use Contract Testing When:</h3><hr>
+<ul>
+<li>Services are developed independently</li>
+<li>You want fast CI pipelines</li>
+<li>You're struggling with flaky integration tests</li>
+</ul>
+<h3>Avoid Relying Only on Contract Tests When:</h3><hr>
+<ul>
+<li>You need to verify end-to-end business flows</li>
+<li>You need to test real-world data or side effects</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

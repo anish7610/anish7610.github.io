@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - data-pipelines</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>data-pipelines</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/data-pipelines/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Data Pipelines: Batch vs Stream</h1><hr>
+<p>Modern data-driven systems rely heavily on efficient data pipelines to extract, process, and move data from source systems to analytical platforms. Two primary paradigms exist in data processing: <strong>Batch Processing</strong> and <strong>Stream Processing</strong>. Choosing between them depends on latency needs, data volume, complexity, and infrastructure.</p>
+<hr />
+<h2>1. Overview</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Batch Processing</th>
+<th>Stream Processing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Processing Mode</td>
+<td>Periodic (e.g., hourly, daily)</td>
+<td>Continuous (real-time or near real-time)</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>Minutes to hours</td>
+<td>Milliseconds to seconds</td>
+</tr>
+<tr>
+<td>Data Size</td>
+<td>Large volumes at once</td>
+<td>Small pieces, continuously flowing</td>
+</tr>
+<tr>
+<td>Use Cases</td>
+<td>ETL, reporting, backups</td>
+<td>Fraud detection, monitoring, alerting</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>Hadoop, AWS Glue, Apache Nifi</td>
+<td>Kafka Streams, Apache Flink, Spark Streaming</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Batch Processing</h2><hr>
+<h3>How It Works:</h3><hr>
+<p>Data is collected over a period, stored, and then processed as a group (batch). For example, processing all sales transactions at the end of the day.</p>
+<h3>Architecture:</h3><hr>
+<ul>
+<li><strong>Ingestion</strong>: Data is read from logs/files (e.g., S3, HDFS).</li>
+<li><strong>Transformation</strong>: Performed using frameworks like Apache Spark or MapReduce.</li>
+<li><strong>Storage/Output</strong>: Results are stored in databases, warehouses (like Snowflake, Redshift).</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Efficient for large volumes.</li>
+<li>Simpler to implement and maintain.</li>
+<li>Ideal for data analysis that isn’t time-sensitive.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Not suitable for real-time needs.</li>
+<li>Delayed data visibility and insights.</li>
+</ul>
+<hr />
+<h2>3. Stream Processing</h2><hr>
+<h3>How It Works:</h3><hr>
+<p>Processes data as it arrives, record by record. Useful in scenarios where immediate decisions or actions are needed (e.g., processing sensor data or financial transactions).</p>
+<h3>Architecture:</h3><hr>
+<ul>
+<li><strong>Source</strong>: Kafka, Pulsar, or a real-time database.</li>
+<li><strong>Processor</strong>: Spark Streaming, Flink, or Apache Beam.</li>
+<li><strong>Sink</strong>: Real-time dashboards, databases, or alerts.</li>
+</ul>
+<h3>Pros:</h3><hr>
+<ul>
+<li>Real-time analytics and actions.</li>
+<li>Enables dynamic dashboards and live user feedback.</li>
+<li>Faster anomaly or fraud detection.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>More complex architecture.</li>
+<li>Requires state management and fault tolerance.</li>
+<li>Debugging and testing can be harder.</li>
+</ul>
+<hr />
+<h2>4. Key Design Considerations</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Criteria</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Latency</strong></td>
+<td>Real-time systems need low latency; batch can tolerate delay.</td>
+</tr>
+<tr>
+<td><strong>Scalability</strong></td>
+<td>Both systems should scale, but streaming needs fine-grained resource tuning.</td>
+</tr>
+<tr>
+<td><strong>Fault Tolerance</strong></td>
+<td>Stream processors must handle retries, checkpoints, and state recovery.</td>
+</tr>
+<tr>
+<td><strong>Ordering Guarantees</strong></td>
+<td>Stream processing might face out-of-order data; batch is more deterministic.</td>
+</tr>
+<tr>
+<td><strong>Throughput</strong></td>
+<td>Batch systems can handle more data in bulk; streaming needs to be always on.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>5. When to Use What?</h2><hr>
+<h3>Use <strong>Batch Processing</strong> When:</h3><hr>
+<ul>
+<li>Daily reporting or ETL jobs.</li>
+<li>Historical data processing.</li>
+<li>Data can tolerate delay.</li>
+</ul>
+<h3>Use <strong>Stream Processing</strong> When:</h3><hr>
+<ul>
+<li>Monitoring or alerting systems.</li>
+<li>User-facing systems needing real-time updates.</li>
+<li>Time-critical analytics (e.g., fraud detection).</li>
+</ul>
+<hr />
+<h2>6. Hybrid Pipelines: Lambda &amp; Kappa Architectures</h2><hr>
+<ul>
+<li><strong>Lambda Architecture</strong>: Combines batch and stream processing for fault tolerance and real-time analytics.</li>
+<li><strong>Kappa Architecture</strong>: Simplifies by using stream processing for all workloads with replayable logs (e.g., Kafka).</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Both batch and stream processing have unique strengths. Batch is robust and simple for offline analytics, while stream processing is essential for real-time applications. Often, modern data architectures blend both to maximize performance and insight delivery.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

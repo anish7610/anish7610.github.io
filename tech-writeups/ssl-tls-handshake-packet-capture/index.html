@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - ssl-tls-handshake-packet-capture</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>ssl-tls-handshake-packet-capture</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ssl-tls-handshake-packet-capture/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h3>SSL/TLS Handshake with Packet Capture Analysis (Wireshark)</h3><hr>
+<hr />
+<h3>1. Introduction</h3><hr>
+<p>The <strong>SSL/TLS handshake</strong> is the foundational process for establishing a secure communication channel over the internet. It ensures:</p>
+<ul>
+<li><strong>Confidentiality</strong> using encryption</li>
+<li><strong>Integrity</strong> using message authentication codes (MACs)</li>
+<li><strong>Authentication</strong> through certificates</li>
+</ul>
+<p>Wireshark, a network protocol analyzer, is a powerful tool to observe and analyze the handshake in real-time, packet-by-packet.</p>
+<hr />
+<h3>2. SSL vs TLS</h3><hr>
+<ul>
+<li><strong>SSL (Secure Sockets Layer)</strong> is deprecated due to vulnerabilities.</li>
+<li><strong>TLS (Transport Layer Security)</strong> is the modern and secure alternative (TLS 1.2 and TLS 1.3 are widely used).</li>
+</ul>
+<hr />
+<h3>3. TLS Handshake Steps (TLS 1.2)</h3><hr>
+<p>The handshake happens before any application data is transmitted. Here's a breakdown of the typical flow:</p>
+<h4>Step 1: ClientHello</h4>
+<ul>
+<li>Initiated by the client.</li>
+<li>Contains supported <strong>TLS versions</strong>, <strong>cipher suites</strong>, <strong>compression methods</strong>, and <strong>random number</strong>.</li>
+<li>May include <strong>Server Name Indication (SNI)</strong> and <strong>extensions</strong>.</li>
+</ul>
+<h4>Step 2: ServerHello</h4>
+<ul>
+<li>Chosen <strong>TLS version</strong>, <strong>cipher suite</strong>, and another <strong>random number</strong>.</li>
+<li>Server’s <strong>digital certificate</strong>.</li>
+<li><strong>ServerKeyExchange</strong> (if using DHE/ECDHE).</li>
+<li><strong>CertificateRequest</strong> (optional, for mutual authentication).</li>
+</ul>
+<h4>Step 3: ClientKeyExchange</h4>
+<ul>
+<li>Client sends a <strong>pre-master secret</strong>, usually encrypted with the server’s public key.</li>
+<li>Both sides derive a <strong>session key</strong> from the pre-master and random numbers.</li>
+</ul>
+<h4>Step 4: ChangeCipherSpec &amp; Finished</h4>
+<ul>
+<li>Both parties signal readiness to switch to encrypted communication.</li>
+<li>Exchanged <strong>Finished</strong> messages confirm the handshake is complete.</li>
+</ul>
+<hr />
+<h3>4. TLS 1.3 Differences</h3><hr>
+<p>TLS 1.3 significantly streamlines the handshake:</p>
+<ul>
+<li>Removes many insecure cipher suites.</li>
+<li>Merges steps to improve performance.</li>
+<li>Always uses forward secrecy.</li>
+<li>Faster (1-RTT instead of 2-RTT).</li>
+</ul>
+<hr />
+<h3>5. Capturing SSL/TLS Handshake in Wireshark</h3><hr>
+<h4>Step-by-step:</h4>
+<ol>
+<li><strong>Start Wireshark</strong> and begin capture on the network interface.</li>
+<li>Use the display filter:</li>
+</ol>
+<p><code>tls.handshake</code>
+3. Initiate an HTTPS request (e.g., visit <code>https://example.com</code>).
+4. Observe the packets:</p>
+<ul>
+<li><strong>Packet 1</strong>: ClientHello</li>
+<li><strong>Packet 2-3</strong>: ServerHello, Certificate</li>
+<li><strong>Later</strong>: Key exchange, ChangeCipherSpec, Finished</li>
+</ul>
+<hr />
+<h3>6. Interpreting Key Fields in Wireshark</h3><hr>
+<ul>
+<li><strong>Version</strong>: TLS version being negotiated (e.g., TLS 1.2).</li>
+<li><strong>Cipher Suite</strong>: The algorithm combination selected (e.g., TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256).</li>
+<li><strong>Extensions</strong>: ALPN, SNI, etc.</li>
+<li><strong>Certificate Info</strong>: Issuer, subject, validity, etc.</li>
+<li><strong>Random values</strong>: Used for key derivation.</li>
+</ul>
+<hr />
+<h3>7. Decrypting TLS in Wireshark</h3><hr>
+<p>To decrypt TLS traffic:</p>
+<ul>
+<li>Use <strong>pre-master secrets</strong> with browser support (like Chrome or Firefox).</li>
+<li>Set the environment variable:</li>
+</ul>
+<p><code>SSLKEYLOGFILE=/path/to/sslkeys.log</code>
+* Load this file in Wireshark under:</p>
+<p><code>Preferences → Protocols → TLS → (Pre)-Master-Secret log filename</code></p>
+<p>Note: This only works with TLS 1.2 and earlier unless TLS 1.3 is supported in logging.</p>
+<hr />
+<h3>8. Detecting Issues</h3><hr>
+<p>Wireshark helps diagnose:</p>
+<ul>
+<li><strong>Certificate mismatches</strong></li>
+<li><strong>Handshake failures</strong></li>
+<li><strong>Unsupported cipher suite errors</strong></li>
+<li><strong>Version negotiation problems</strong></li>
+<li><strong>Improper certificate chains</strong></li>
+</ul>
+<p>Look for <code>Alert</code> messages in the TLS stream:</p>
+<ul>
+<li>Level: <strong>fatal</strong></li>
+<li>Description: e.g., <strong>handshake_failure</strong>, <strong>bad_certificate</strong></li>
+</ul>
+<hr />
+<h3>9. Real-World Use Cases</h3><hr>
+<ul>
+<li>Debugging HTTPS problems in web applications</li>
+<li>Validating certificate chains and expiry</li>
+<li>Investigating MITM attacks</li>
+<li>Auditing TLS configurations during pentesting or blue-team analysis</li>
+</ul>
+<hr />
+<h3>10. Conclusion</h3><hr>
+<p>Understanding the SSL/TLS handshake at the packet level is vital for secure communications troubleshooting, pentesting, and compliance checks. Wireshark provides an accessible, visual way to trace and validate each handshake phase, from cipher negotiation to certificate exchange.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

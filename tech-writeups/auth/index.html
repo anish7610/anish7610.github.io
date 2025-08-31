@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - Auth</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>Auth</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/auth/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>OAuth 2.0 vs OpenID Connect: Authentication vs Authorization</h1><hr>
+<h2>Introduction</h2><hr>
+<p>Modern web applications often rely on third-party services to manage <strong>user identity</strong> and <strong>access control</strong>. Two widely adopted protocols for these tasks are <strong>OAuth 2.0</strong> and <strong>OpenID Connect (OIDC)</strong>. While they are related, they serve fundamentally different purposes.</p>
+<p>This write-up explores the <strong>technical differences</strong> between OAuth 2.0 and OpenID Connect, focusing on how they handle <strong>authorization</strong> and <strong>authentication</strong>, respectively.</p>
+<hr />
+<h2>What is OAuth 2.0?</h2><hr>
+<p><strong>OAuth 2.0</strong> is an <strong>authorization framework</strong>. It allows a user to grant limited access to their resources stored on one service to another service, without exposing their credentials.</p>
+<h3>Primary Use Case</h3><hr>
+<ul>
+<li><strong>Delegated access to APIs</strong> without sharing credentials.</li>
+<li>Commonly used by applications to access <strong>user data</strong> from services like Google, GitHub, or Facebook.</li>
+</ul>
+<h3>Key Components</h3><hr>
+<ul>
+<li><strong>Resource Owner</strong>: The user who owns the data.</li>
+<li><strong>Client</strong>: The application requesting access to the user’s data.</li>
+<li><strong>Authorization Server</strong>: Issues access tokens after user consent.</li>
+<li><strong>Resource Server</strong>: Hosts the protected resources (APIs).</li>
+</ul>
+<h3>Grant Types</h3><hr>
+<ul>
+<li><strong>Authorization Code</strong> (most secure)</li>
+<li><strong>Client Credentials</strong></li>
+<li><strong>Implicit</strong> (deprecated for SPAs)</li>
+<li><strong>Refresh Token</strong></li>
+<li><strong>Password Grant</strong> (discouraged)</li>
+</ul>
+<h3>What OAuth 2.0 Does</h3><hr>
+<ul>
+<li>Issues <strong>access tokens</strong> to allow access to APIs.</li>
+<li>Defines scopes (e.g., <code>read:user</code>, <code>write:repo</code>) to <strong>limit access</strong>.</li>
+</ul>
+<h3>What OAuth 2.0 Does <em>Not</em> Do</h3><hr>
+<ul>
+<li>Does <strong>not define how to authenticate the user</strong>.</li>
+<li>Does <strong>not return user identity</strong> information by default.</li>
+</ul>
+<hr />
+<h2>What is OpenID Connect?</h2><hr>
+<p><strong>OpenID Connect (OIDC)</strong> is an <strong>authentication layer</strong> built on top of OAuth 2.0.</p>
+<h3>Primary Use Case</h3><hr>
+<ul>
+<li><strong>Single Sign-On (SSO)</strong> and user identity verification.</li>
+<li>Enables apps to <strong>know who the user is</strong>, i.e., <strong>authentication</strong>.</li>
+</ul>
+<h3>What it Adds to OAuth 2.0</h3><hr>
+<ul>
+<li>Introduces an <strong>ID Token</strong>, a JWT (JSON Web Token) that contains user identity information.</li>
+<li>Defines a standard <code>/userinfo</code> endpoint to fetch profile data.</li>
+<li>
+<p>Adds scopes like:</p>
+</li>
+<li>
+<p><code>openid</code> (required to use OIDC)</p>
+</li>
+<li><code>profile</code>, <code>email</code>, etc.</li>
+</ul>
+<h3>ID Token Example (decoded):</h3><hr>
+<pre class="codehilite"><code class="language-json">{
+  &quot;sub&quot;: &quot;248289761001&quot;,
+  &quot;name&quot;: &quot;Jane Doe&quot;,
+  &quot;email&quot;: &quot;janedoe@example.com&quot;,
+  &quot;iss&quot;: &quot;https://accounts.google.com&quot;,
+  &quot;aud&quot;: &quot;client-id&quot;,
+  &quot;exp&quot;: 1625070900
+}
+</code></pre>
+
+<h3>OIDC Flow</h3><hr>
+<ul>
+<li>Reuses OAuth 2.0 Authorization Code flow.</li>
+<li>Additionally returns an <strong>ID Token</strong> alongside the Access Token.</li>
+</ul>
+<hr />
+<h2>Authentication vs Authorization: Key Differences</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>OAuth 2.0</th>
+<th>OpenID Connect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td><strong>Authorization</strong> (access control)</td>
+<td><strong>Authentication</strong> (identity proof)</td>
+</tr>
+<tr>
+<td>Token Returned</td>
+<td>Access Token</td>
+<td>Access Token + <strong>ID Token</strong></td>
+</tr>
+<tr>
+<td>Who Uses It</td>
+<td>APIs</td>
+<td>Web/Mobile apps needing login</td>
+</tr>
+<tr>
+<td>User Info Provided</td>
+<td>No</td>
+<td>Yes (<code>ID Token</code>, <code>/userinfo</code>)</td>
+</tr>
+<tr>
+<td>Is User Authenticated?</td>
+<td>Not guaranteed</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Authorization</strong> = What can the app do?
+ <strong>Authentication</strong> = Who is the user?</p>
+</blockquote>
+<hr />
+<h2>Analogy</h2><hr>
+<p>Imagine logging into a third-party photo editing app using Google:</p>
+<ul>
+<li><strong>OAuth 2.0</strong> lets the app access your Google Drive photos <strong>after you grant permission</strong>.</li>
+<li><strong>OpenID Connect</strong> lets the app <strong>log you in using your Google account</strong>, knowing your name and email.</li>
+</ul>
+<hr />
+<h2>Security Considerations</h2><hr>
+<ul>
+<li>Always validate the <strong>audience (<code>aud</code>)</strong>, <strong>issuer (<code>iss</code>)</strong>, and <strong>expiration (<code>exp</code>)</strong> fields in the ID Token.</li>
+<li>Avoid using <strong>OAuth alone for login</strong> — doing so may lead to <strong>confused deputy problems</strong> or impersonation attacks.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>While OAuth 2.0 and OpenID Connect often coexist, they serve <strong>different security goals</strong>:</p>
+<ul>
+<li>Use <strong>OAuth 2.0</strong> for <strong>secure delegated access</strong> to APIs.</li>
+<li>Use <strong>OpenID Connect</strong> when you need to <strong>identify and authenticate users</strong>.</li>
+</ul>
+<p>When designing modern web and mobile apps, understanding and correctly implementing both is essential to ensure secure authentication and authorization mechanisms.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

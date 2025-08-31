@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - dependency-injection</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>dependency-injection</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/dependency-injection/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Dependency Injection with Real-Life Examples</h1><hr>
+<p><strong>Dependency Injection (DI)</strong> is a design pattern used in software engineering to reduce tight coupling between components, making code more modular, testable, and maintainable. It allows objects to receive their dependencies from external sources rather than creating them internally.</p>
+<hr />
+<h2>What is Dependency Injection?</h2><hr>
+<p>In traditional programming, a class often creates and manages its dependencies:</p>
+<pre class="codehilite"><code class="language-python">class Service:
+    def process(self):
+        print(&quot;Processing...&quot;)
+
+class Client:
+    def __init__(self):
+        self.service = Service()  # tightly coupled
+
+    def do_work(self):
+        self.service.process()
+</code></pre>
+
+<p>Here, <code>Client</code> is tightly coupled to <code>Service</code>. If we want to test <code>Client</code> with a mock or swap out <code>Service</code>, we’ll need to modify the code.</p>
+<p>With <strong>Dependency Injection</strong>, we pass the dependency externally:</p>
+<pre class="codehilite"><code class="language-python">class Client:
+    def __init__(self, service):
+        self.service = service
+
+    def do_work(self):
+        self.service.process()
+</code></pre>
+
+<p>Now, <code>Client</code> is decoupled from the <code>Service</code> implementation.</p>
+<hr />
+<h2>️ Types of Dependency Injection</h2><hr>
+<ol>
+<li><strong>Constructor Injection</strong>
+   Dependencies are passed via the class constructor.</li>
+</ol>
+<p><code>python
+   class Controller:
+       def __init__(self, repository):
+           self.repo = repository</code></p>
+<ol>
+<li><strong>Setter Injection</strong>
+   Dependencies are set via setter methods after object construction.</li>
+</ol>
+<p><code>python
+   controller = Controller()
+   controller.set_repository(repo)</code></p>
+<ol>
+<li><strong>Interface Injection</strong> (less common in Python)
+   The dependency exposes a method that the consumer calls to pass itself.</li>
+</ol>
+<hr />
+<h2>Real-Life Examples</h2><hr>
+<h3>1. <strong>Web Applications (Flask)</strong></h3><hr>
+<p>Using Flask with service classes:</p>
+<pre class="codehilite"><code class="language-python">class UserService:
+    def get_user(self, user_id):
+        return {&quot;id&quot;: user_id, &quot;name&quot;: &quot;Anish&quot;}
+
+class UserController:
+    def __init__(self, user_service):
+        self.user_service = user_service
+
+    def get_user(self, user_id):
+        return self.user_service.get_user(user_id)
+
+# App setup
+user_service = UserService()
+user_controller = UserController(user_service)
+</code></pre>
+
+<p>This pattern allows you to replace <code>UserService</code> with a mock in tests.</p>
+<hr />
+<h3>2. <strong>Testing with Mocks</strong></h3><hr>
+<pre class="codehilite"><code class="language-python">class MockService:
+    def process(self):
+        print(&quot;Mocked!&quot;)
+
+client = Client(MockService())
+client.do_work()  # prints &quot;Mocked!&quot;
+</code></pre>
+
+<p>DI makes testing easy without needing complex setups or modifying core logic.</p>
+<hr />
+<h3>3. <strong>JavaScript Frontend (React)</strong></h3><hr>
+<p>React's <strong>Context API</strong> or props pattern is a form of dependency injection:</p>
+<pre class="codehilite"><code class="language-jsx">function App() {
+  return &lt;UserProvider&gt;&lt;Dashboard /&gt;&lt;/UserProvider&gt;;
+}
+
+function Dashboard() {
+  const user = useUser(); // injected from context
+}
+</code></pre>
+
+<hr />
+<h3>4. <strong>Framework Support</strong></h3><hr>
+<ul>
+<li><strong>Spring (Java)</strong> – built-in support for DI using annotations like <code>@Autowired</code></li>
+<li><strong>Angular</strong> – powerful DI system for injecting services into components</li>
+<li><strong>FastAPI / Flask / Django</strong> – can implement DI via constructor-based or third-party libs like <code>dependency-injector</code></li>
+</ul>
+<hr />
+<h2>Benefits of DI</h2><hr>
+<ul>
+<li>Loose coupling</li>
+<li>Easier unit testing</li>
+<li>Improved code reuse</li>
+<li>Swappable implementations (e.g., SQL vs NoSQL backends)</li>
+</ul>
+<hr />
+<h2>️ Caveats</h2><hr>
+<ul>
+<li>Can introduce complexity</li>
+<li>Overhead of managing containers/injectors</li>
+<li>May reduce readability for newcomers</li>
+</ul>
+<hr />
+<h2>Python Libraries for DI</h2><hr>
+<ul>
+<li><a href="https://python-dependency-injector.ets-labs.org/"><code>dependency-injector</code></a></li>
+<li><a href="https://github.com/ivankorobkov/python-inject"><code>inject</code></a></li>
+</ul>
+<p>Example using <code>dependency-injector</code>:</p>
+<pre class="codehilite"><code class="language-python">from dependency_injector import containers, providers
+
+class Service:
+    def process(self):
+        print(&quot;Injected!&quot;)
+
+class Container(containers.DeclarativeContainer):
+    service = providers.Factory(Service)
+
+container = Container()
+service = container.service()
+service.process()
+</code></pre>
+
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Dependency Injection fosters flexibility and testability in modern codebases. While not always necessary in simple scripts, it becomes indispensable in large-scale applications and microservices where decoupling is key.</p>
+<p>Use it when:</p>
+<ul>
+<li>Components have multiple responsibilities</li>
+<li>You need testability with mocks/stubs</li>
+<li>You want to follow SOLID principles (esp. the D in <strong>D</strong>IP)</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

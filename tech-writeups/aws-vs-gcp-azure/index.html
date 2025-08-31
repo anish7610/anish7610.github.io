@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - aws-vs-gcp-azure</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>aws-vs-gcp-azure</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/aws-vs-gcp-azure/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>AWS vs Azure vs GCP: Core Services Compared</h1><hr>
+<hr />
+<h3>Introduction</h3><hr>
+<p>The three major cloud providers—<strong>Amazon Web Services (AWS)</strong>, <strong>Microsoft Azure</strong>, and <strong>Google Cloud Platform (GCP)</strong>—offer robust, scalable cloud computing services. Though similar in foundational services (compute, storage, networking), they differ in implementation, ecosystem, pricing, and target audience.</p>
+<p>This writeup compares their <strong>core services</strong> across critical categories:</p>
+<hr />
+<h3>️ 1. <strong>Compute Services</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Virtual Machines</td>
+<td>EC2 (Elastic Compute Cloud)</td>
+<td>Azure Virtual Machines</td>
+<td>Compute Engine</td>
+</tr>
+<tr>
+<td>Serverless</td>
+<td>AWS Lambda</td>
+<td>Azure Functions</td>
+<td>Cloud Functions</td>
+</tr>
+<tr>
+<td>Container Services</td>
+<td>ECS, EKS</td>
+<td>Azure Kubernetes Service (AKS)</td>
+<td>GKE (Google Kubernetes Engine)</td>
+</tr>
+<tr>
+<td>Autoscaling</td>
+<td>Auto Scaling Groups (ASG)</td>
+<td>VM Scale Sets</td>
+<td>Managed Instance Groups</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Highlight</strong>: AWS offers more instance types and customization; GCP emphasizes fast boot and billing per second.</li>
+</ul>
+<hr />
+<h3>️ 2. <strong>Storage Services</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Object Storage</td>
+<td>S3</td>
+<td>Blob Storage</td>
+<td>Cloud Storage</td>
+</tr>
+<tr>
+<td>Block Storage</td>
+<td>EBS</td>
+<td>Managed Disks</td>
+<td>Persistent Disks</td>
+</tr>
+<tr>
+<td>File Storage</td>
+<td>EFS</td>
+<td>Azure Files</td>
+<td>Filestore</td>
+</tr>
+<tr>
+<td>Cold/Archival Storage</td>
+<td>Glacier</td>
+<td>Archive Storage</td>
+<td>Archive Storage</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Highlight</strong>: S3 is the industry standard for object storage; GCP shines with lifecycle rules and multi-region buckets.</li>
+</ul>
+<hr />
+<h3>3. <strong>Networking Services</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Virtual Network</td>
+<td>VPC</td>
+<td>Virtual Network (VNet)</td>
+<td>VPC</td>
+</tr>
+<tr>
+<td>Load Balancer</td>
+<td>Elastic Load Balancing</td>
+<td>Azure Load Balancer / App GW</td>
+<td>Cloud Load Balancing</td>
+</tr>
+<tr>
+<td>DNS</td>
+<td>Route 53</td>
+<td>Azure DNS</td>
+<td>Cloud DNS</td>
+</tr>
+<tr>
+<td>CDN</td>
+<td>CloudFront</td>
+<td>Azure CDN</td>
+<td>Cloud CDN</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Highlight</strong>: GCP provides global load balancers that aren’t region-bound, making it strong for multi-region apps.</li>
+</ul>
+<hr />
+<h3>4. <strong>Identity &amp; Access Management</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>IAM</td>
+<td>IAM</td>
+<td>Azure Active Directory (AAD)</td>
+<td>IAM</td>
+</tr>
+<tr>
+<td>Role-Based Access</td>
+<td>Supported</td>
+<td>Supported</td>
+<td>Supported</td>
+</tr>
+<tr>
+<td>SSO</td>
+<td>AWS SSO</td>
+<td>Azure AD with SSO</td>
+<td>Identity Platform</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Highlight</strong>: Azure’s strength lies in its tight integration with AAD for enterprise identity systems.</li>
+</ul>
+<hr />
+<h3>5. <strong>Databases</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Relational</td>
+<td>RDS (MySQL, PostgreSQL, etc.)</td>
+<td>Azure SQL Database</td>
+<td>Cloud SQL</td>
+</tr>
+<tr>
+<td>NoSQL</td>
+<td>DynamoDB</td>
+<td>Cosmos DB</td>
+<td>Firestore / Bigtable</td>
+</tr>
+<tr>
+<td>Data Warehousing</td>
+<td>Redshift</td>
+<td>Synapse Analytics</td>
+<td>BigQuery</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Highlight</strong>: BigQuery is highly optimized for analytics; Cosmos DB is globally distributed and multi-model.</li>
+</ul>
+<hr />
+<h3>6. <strong>AI/ML Services</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ML Platform</td>
+<td>SageMaker</td>
+<td>Azure ML Studio</td>
+<td>Vertex AI</td>
+</tr>
+<tr>
+<td>NLP/Translation</td>
+<td>Comprehend, Translate</td>
+<td>Text Analytics, Translator</td>
+<td>Natural Language API, Translate</td>
+</tr>
+<tr>
+<td>Vision</td>
+<td>Rekognition</td>
+<td>Azure Computer Vision</td>
+<td>Vision API</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>Highlight</strong>: GCP leads in AI with Vertex AI and tight TensorFlow integration.</li>
+</ul>
+<hr />
+<h3>️ 7. <strong>DevOps &amp; CI/CD Tools</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CI/CD</td>
+<td>CodePipeline, CodeBuild</td>
+<td>Azure DevOps, GitHub Actions</td>
+<td>Cloud Build, Cloud Deploy</td>
+</tr>
+<tr>
+<td>Infrastructure as Code</td>
+<td>CloudFormation</td>
+<td>ARM/Bicep</td>
+<td>Deployment Manager, Terraform</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>CloudWatch</td>
+<td>Azure Monitor</td>
+<td>Cloud Operations Suite</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>8. <strong>Pricing Model</strong></h3><hr>
+<ul>
+<li><strong>AWS</strong>: Pay-as-you-go + Reserved + Spot Instances</li>
+<li><strong>Azure</strong>: Pay-as-you-go + Reserved + Hybrid Benefits</li>
+<li><strong>GCP</strong>: Per-second billing, sustained use discounts</li>
+</ul>
+<p><strong>GCP</strong> is often considered most cost-effective for <strong>ephemeral</strong> workloads; <strong>AWS</strong> provides fine-grained billing with a rich marketplace.</p>
+<hr />
+<h3>Summary Table</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>AWS</th>
+<th>Azure</th>
+<th>GCP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Compute</td>
+<td>EC2, Lambda</td>
+<td>VM, Functions</td>
+<td>Compute Engine</td>
+</tr>
+<tr>
+<td>Object Storage</td>
+<td>S3</td>
+<td>Blob Storage</td>
+<td>Cloud Storage</td>
+</tr>
+<tr>
+<td>Container Orchestration</td>
+<td>ECS, EKS</td>
+<td>AKS</td>
+<td>GKE</td>
+</tr>
+<tr>
+<td>DB &amp; Data</td>
+<td>RDS, DynamoDB</td>
+<td>SQL DB, Cosmos</td>
+<td>Cloud SQL, BQ</td>
+</tr>
+<tr>
+<td>IAM &amp; Identity</td>
+<td>IAM</td>
+<td>AAD</td>
+<td>IAM</td>
+</tr>
+<tr>
+<td>AI/ML</td>
+<td>SageMaker</td>
+<td>Azure ML</td>
+<td>Vertex AI</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>CodePipeline</td>
+<td>Azure DevOps</td>
+<td>Cloud Build</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Conclusion</h3><hr>
+<ul>
+<li><strong>AWS</strong> is the most mature and has the largest ecosystem.</li>
+<li><strong>Azure</strong> integrates deeply with Windows environments and Active Directory.</li>
+<li><strong>GCP</strong> excels at data analytics, ML, and developer-friendly pricing.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

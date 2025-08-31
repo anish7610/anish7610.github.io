@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - virtual-memory</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>virtual-memory</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/virtual-memory/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Virtual Memory, Paging, and Swapping Explained</h1><hr>
+<p>Efficient memory management is critical for any modern operating system. <strong>Virtual memory</strong>, <strong>paging</strong>, and <strong>swapping</strong> are key mechanisms that make it possible to run large and multiple applications on limited physical RAM, while maintaining system stability and performance.</p>
+<hr />
+<h2>1. Virtual Memory</h2><hr>
+<h3>What is Virtual Memory?</h3><hr>
+<p>Virtual memory is an abstraction where each process is given the <strong>illusion</strong> of having access to a large, contiguous block of memory, even if the physical RAM is smaller or fragmented.</p>
+<blockquote>
+<p>Think of it as a <strong>virtualized address space</strong> — the OS and CPU translate virtual addresses into physical ones.</p>
+</blockquote>
+<h3>Why Use Virtual Memory?</h3><hr>
+<ul>
+<li><strong>Isolation</strong>: Each process is protected from accessing another’s memory.</li>
+<li><strong>Convenience</strong>: Programmers don't need to manage physical addresses.</li>
+<li><strong>Flexibility</strong>: Enables <strong>memory overcommitment</strong> and efficient use of RAM.</li>
+</ul>
+<h3>How It Works:</h3><hr>
+<ul>
+<li>The <strong>MMU (Memory Management Unit)</strong> in the CPU translates <strong>Virtual Addresses (VA)</strong> to <strong>Physical Addresses (PA)</strong> using <strong>page tables</strong>.</li>
+<li>The OS maintains a mapping for each process's virtual address space.</li>
+</ul>
+<hr />
+<h2>2. Paging</h2><hr>
+<h3>What is Paging?</h3><hr>
+<p>Paging divides memory into fixed-size blocks:</p>
+<ul>
+<li><strong>Pages</strong> (virtual memory): usually 4 KB each</li>
+<li><strong>Page Frames</strong> (physical memory): same size</li>
+</ul>
+<p>The OS maintains a <strong>page table</strong> for each process, mapping virtual pages to physical frames.</p>
+<h3>Benefits of Paging:</h3><hr>
+<ul>
+<li><strong>No external fragmentation</strong></li>
+<li>Enables <strong>non-contiguous allocation</strong></li>
+<li>Easy to implement <strong>demand paging</strong> (load pages only when needed)</li>
+</ul>
+<h3>Page Table Mechanics:</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Virtual Address</th>
+<th>→</th>
+<th>Page Table</th>
+<th>→</th>
+<th>Physical Address</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>Each memory access goes through the <strong>page table lookup</strong>, often cached via <strong>TLB (Translation Lookaside Buffer)</strong> for performance.</li>
+</ul>
+<hr />
+<h2>3. Swapping</h2><hr>
+<h3>What is Swapping?</h3><hr>
+<p>Swapping moves <strong>pages of memory</strong> to disk when physical RAM is full.</p>
+<ul>
+<li>Pages not currently in use are written to a <strong>swap space</strong> (a swap file or partition).</li>
+<li>Later, if the process needs that page again, it is <strong>paged back into RAM</strong>, possibly pushing another page out.</li>
+</ul>
+<blockquote>
+<p>This mechanism is called <strong>demand paging with swapping</strong>.</p>
+</blockquote>
+<h3>Swap Space:</h3><hr>
+<ul>
+<li>Defined at install time or dynamically via a file.</li>
+<li>Managed by the OS.</li>
+<li>Much slower than RAM (\~100x slower), but prevents out-of-memory crashes.</li>
+</ul>
+<h3>Linux Tools:</h3><hr>
+<ul>
+<li><code>free -h</code> → See swap usage.</li>
+<li><code>swapon -s</code> → View active swap devices.</li>
+<li><code>vmstat</code> → Monitor swapping activity.</li>
+<li><code>top/htop</code> → Live view of memory and swap usage.</li>
+</ul>
+<hr />
+<h2>Performance Implications</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Mechanism</th>
+<th>Speed</th>
+<th>Memory Location</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RAM Access</td>
+<td>Fast</td>
+<td>Physical RAM</td>
+<td>Active data</td>
+</tr>
+<tr>
+<td>Swapped Page</td>
+<td>Very Slow</td>
+<td>Disk</td>
+<td>Idle or rarely-used pages</td>
+</tr>
+<tr>
+<td>Page Fault</td>
+<td>Slow</td>
+<td>Triggers disk I/O</td>
+<td>When accessing swapped-out page</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>️ <strong>Thrashing</strong> occurs when the system spends more time swapping pages in and out than doing useful work — typically due to insufficient RAM.</p>
+</blockquote>
+<hr />
+<h2>Key Terms Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Virtual Memory</td>
+<td>Abstract memory space provided to each process</td>
+</tr>
+<tr>
+<td>Physical Memory</td>
+<td>Actual RAM installed on the system</td>
+</tr>
+<tr>
+<td>Page</td>
+<td>Fixed-size block of virtual memory (e.g., 4 KB)</td>
+</tr>
+<tr>
+<td>Frame</td>
+<td>Fixed-size block of physical memory</td>
+</tr>
+<tr>
+<td>Page Table</td>
+<td>Maps virtual pages to physical frames</td>
+</tr>
+<tr>
+<td>Swap Space</td>
+<td>Disk area used as an overflow when RAM is full</td>
+</tr>
+<tr>
+<td>Page Fault</td>
+<td>Interrupt caused by accessing a page not in RAM</td>
+</tr>
+<tr>
+<td>TLB</td>
+<td>Hardware cache of recent page table entries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Real-World Analogy</h2><hr>
+<ul>
+<li><strong>Virtual Memory</strong> = A large office desk with many drawers (virtual space)</li>
+<li><strong>RAM</strong> = The part of the desk where you’re currently working</li>
+<li><strong>Swap</strong> = A cabinet in another room (slow to reach)</li>
+<li><strong>Page Table</strong> = The index showing where each document is located</li>
+</ul>
+<hr />
+<h2>Example (Linux)</h2><hr>
+<pre class="codehilite"><code class="language-bash"># Check total memory and swap usage
+free -h
+
+# Add a 1GB swap file
+sudo fallocate -l 1G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+
+# Make it permanent
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+</code></pre>
+
+<hr />
+<h2>Conclusion</h2><hr>
+<ul>
+<li><strong>Virtual memory</strong> provides abstraction and isolation.</li>
+<li><strong>Paging</strong> enables fine-grained memory management without fragmentation.</li>
+<li><strong>Swapping</strong> allows the system to handle memory pressure, albeit with a performance cost.</li>
+</ul>
+<p>Understanding these mechanisms helps in tuning systems, debugging performance issues, and building efficient applications.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

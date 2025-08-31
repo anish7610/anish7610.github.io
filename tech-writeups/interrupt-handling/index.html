@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - interrupt-handling</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>interrupt-handling</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/interrupt-handling/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Interrupt Handling and Context Switching in Kernel</h1><hr>
+<p>Efficient multitasking and hardware responsiveness in modern operating systems are enabled by two key mechanisms in the kernel: <strong>interrupt handling</strong> and <strong>context switching</strong>. These are fundamental to how the kernel orchestrates processes, handles external events, and maintains CPU utilization.</p>
+<hr />
+<h2>1. What is an Interrupt?</h2><hr>
+<p>An <strong>interrupt</strong> is a signal emitted by hardware or software to the processor, indicating an event that needs immediate attention.</p>
+<h3>Types of Interrupts:</h3><hr>
+<ul>
+<li><strong>Hardware Interrupts:</strong> Generated by devices (e.g., keyboard, network card, timer).</li>
+<li><strong>Software Interrupts:</strong> Generated by programs (e.g., system calls, exceptions).</li>
+</ul>
+<h3>Lifecycle of an Interrupt:</h3><hr>
+<ol>
+<li><strong>Interrupt signal</strong> is raised by a device or software.</li>
+<li>The <strong>CPU stops current execution</strong>.</li>
+<li>CPU consults the <strong>Interrupt Descriptor Table (IDT)</strong>.</li>
+<li>Corresponding <strong>Interrupt Service Routine (ISR)</strong> is executed.</li>
+<li>ISR completes, and control is returned (possibly to a different task).</li>
+</ol>
+<hr />
+<h2>2. Interrupt Handling in the Kernel</h2><hr>
+<p>When an interrupt occurs:</p>
+<ol>
+<li>
+<p><strong>Interrupt Context</strong>:</p>
+</li>
+<li>
+<p>The kernel enters a special context where regular process scheduling is suspended.</p>
+</li>
+<li>
+<p>It saves the state of the current task (registers, stack pointer).</p>
+</li>
+<li>
+<p><strong>Top Half and Bottom Half</strong>:</p>
+</li>
+<li>
+<p><strong>Top Half (ISR):</strong> Runs immediately; does minimal work (acknowledges interrupt).</p>
+</li>
+<li>
+<p><strong>Bottom Half:</strong> Deferred work using mechanisms like:</p>
+<ul>
+<li>SoftIRQs</li>
+<li>Tasklets</li>
+<li>Workqueues</li>
+</ul>
+</li>
+</ol>
+<p>These bottom halves are scheduled to run later when it is safe to sleep or schedule tasks.</p>
+<hr />
+<h2>3. What is Context Switching?</h2><hr>
+<p><strong>Context switching</strong> is the act of saving the state of one process/thread and loading the state of another, allowing the CPU to switch between tasks.</p>
+<h3>Types:</h3><hr>
+<ul>
+<li><strong>Process context switch</strong> (between different processes)</li>
+<li><strong>Thread context switch</strong> (between threads of the same or different processes)</li>
+</ul>
+<h3>Steps in Context Switching:</h3><hr>
+<ol>
+<li><strong>Save context</strong> of current task (registers, program counter, stack pointer).</li>
+<li><strong>Update kernel data structures</strong> (task scheduler, CPU state).</li>
+<li><strong>Load context</strong> of the next task.</li>
+<li><strong>Transfer control</strong> to the new task.</li>
+</ol>
+<hr />
+<h2>4. Context Switching and the Scheduler</h2><hr>
+<p>The <strong>Linux scheduler</strong> (CFS – Completely Fair Scheduler) decides which task runs next based on priorities and fairness.</p>
+<p>Interrupts can:</p>
+<ul>
+<li><strong>Preempt the current task</strong>, forcing a context switch.</li>
+<li><strong>Schedule deferred work</strong>, which may also cause a switch.</li>
+</ul>
+<h3>Involuntary Switch:</h3><hr>
+<p>Triggered by:</p>
+<ul>
+<li>Timer interrupts (preemption)</li>
+<li>I/O wait</li>
+<li>Kernel yields</li>
+</ul>
+<h3>Voluntary Switch:</h3><hr>
+<p>Triggered by:</p>
+<ul>
+<li>Process calling <code>sleep()</code>, <code>wait()</code>, <code>sched_yield()</code>.</li>
+</ul>
+<hr />
+<h2>5. Interrupts and Context Switches in Practice</h2><hr>
+<ul>
+<li>Interrupts are <strong>asynchronous</strong>.</li>
+<li>Context switches are <strong>synchronous</strong> decisions by the scheduler.</li>
+<li>A context switch can be triggered as a result of an interrupt (e.g., timer interrupt leading to a new task being scheduled).</li>
+</ul>
+<h3>Key Performance Metric:</h3><hr>
+<ul>
+<li><strong>High context switch rate</strong> can degrade performance.</li>
+<li><strong>Interrupt storms</strong> can overwhelm the system — mitigated using interrupt throttling and coalescing.</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Interrupt Handling</th>
+<th>Context Switching</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Trigger</td>
+<td>Asynchronous (HW/SW event)</td>
+<td>Scheduler decision or blocking call</td>
+</tr>
+<tr>
+<td>Purpose</td>
+<td>Handle external/internal events</td>
+<td>Switch execution between tasks</td>
+</tr>
+<tr>
+<td>Context</td>
+<td>Runs in interrupt context</td>
+<td>Runs in process/thread context</td>
+</tr>
+<tr>
+<td>Latency Critical?</td>
+<td>Yes (especially in ISRs)</td>
+<td>No (usually)</td>
+</tr>
+<tr>
+<td>Preemptive?</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Interrupt handling and context switching are core kernel functions that allow responsive, multitasking operating systems. The balance between fast interrupt response and efficient task scheduling is crucial for system performance and reliability.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

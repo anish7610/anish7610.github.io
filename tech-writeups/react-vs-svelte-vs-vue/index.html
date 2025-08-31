@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - react-vs-svelte-vs-vue</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>react-vs-svelte-vs-vue</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/react-vs-svelte-vs-vue/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>React vs Svelte vs Vue: Comparative Study</h1><hr>
+<p>Frontend frameworks and libraries form the backbone of modern web development. Among the most popular are <strong>React</strong>, <strong>Vue</strong>, and <strong>Svelte</strong>. While they aim to solve similar problems—building reactive, component-based UIs—they approach these goals differently under the hood.</p>
+<hr />
+<h2>1. Philosophy &amp; Design Goals</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>React</th>
+<th>Vue</th>
+<th>Svelte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Type</td>
+<td>Library</td>
+<td>Framework</td>
+<td>Compiler</td>
+</tr>
+<tr>
+<td>Core Idea</td>
+<td>Declarative UI via Virtual DOM</td>
+<td>Reactive bindings + Virtual DOM</td>
+<td>Compiles to vanilla JS — no runtime</td>
+</tr>
+<tr>
+<td>Learning Curve</td>
+<td>Moderate</td>
+<td>Easy for beginners</td>
+<td>Very easy; closer to HTML/CSS/JS</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Rendering Mechanism</h2><hr>
+<ul>
+<li><strong>React</strong> uses a <em>Virtual DOM</em> and re-renders components based on state changes, using diffing to minimize DOM updates.</li>
+<li><strong>Vue</strong> also uses a <em>Virtual DOM</em>, but combines it with a more declarative syntax and template system.</li>
+<li><strong>Svelte</strong> takes a radical approach: it compiles components to imperative JavaScript code at build time—eliminating the Virtual DOM entirely.</li>
+</ul>
+<hr />
+<h2>3. Syntax and Developer Experience</h2><hr>
+<p><strong>React:</strong></p>
+<pre class="codehilite"><code class="language-jsx">function App() {
+  const [count, setCount] = useState(0);
+  return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;{count}&lt;/button&gt;;
+}
+</code></pre>
+
+<p><strong>Vue:</strong></p>
+<pre class="codehilite"><code class="language-html">&lt;template&gt;
+  &lt;button @click=&quot;count++&quot;&gt;{{ count }}&lt;/button&gt;
+&lt;/template&gt;
+&lt;script&gt;
+export default {
+  data() {
+    return { count: 0 };
+  },
+};
+&lt;/script&gt;
+</code></pre>
+
+<p><strong>Svelte:</strong></p>
+<pre class="codehilite"><code class="language-svelte">&lt;script&gt;
+  let count = 0;
+&lt;/script&gt;
+&lt;button on:click={() =&gt; count++}&gt;{count}&lt;/button&gt;
+</code></pre>
+
+<p>Svelte offers the most concise and HTML-like syntax, followed by Vue. React requires more boilerplate and hooks.</p>
+<hr />
+<h2>4. Performance</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Factor</th>
+<th>React</th>
+<th>Vue</th>
+<th>Svelte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Runtime Size</td>
+<td>\~40–45 KB</td>
+<td>\~30 KB</td>
+<td>\~1.5 KB (compiled)</td>
+</tr>
+<tr>
+<td>Initial Load Time</td>
+<td>Moderate</td>
+<td>Fast</td>
+<td>Fastest</td>
+</tr>
+<tr>
+<td>Update Performance</td>
+<td>Good</td>
+<td>Very Good</td>
+<td>Excellent</td>
+</tr>
+</tbody>
+</table>
+<p>Svelte’s compile-time optimizations yield minimal runtime overhead and better performance for smaller apps.</p>
+<hr />
+<h2>5. Ecosystem and Tooling</h2><hr>
+<ul>
+<li><strong>React</strong>: Huge ecosystem, maintained by Meta. Wide adoption, backed by mature tools (Next.js, React Native).</li>
+<li><strong>Vue</strong>: Maintained by a core team led by Evan You. Strong ecosystem (Nuxt.js, Vuex, Vue Router).</li>
+<li><strong>Svelte</strong>: Newest of the three. Growing ecosystem, powered by SvelteKit for full-stack apps.</li>
+</ul>
+<hr />
+<h2>6. Community and Adoption</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>React</th>
+<th>Vue</th>
+<th>Svelte</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub Stars</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Job Market</td>
+<td>High</td>
+<td>Moderate</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Community Size</td>
+<td>Very Large</td>
+<td>Large</td>
+<td>Growing</td>
+</tr>
+</tbody>
+</table>
+<p>React dominates in enterprise usage. Vue has significant traction in Asia and open-source projects. Svelte is popular in hobbyist and performance-focused apps.</p>
+<hr />
+<h2>7. When to Use What?</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Recommended Framework</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Large-scale, enterprise-grade apps</td>
+<td>React</td>
+</tr>
+<tr>
+<td>Simpler apps, excellent DX</td>
+<td>Vue</td>
+</tr>
+<tr>
+<td>High-performance, small bundle apps</td>
+<td>Svelte</td>
+</tr>
+<tr>
+<td>Server-side rendering / static sites</td>
+<td>Next.js (React), Nuxt (Vue), SvelteKit (Svelte)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<ul>
+<li><strong>React</strong> is a solid choice with strong community support and a mature ecosystem.</li>
+<li><strong>Vue</strong> is ideal for beginners and offers a smooth learning curve.</li>
+<li><strong>Svelte</strong> brings innovation by shifting work to the compiler, resulting in better runtime performance and smaller bundles.</li>
+</ul>
+<p>Each has its strengths—choose based on project size, team familiarity, and performance needs.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

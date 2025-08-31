@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - doh-vs-dot</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>doh-vs-dot</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/doh-vs-dot/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h3>DNS over HTTPS (DoH) vs DNS over TLS (DoT)</h3><hr>
+<h4>Introduction</h4>
+<p>Domain Name System (DNS) is a fundamental component of the internet, translating human-readable domain names (like <code>example.com</code>) into IP addresses. Traditionally, DNS queries are sent in plaintext over UDP or TCP, exposing them to surveillance, manipulation, and censorship.</p>
+<p>To mitigate these privacy and security concerns, two encrypted DNS protocols have emerged:</p>
+<ul>
+<li><strong>DNS over HTTPS (DoH)</strong></li>
+<li><strong>DNS over TLS (DoT)</strong></li>
+</ul>
+<p>While both encrypt DNS traffic, they differ in transport mechanisms, performance, and deployment models.</p>
+<hr />
+<h3>DNS over TLS (DoT)</h3><hr>
+<p><strong>Definition</strong>: DNS over TLS encrypts DNS queries using Transport Layer Security (TLS) over port <strong>853</strong>.</p>
+<h4>Key Characteristics:</h4>
+<ul>
+<li>Uses a dedicated port (<code>853</code>)</li>
+<li>Maintains DNS structure but adds TLS encryption</li>
+<li>Easily blocked via port-based filtering</li>
+<li>Simpler to implement at the system resolver level</li>
+<li>Supported by many recursive resolvers (e.g., Cloudflare, Quad9, Google)</li>
+</ul>
+<h4>Pros:</h4>
+<ul>
+<li><strong>Improves privacy and security</strong> by encrypting DNS traffic</li>
+<li><strong>Cleaner separation of concerns</strong> (only DNS traffic over port 853)</li>
+<li><strong>Easier to audit and log</strong> for security appliances</li>
+</ul>
+<h4>Cons:</h4>
+<ul>
+<li><strong>Can be blocked by firewalls</strong> that filter non-standard ports</li>
+<li><strong>Less stealthy</strong> than HTTPS traffic (port 853 stands out)</li>
+<li><strong>Lacks application-level integration</strong> (browser needs OS support)</li>
+</ul>
+<hr />
+<h3>DNS over HTTPS (DoH)</h3><hr>
+<p><strong>Definition</strong>: DNS over HTTPS sends DNS queries over standard HTTPS connections (port <strong>443</strong>) using the HTTP/2 or HTTP/3 protocol.</p>
+<h4>Key Characteristics:</h4>
+<ul>
+<li>Encapsulates DNS queries inside HTTPS traffic</li>
+<li>Uses port <code>443</code>—the same as regular web traffic</li>
+<li>Often integrated directly into browsers (e.g., Firefox, Chrome)</li>
+<li>Harder to distinguish from normal HTTPS traffic</li>
+</ul>
+<h4>Pros:</h4>
+<ul>
+<li><strong>Difficult to block or censor</strong> due to use of port 443</li>
+<li><strong>Provides privacy even in restrictive networks</strong></li>
+<li><strong>Easily integrated into browsers and apps</strong> for per-app privacy</li>
+</ul>
+<h4>Cons:</h4>
+<ul>
+<li><strong>Harder to filter or log</strong> DNS traffic by enterprises</li>
+<li><strong>Can bypass local DNS controls</strong>, causing security or compliance concerns</li>
+<li><strong>Potential centralization</strong> of DNS data with third-party DoH providers</li>
+</ul>
+<hr />
+<h3>Comparison Table</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>DoH</th>
+<th>DoT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transport Protocol</td>
+<td>HTTPS (HTTP/2 or HTTP/3 over TCP/TLS)</td>
+<td>TCP over TLS</td>
+</tr>
+<tr>
+<td>Port Used</td>
+<td>443 (same as web traffic)</td>
+<td>853 (dedicated)</td>
+</tr>
+<tr>
+<td>Visibility to Firewalls</td>
+<td>Obfuscated (hard to block)</td>
+<td>Detectable and blockable</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>May introduce HTTP overhead</td>
+<td>Slightly faster in some cases</td>
+</tr>
+<tr>
+<td>Integration Level</td>
+<td>App-level (e.g., browser)</td>
+<td>OS-level/system resolver</td>
+</tr>
+<tr>
+<td>Logging/Filtering</td>
+<td>Harder to inspect for enterprises</td>
+<td>Easier to monitor</td>
+</tr>
+<tr>
+<td>Resistance to Censorship</td>
+<td>High</td>
+<td>Moderate</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Use Cases</h3><hr>
+<ul>
+<li>
+<p><strong>DoH is ideal for</strong>:</p>
+</li>
+<li>
+<p>Circumventing DNS-based censorship</p>
+</li>
+<li>Privacy in public or hostile networks</li>
+<li>
+<p>Applications needing built-in DNS privacy</p>
+</li>
+<li>
+<p><strong>DoT is ideal for</strong>:</p>
+</li>
+<li>
+<p>Securing DNS at the network or system resolver level</p>
+</li>
+<li>Enterprises that want DNS privacy with more control</li>
+<li>Networks that rely on traditional DNS monitoring tools</li>
+</ul>
+<hr />
+<h3>Security and Privacy Considerations</h3><hr>
+<ul>
+<li><strong>Both DoH and DoT encrypt DNS traffic</strong>, preventing eavesdropping and tampering.</li>
+<li><strong>Neither hides DNS destination from ISPs completely</strong> (e.g., IP addresses are still visible).</li>
+<li><strong>Encrypted DNS ≠ anonymous browsing</strong>—they prevent local DNS snooping, but not full tracking.</li>
+<li><strong>Trust still depends on the DNS resolver</strong> (e.g., Cloudflare, Google)—they see your DNS queries.</li>
+</ul>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>DoH and DoT represent significant improvements in DNS privacy and integrity, each suited for different environments:</p>
+<ul>
+<li>Use <strong>DoH</strong> when you need stealth, app-level integration, or must bypass network controls.</li>
+<li>Use <strong>DoT</strong> when you want system-wide encrypted DNS with more visibility and control.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

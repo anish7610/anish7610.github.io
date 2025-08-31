@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - mlops</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>mlops</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/mlops/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>MLOps: Versioning Models and Automating Deployment</h1><hr>
+<p>MLOps (Machine Learning Operations) bridges the gap between data science and operations, bringing DevOps principles into the lifecycle of machine learning models. A critical component of MLOps is <strong>model versioning</strong> and <strong>automated deployment</strong>, ensuring models are reproducible, traceable, and scalable in production environments.</p>
+<hr />
+<h2>Why Versioning Models?</h2><hr>
+<p>Just as source code needs version control, so do ML models — but models are more complex. You must track:</p>
+<ul>
+<li><strong>Model weights and architecture</strong></li>
+<li><strong>Training datasets and preprocessing steps</strong></li>
+<li><strong>Hyperparameters</strong></li>
+<li><strong>Training code and environment</strong></li>
+<li><strong>Metrics and evaluation results</strong></li>
+</ul>
+<h3>Tools for Model Versioning</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git</td>
+<td>Code versioning</td>
+</tr>
+<tr>
+<td>DVC (Data Version Control)</td>
+<td>Data and model artifact versioning</td>
+</tr>
+<tr>
+<td>MLflow</td>
+<td>Experiment tracking and model registry</td>
+</tr>
+<tr>
+<td>Weights &amp; Biases</td>
+<td>Logging and tracking training runs</td>
+</tr>
+<tr>
+<td>HuggingFace Hub</td>
+<td>Sharing pre-trained models</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Example with DVC:</strong></p>
+<pre class="codehilite"><code class="language-bash">dvc init
+dvc add model.pkl
+git add model.pkl.dvc
+git commit -m &quot;Add trained model v1&quot;
+</code></pre>
+
+<hr />
+<h2>Automating Deployment of Models</h2><hr>
+<p>Automating deployment is about continuously delivering and updating models in production with minimal manual intervention.</p>
+<h3>Packaging the Model</h3><hr>
+<p>Models are usually packaged as:</p>
+<ul>
+<li>Python packages (<code>setup.py</code>)</li>
+<li>REST APIs using Flask/FastAPI</li>
+<li>Docker containers for portability</li>
+</ul>
+<h3>CI/CD Pipeline for ML (MLOps)</h3><hr>
+<pre class="codehilite"><code class="language-plaintext">[Git Push]  [CI: Test + Build]  [Model Registry Push]  
+[CD: Deploy to Staging/Production]  [Monitor and Retrain]
+</code></pre>
+
+<p><strong>Popular CI/CD Tools for MLOps:</strong></p>
+<ul>
+<li><strong>GitHub Actions / GitLab CI:</strong> Trigger pipelines on code/model changes</li>
+<li><strong>Jenkins:</strong> Custom automation jobs</li>
+<li><strong>Seldon Core / KFServing:</strong> Deploy models on Kubernetes</li>
+<li><strong>Argo Workflows:</strong> For ML workflows in Kubernetes</li>
+</ul>
+<h3>️ Deployment Patterns</h3><hr>
+<ul>
+<li><strong>Batch Inference</strong>: Pre-compute predictions and store</li>
+<li><strong>Online Inference</strong>: Serve predictions in real-time via API</li>
+<li><strong>Streaming Inference</strong>: Combine with Kafka/Spark for real-time processing</li>
+</ul>
+<hr />
+<h2>Example: MLflow Model Deployment (REST API)</h2><hr>
+<pre class="codehilite"><code class="language-bash">mlflow models serve -m runs:/&lt;run-id&gt;/model -p 5000
+</code></pre>
+
+<p>This exposes your model as a REST API with <code>/predict</code> endpoint.</p>
+<hr />
+<h2>Monitoring and Retraining</h2><hr>
+<p>Once deployed, models must be:</p>
+<ul>
+<li><strong>Monitored</strong> for performance drift (e.g., accuracy drop)</li>
+<li><strong>Logged</strong> for input/output</li>
+<li><strong>Re-trained</strong> on fresh data via automated workflows</li>
+</ul>
+<p>Tools: Prometheus + Grafana, EvidentlyAI, A/B Testing pipelines</p>
+<hr />
+<h2>Version Control Best Practices</h2><hr>
+<ul>
+<li>Use semantic versioning (<code>v1.0.0</code>)</li>
+<li>Save metadata: metrics, git hash, environment (conda/pip)</li>
+<li>Store models in a registry (e.g., MLflow Registry, S3, or HuggingFace)</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Tool/Concept</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Code Versioning</td>
+<td>Git</td>
+</tr>
+<tr>
+<td>Data/Model Versioning</td>
+<td>DVC, MLflow</td>
+</tr>
+<tr>
+<td>Packaging</td>
+<td>Docker, FastAPI</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions, Jenkins</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Kubernetes, Seldon Core</td>
+</tr>
+<tr>
+<td>Monitoring</td>
+<td>Prometheus, Grafana</td>
+</tr>
+</tbody>
+</table>
+<p>MLOps enables reliable, repeatable, and scalable ML pipelines. Versioning and automated deployment are foundational for ensuring that ML models remain robust and accountable in production.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

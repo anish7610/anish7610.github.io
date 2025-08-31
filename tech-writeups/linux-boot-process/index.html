@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - linux-boot-process</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>linux-boot-process</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/linux-boot-process/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Technical Writeup: Linux Boot Process — From BIOS to Shell</h1><hr>
+<p>The Linux boot process is a sequence of steps that your system follows to transition from powered-off hardware to a fully functional Linux environment, complete with a shell. Understanding each stage is crucial for system administrators, developers, and security professionals.</p>
+<hr />
+<h2>1. BIOS / UEFI: Power-On and Hardware Initialization</h2><hr>
+<h3>BIOS (Basic Input/Output System)</h3><hr>
+<ul>
+<li>BIOS is firmware embedded in the motherboard.</li>
+<li>It performs POST (Power-On Self-Test) to check hardware integrity (RAM, CPU, keyboard, etc.).</li>
+<li>After POST, it locates a bootable device using a <strong>boot sequence</strong> (HDD, SSD, USB, etc.).</li>
+<li>BIOS loads the first 512 bytes of the bootable device — the <strong>MBR (Master Boot Record)</strong> — into memory and hands control to it.</li>
+</ul>
+<h3>UEFI (Unified Extensible Firmware Interface)</h3><hr>
+<ul>
+<li>Modern replacement for BIOS with enhanced features (larger drive support, secure boot).</li>
+<li>Loads a <strong>.efi</strong> bootloader from the EFI system partition (usually <code>/boot/efi</code>).</li>
+<li>UEFI directly loads the Linux bootloader, bypassing the MBR.</li>
+</ul>
+<blockquote>
+<p><strong>Key Difference</strong>: BIOS uses MBR and legacy bootloaders like GRUB Legacy; UEFI uses GPT and newer bootloaders like GRUB2 or systemd-boot.</p>
+</blockquote>
+<hr />
+<h2>2. Bootloader: GRUB or systemd-boot</h2><hr>
+<p>The bootloader is responsible for loading the Linux kernel into memory.</p>
+<h3>GRUB (GRand Unified Bootloader)</h3><hr>
+<ul>
+<li>Reads its configuration file: <code>/boot/grub/grub.cfg</code></li>
+<li>Presents a menu to choose the kernel (if multiple available).</li>
+<li>Loads the selected kernel image (<code>vmlinuz-&lt;version&gt;</code>) and <strong>initramfs</strong> (initial RAM filesystem) into memory.</li>
+<li>Passes control to the kernel with selected parameters (e.g., root filesystem).</li>
+</ul>
+<h3>systemd-boot (alternative to GRUB on UEFI systems)</h3><hr>
+<ul>
+<li>Simpler than GRUB, reads <code>/boot/loader/loader.conf</code> and entries in <code>/boot/loader/entries/</code>.</li>
+</ul>
+<hr />
+<h2>3. Kernel Initialization</h2><hr>
+<p>Once the kernel is loaded into memory:</p>
+<ul>
+<li><strong>Decompresses itself</strong> (vmlinuz is a compressed image).</li>
+<li>Initializes low-level hardware: memory management, device drivers, CPU scheduling.</li>
+<li>Mounts the <strong>initramfs</strong> (temporary root filesystem in RAM) to access basic binaries and drivers.</li>
+</ul>
+<h3>Role of initramfs:</h3><hr>
+<ul>
+<li>Provides a minimal root environment.</li>
+<li>Loads drivers required for accessing the real root filesystem (e.g., LVM, RAID).</li>
+<li>Once the real root is accessible, it hands control to the <strong>init system</strong>.</li>
+</ul>
+<hr />
+<h2>4. init System: PID 1</h2><hr>
+<p>The init system is the first userspace process (PID 1) that manages user-space services.</p>
+<h3>Options:</h3><hr>
+<ul>
+<li><strong>Systemd</strong> (default in most modern distros): Reads configuration from <code>/etc/systemd/</code></li>
+<li><strong>SysVinit</strong> (older): Executes scripts in <code>/etc/init.d/</code></li>
+<li><strong>Upstart</strong> (legacy Ubuntu): Uses <code>.conf</code> files in <code>/etc/init/</code></li>
+</ul>
+<h4>What init does:</h4>
+<ul>
+<li>Mounts remaining filesystems.</li>
+<li>Starts essential services (udev, networking, cron, syslog).</li>
+<li>Spawns <strong>getty</strong> processes to manage TTYs (terminals).</li>
+<li>Launches the <strong>default target</strong> (multi-user, graphical, etc.).</li>
+</ul>
+<hr />
+<h2>5. Login Prompt and Shell</h2><hr>
+<p>Once the system reaches the default target:</p>
+<ul>
+<li>A <strong>login manager</strong> or <code>getty</code> provides a login prompt on virtual terminals.</li>
+<li>Upon successful login, the user is dropped into a <strong>shell</strong> (bash, zsh, etc.).</li>
+<li>The shell executes initialization scripts (<code>.bashrc</code>, <code>.profile</code>) and presents a command prompt.</li>
+</ul>
+<hr />
+<h2>Summary Diagram</h2><hr>
+<pre class="codehilite"><code>[Power On]
+     ↓
+[BIOS / UEFI]
+     ↓
+[Bootloader (GRUB / systemd-boot)]
+     ↓
+[Kernel + initramfs]
+     ↓
+[Init system (systemd, SysV)]
+     ↓
+[Login Prompt (TTY or GUI)]
+     ↓
+[Shell or Desktop Environment]
+</code></pre>
+
+<hr />
+<h2>Troubleshooting Tools</h2><hr>
+<ul>
+<li><code>dmesg</code> — Kernel ring buffer logs.</li>
+<li><code>journalctl</code> — Logs managed by systemd.</li>
+<li><code>/var/log/boot.log</code> — System boot messages.</li>
+<li><code>systemctl list-units</code> — Services started at boot.</li>
+</ul>
+<hr />
+<h2>Final Notes</h2><hr>
+<ul>
+<li><strong>Fast Boot</strong> options in UEFI/BIOS can skip POST checks.</li>
+<li><strong>Secure Boot</strong> restricts unsigned kernel/modules — must be configured correctly for custom kernels.</li>
+<li><strong>initrd vs initramfs</strong>: initrd is a block device image, initramfs is a cpio archive in RAM.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

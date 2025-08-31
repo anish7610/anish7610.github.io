@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - device-drivers</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>device-drivers</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/device-drivers/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Writing Device Drivers in Linux: A Beginner's Guide</h1><hr>
+<p>Device drivers act as the bridge between the hardware and the kernel. They allow user applications to interact with hardware devices without knowing the intricate details of how they operate. Linux, being an open-source OS, provides a rich environment for writing, testing, and deploying custom device drivers.</p>
+<hr />
+<h2>What is a Linux Device Driver?</h2><hr>
+<p>A <strong>Linux device driver</strong> is a kernel module that controls a specific piece of hardware. These modules can be loaded and unloaded dynamically using tools like <code>insmod</code> and <code>rmmod</code>.</p>
+<p>There are different types of drivers:</p>
+<ul>
+<li><strong>Character drivers</strong> – Accessed as a stream of bytes (e.g., serial ports)</li>
+<li><strong>Block drivers</strong> – Read/write data in blocks (e.g., hard drives)</li>
+<li><strong>Network drivers</strong> – Facilitate network interfaces</li>
+<li><strong>USB, PCI, framebuffer drivers</strong>, etc.</li>
+</ul>
+<hr />
+<h2>Anatomy of a Simple Character Device Driver</h2><hr>
+<p>Here's what’s typically needed for a character device:</p>
+<ol>
+<li><strong>Register the device</strong> with the kernel</li>
+<li><strong>Define file operations</strong> (open, read, write, release)</li>
+<li><strong>Handle data exchange</strong></li>
+<li><strong>Unregister on exit</strong></li>
+</ol>
+<hr />
+<h2>️ Minimal Skeleton of a Character Driver</h2><hr>
+<pre class="codehilite"><code class="language-c">#include &lt;linux/init.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/fs.h&gt;
+
+#define DEVICE_NAME &quot;mychardev&quot;
+
+static int major;
+
+static int my_open(struct inode *inode, struct file *file) {
+    printk(KERN_INFO &quot;Device opened\n&quot;);
+    return 0;
+}
+
+static int my_release(struct inode *inode, struct file *file) {
+    printk(KERN_INFO &quot;Device closed\n&quot;);
+    return 0;
+}
+
+static ssize_t my_read(struct file *file, char __user *buf, size_t len, loff_t *offset) {
+    printk(KERN_INFO &quot;Read called\n&quot;);
+    return 0;
+}
+
+static ssize_t my_write(struct file *file, const char __user *buf, size_t len, loff_t *offset) {
+    printk(KERN_INFO &quot;Write called\n&quot;);
+    return len;
+}
+
+static struct file_operations fops = {
+    .open = my_open,
+    .release = my_release,
+    .read = my_read,
+    .write = my_write,
+};
+
+static int __init my_driver_init(void) {
+    major = register_chrdev(0, DEVICE_NAME, &amp;fops);
+    printk(KERN_INFO &quot;Registered with major number %d\n&quot;, major);
+    return 0;
+}
+
+static void __exit my_driver_exit(void) {
+    unregister_chrdev(major, DEVICE_NAME);
+    printk(KERN_INFO &quot;Unregistered device\n&quot;);
+}
+
+module_init(my_driver_init);
+module_exit(my_driver_exit);
+
+MODULE_LICENSE(&quot;GPL&quot;);
+</code></pre>
+
+<hr />
+<h2>Testing the Driver</h2><hr>
+<ol>
+<li><strong>Compile</strong> with a Makefile</li>
+<li><strong>Insert</strong> using <code>insmod mydriver.ko</code></li>
+<li><strong>Create device node</strong>:</li>
+</ol>
+<p><code>bash
+   mknod /dev/mychardev c &lt;major&gt; 0</code>
+4. <strong>Interact</strong>:</p>
+<p><code>bash
+   echo "hello" &gt; /dev/mychardev
+   cat /dev/mychardev</code></p>
+<hr />
+<h2>Kernel Space vs User Space</h2><hr>
+<ul>
+<li>Drivers run in <strong>kernel space</strong>, unlike applications that run in <strong>user space</strong>.</li>
+<li>Kernel-space code has full access to hardware, making it powerful but dangerous (a bug can crash the system).</li>
+</ul>
+<hr />
+<h2>Key Concepts</h2><hr>
+<ul>
+<li><strong>Device number (major/minor)</strong>: Identifies the driver and the device.</li>
+<li><strong>File operations struct</strong>: Maps system calls (<code>read</code>, <code>write</code>, etc.) to your driver’s functions.</li>
+<li><strong>Copy_to_user / copy_from_user</strong>: Used for safely transferring data between kernel and user space.</li>
+</ul>
+<hr />
+<h2>Next Steps</h2><hr>
+<ul>
+<li>Handle <strong>interrupts</strong> and <strong>DMA</strong></li>
+<li>Add <strong>IOCTL</strong> support for custom commands</li>
+<li>Learn <strong>platform drivers</strong> and <strong>device trees</strong> for embedded devices</li>
+<li>Explore <strong>udev rules</strong> for dynamic device management</li>
+</ul>
+<hr />
+<h2>Precautions</h2><hr>
+<ul>
+<li>Always test drivers on virtual machines or non-critical systems.</li>
+<li>Use logging (<code>printk</code>) generously.</li>
+<li>Be cautious with memory access and pointer dereferencing.</li>
+</ul>
+<hr />
+<h2>References</h2><hr>
+<ul>
+<li><a href="https://lwn.net/Kernel/LDD3/">Linux Device Drivers, 3rd Edition</a></li>
+<li><code>man 9</code> pages: <code>man 9 register_chrdev</code>, <code>man 9 file_operations</code></li>
+<li><a href="https://www.kernel.org/doc/html/latest/">kernel.org documentation</a></li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

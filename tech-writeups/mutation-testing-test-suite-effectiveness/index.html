@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - mutation-testing-test-suite-effectiveness</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>mutation-testing-test-suite-effectiveness</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/mutation-testing-test-suite-effectiveness/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Mutation Testing to Measure Test Suite Effectiveness</h2><hr>
+<hr />
+<p><strong>Overview</strong>
+Mutation testing is a technique used to assess the <strong>quality of your test suite</strong>. It works by <strong>introducing small changes (mutations)</strong> into your code and then checking whether your existing tests can <strong>catch these injected faults</strong>. If the tests fail — great! That means your test suite is sensitive to bugs. If not, it exposes gaps in your test coverage or logic.</p>
+<hr />
+<h3>What is a Mutation?</h3><hr>
+<p>A <strong>mutation</strong> is a small syntactic change in your source code meant to mimic a common developer mistake. Examples:</p>
+<table>
+<thead>
+<tr>
+<th>Original Code</th>
+<th>Mutated Code</th>
+<th>Mutation Type</th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>a + b</code></td>
+<td><code>a - b</code></td>
+<td>Arithmetic operator</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>if (x &gt; y)</code></td>
+<td><code>if (x &gt;= y)</code></td>
+<td>Relational operator</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>return true</code></td>
+<td><code>return false</code></td>
+<td>Boolean return</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><code>x &amp;&amp; y</code></td>
+<td>`x</td>
+<td></td>
+<td>y`</td>
+<td>Logical operator</td>
+</tr>
+</tbody>
+</table>
+<p>These are injected one at a time to create <strong>mutants</strong> (modified versions of your code).</p>
+<hr />
+<h3>Process of Mutation Testing</h3><hr>
+<ol>
+<li>
+<p><strong>Original Test Run</strong>
+   Ensure all tests pass on the unmodified (original) code.</p>
+</li>
+<li>
+<p><strong>Mutant Generation</strong>
+   A mutation testing tool creates multiple versions of your code, each with a single small mutation.</p>
+</li>
+<li>
+<p><strong>Test Execution on Mutants</strong>
+   The test suite is run against each mutant.</p>
+</li>
+<li>
+<p><strong>Score Calculation</strong>
+   If a mutant causes a test failure, it’s <strong>killed</strong>. If all tests pass, it <strong>survives</strong>.</p>
+</li>
+</ol>
+<hr />
+<h3>Mutation Score</h3><hr>
+<p>$$
+\text{Mutation Score} = \frac{\text{Killed Mutants}}{\text{Total Mutants}} \times 100
+$$</p>
+<ul>
+<li><strong>High score (90–100%)</strong>: Strong test suite</li>
+<li><strong>Low score</strong>: Weak coverage or missing assertions</li>
+</ul>
+<hr />
+<h3>Tools by Language</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Language</th>
+<th>Tool</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Python</td>
+<td><code>mutmut</code>, <code>Cosmic Ray</code>, <code>mutpy</code></td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td><code>StrykerJS</code></td>
+</tr>
+<tr>
+<td>Java</td>
+<td><code>PIT</code></td>
+</tr>
+<tr>
+<td>Ruby</td>
+<td><code>mutant</code></td>
+</tr>
+<tr>
+<td>.NET</td>
+<td><code>Stryker.NET</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Example (Python with <code>mutmut</code>)</h3><hr>
+<h4>Original Function (example.py):</h4>
+<pre class="codehilite"><code class="language-python">def is_even(n):
+    return n % 2 == 0
+</code></pre>
+
+<h4>Test (test_example.py):</h4>
+<pre class="codehilite"><code class="language-python">def test_is_even():
+    assert is_even(4)
+    assert not is_even(3)
+</code></pre>
+
+<h4>Run Mutation Testing:</h4>
+<pre class="codehilite"><code class="language-bash">pip install mutmut
+mutmut run
+mutmut results
+</code></pre>
+
+<p><strong>Output</strong>:</p>
+<pre class="codehilite"><code>1 killed, 1 survived, 0 timeout, 0 incompetent
+</code></pre>
+
+<p>You now know at least one mutant was <strong>not</strong> caught by the test suite.</p>
+<hr />
+<h3>Why Mutation Testing?</h3><hr>
+<ul>
+<li>Goes beyond <strong>line/code coverage</strong> — which might be misleading.</li>
+<li>
+<p>Uncovers:</p>
+</li>
+<li>
+<p>Missing edge cases</p>
+</li>
+<li>Poorly asserted tests</li>
+<li>Overly complex logic that's untested</li>
+</ul>
+<hr />
+<h3>️ Caveats</h3><hr>
+<ul>
+<li><strong>Performance</strong>: It runs tests multiple times (once per mutant), so it’s slower than normal test runs.</li>
+<li><strong>False Positives</strong>: Some mutants are <strong>equivalent</strong> (they don't change the behavior), and no test could kill them.</li>
+<li><strong>Noise</strong>: Over-mutation or trivial changes may generate noise. Focus on core modules or critical logic paths.</li>
+</ul>
+<hr />
+<h3>Best Practices</h3><hr>
+<ul>
+<li>Use in <strong>CI pipelines selectively</strong> (e.g., nightly or on core services).</li>
+<li>Focus mutation testing on <strong>critical or high-risk</strong> components.</li>
+<li>Combine with <strong>code coverage</strong>, <strong>static analysis</strong>, and <strong>regular testing</strong> for a holistic quality view.</li>
+<li>Use <code>--use-coverage</code> flags or file filters to scope mutation runs.</li>
+</ul>
+<hr />
+<h3>Integration with Pytest</h3><hr>
+<p>Some tools like <a href="https://github.com/boxed/mutmut"><code>mutmut</code></a> integrate well with <code>pytest</code>. You can set it to use your pytest runner with:</p>
+<pre class="codehilite"><code class="language-bash">mutmut run --runner &quot;pytest test_example.py&quot;
+</code></pre>
+
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Mutation testing is a <strong>powerful quality assurance technique</strong> that challenges the assumptions made by developers when writing tests. It helps ensure your tests are not just <strong>covering lines</strong>, but also catching <strong>real defects</strong>.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - xgboost-internals</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>xgboost-internals</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/xgboost-internals/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>XGBoost Internals and Use Cases in Tabular Data</h1><hr>
+<h2>Overview</h2><hr>
+<p><strong>XGBoost (Extreme Gradient Boosting)</strong> is a scalable and accurate implementation of gradient boosting machines. It is highly popular in machine learning competitions and real-world applications for handling structured/tabular data, due to its performance, regularization features, and parallelized tree learning.</p>
+<hr />
+<h2>1. Core Concepts Behind XGBoost</h2><hr>
+<h3>a. Gradient Boosting Framework</h3><hr>
+<p>XGBoost belongs to the family of <strong>ensemble learning algorithms</strong>. It builds a <strong>strong model</strong> by combining <strong>weak learners</strong>, typically decision trees, in a <strong>sequential manner</strong>.</p>
+<p>Each tree attempts to <strong>correct the residual errors</strong> made by the ensemble of previous trees by minimizing a loss function.</p>
+<h3>b. Additive Training</h3><hr>
+<p>Each iteration adds a new tree to the ensemble:</p>
+<p>$$
+\hat{y}^{(t)} = \hat{y}^{(t-1)} + f_t(x)
+$$</p>
+<p>Where:</p>
+<ul>
+<li>$\hat{y}^{(t)}$ is the current prediction</li>
+<li>$f_t(x)$ is the new decision tree</li>
+<li>The objective is to minimize the regularized loss:</li>
+</ul>
+<p>$$
+\text{Obj} = \sum_{i} l(y_i, \hat{y}<em>i) + \sum</em>{k} \Omega(f_k)
+$$</p>
+<hr />
+<h2>2. XGBoost Internals</h2><hr>
+<h3>a. Regularized Objective Function</h3><hr>
+<p>XGBoost includes <strong>L1 (Lasso)</strong> and <strong>L2 (Ridge)</strong> regularization:</p>
+<p>$$
+\Omega(f) = \gamma T + \frac{1}{2} \lambda \sum_j w_j^2
+$$</p>
+<p>Where:</p>
+<ul>
+<li>$T$ is the number of leaves</li>
+<li>$w_j$ are leaf weights</li>
+<li>$\gamma$, $\lambda$ are regularization parameters</li>
+</ul>
+<p>This helps avoid <strong>overfitting</strong>.</p>
+<h3>b. Greedy Tree Construction</h3><hr>
+<p>At each node split, XGBoost uses <strong>approximate greedy algorithms</strong> to find the best split by maximizing the <strong>gain</strong>:</p>
+<p>$$
+\text{Gain} = \frac{1}{2} \left[\frac{G_L^2}{H_L + \lambda} + \frac{G_R^2}{H_R + \lambda} - \frac{(G_L + G_R)^2}{H_L + H_R + \lambda} \right] - \gamma
+$$</p>
+<p>Where $G$ and $H$ are the gradient and hessian of the loss function.</p>
+<h3>c. Sparsity Aware Split Finding</h3><hr>
+<p>XGBoost handles <strong>missing or sparse values</strong> efficiently by learning the optimal direction to handle them during split decisions.</p>
+<h3>d. Column Block Storage (DMatrix)</h3><hr>
+<p>XGBoost uses a custom data structure called <code>DMatrix</code> that enables efficient <strong>columnar access</strong>, which is critical for split-finding and supports <strong>compression and caching</strong>.</p>
+<hr />
+<h2>3. System-Level Optimizations</h2><hr>
+<ul>
+<li><strong>Parallelization</strong>: XGBoost builds trees in a parallelized way across data points.</li>
+<li><strong>Cache-aware access</strong>: Uses memory-efficient access patterns.</li>
+<li><strong>Out-of-core learning</strong>: Handles datasets that don’t fit into memory.</li>
+<li><strong>GPU support</strong>: Accelerates training using CUDA for gradient computation and histogram-based algorithms.</li>
+</ul>
+<hr />
+<h2>4. Use Cases in Tabular Data</h2><hr>
+<p>XGBoost shines in <strong>structured/tabular datasets</strong> where features are heterogeneous (e.g., numeric, categorical). Key use cases include:</p>
+<h3>a. Fraud Detection</h3><hr>
+<ul>
+<li>Predicts fraudulent transactions using historical features (amount, merchant, location, device fingerprint)</li>
+<li>Works well with highly imbalanced datasets</li>
+<li>Handles categorical encoding (after preprocessing)</li>
+</ul>
+<h3>b. Credit Scoring</h3><hr>
+<ul>
+<li>Binary classification of whether a user will default on a loan</li>
+<li>Handles hundreds of features, missing values, and monotonic constraints</li>
+</ul>
+<h3>c. Click-Through Rate (CTR) Prediction</h3><hr>
+<ul>
+<li>Uses user behavior data, ad metadata, and session features</li>
+<li>Fast inference and training on massive datasets</li>
+</ul>
+<h3>d. Churn Prediction</h3><hr>
+<ul>
+<li>Identifies potential customers likely to stop using a service</li>
+<li>Feature interactions and temporal trends handled well by XGBoost</li>
+</ul>
+<h3>e. Insurance Claim Modeling</h3><hr>
+<ul>
+<li>Estimates claim frequency and severity</li>
+<li>Regression tasks with skewed targets handled via custom loss functions</li>
+</ul>
+<hr />
+<h2>5. Limitations</h2><hr>
+<ul>
+<li><strong>Interpretability</strong>: Complex ensemble of trees makes it a black box (mitigated using SHAP or feature importance).</li>
+<li><strong>Preprocessing</strong>: Requires handling categorical features and missing values upfront (unless using frameworks like CatBoost).</li>
+<li><strong>Model Size</strong>: Can grow large with many trees.</li>
+</ul>
+<hr />
+<h2>6. Tools and Ecosystem</h2><hr>
+<ul>
+<li><strong>Languages Supported</strong>: Python, R, Julia, Java, Scala</li>
+<li>
+<p><strong>Integration with Libraries</strong>:</p>
+</li>
+<li>
+<p><code>scikit-learn</code>: <code>XGBClassifier</code>, <code>XGBRegressor</code></p>
+</li>
+<li><code>Dask</code>: for distributed training</li>
+<li><code>Spark</code>: via <code>xgboost4j-spark</code></li>
+<li><strong>Visualization</strong>: Plot trees using <code>plot_tree</code> or feature importance using <code>plot_importance</code>.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>XGBoost remains a go-to choice for practitioners working with tabular data due to its speed, accuracy, and scalability. Its internal optimizations make it suitable for large-scale real-world machine learning pipelines, especially where latency and precision are critical.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

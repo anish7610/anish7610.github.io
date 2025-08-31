@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - port-knocking-and-spa</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>port-knocking-and-spa</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/port-knocking-and-spa/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Port Knocking and Single Packet Authorization</h2><hr>
+<p>Port Knocking and Single Packet Authorization (SPA) are stealthy, layered techniques used to hide open ports and control access to networked services. They play a crucial role in enhancing security, particularly on servers exposed to the internet, by ensuring that ports appear closed unless specific access patterns are used. Let’s explore how both methods work, how they differ, and when to use them.</p>
+<hr />
+<h3>1. <strong>What is Port Knocking?</strong></h3><hr>
+<p>Port knocking is a method of externally opening ports on a firewall by generating a connection attempt (a "knock") on a predefined sequence of ports.</p>
+<h4><strong>How it Works</strong></h4>
+<ul>
+<li>The firewall initially blocks all ports, appearing closed to any outsider.</li>
+<li>A client sends a series of connection attempts (SYN packets) to specific closed ports in a specific sequence (e.g., 1234, 2345, 3456).</li>
+<li>A daemon on the server listens to packet headers/logs for this sequence.</li>
+<li>Upon recognizing the correct sequence, the firewall dynamically opens a designated port (e.g., SSH on 22) for the client’s IP address.</li>
+</ul>
+<h4><strong>Key Characteristics</strong></h4>
+<ul>
+<li>Obscures services from casual port scans.</li>
+<li>Requires out-of-band knowledge of the sequence.</li>
+<li>Sequence can be time-bound or IP-bound.</li>
+</ul>
+<hr />
+<h3>2. <strong>What is Single Packet Authorization (SPA)?</strong></h3><hr>
+<p>SPA is a more modern, secure evolution of port knocking that uses a single, encrypted packet to authenticate and authorize access.</p>
+<h4><strong>How it Works</strong></h4>
+<ul>
+<li>The client sends a single UDP or ICMP packet containing an encrypted payload (usually including authentication info, IP, port to open, and timestamp).</li>
+<li>A server-side daemon (like <code>fwknop</code>) decrypts the payload and, if valid, opens the relevant port for the client IP.</li>
+<li>No sequence is needed—just one secure packet.</li>
+</ul>
+<h4><strong>Security Enhancements Over Port Knocking</strong></h4>
+<ul>
+<li>Strong cryptography (e.g., AES, GPG) is used to prevent replay and sniffing attacks.</li>
+<li>More resistant to packet spoofing and sniffing due to encryption and authentication.</li>
+<li>Can include timestamps, HMACs, and nonces for additional validation.</li>
+</ul>
+<hr />
+<h3>3. <strong>Comparing Port Knocking and SPA</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Port Knocking</th>
+<th>Single Packet Authorization</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mechanism</td>
+<td>Sequence of TCP/UDP port hits</td>
+<td>Encrypted single packet</td>
+</tr>
+<tr>
+<td>Security</td>
+<td>Moderate (spoofable, detectable)</td>
+<td>High (encrypted, authenticated)</td>
+</tr>
+<tr>
+<td>Ease of Use</td>
+<td>Requires precise timing and order</td>
+<td>Simple one-packet send</td>
+</tr>
+<tr>
+<td>Replay Protection</td>
+<td>Difficult to implement</td>
+<td>Supported via timestamps and HMAC</td>
+</tr>
+<tr>
+<td>Visibility</td>
+<td>Detectable via logs or packet capture</td>
+<td>Virtually invisible</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>4. <strong>Use Cases and Scenarios</strong></h3><hr>
+<ul>
+<li><strong>Remote Administration:</strong> Hide SSH access unless the correct knock or SPA is used.</li>
+<li><strong>IoT Devices or Edge Servers:</strong> Limit access in constrained environments.</li>
+<li><strong>High-Security Environments:</strong> Add a stealthy, second-layer defense for internet-facing services.</li>
+<li><strong>Bypassing Geo/IP Firewalls:</strong> Allow access only after successful SPA, even behind NAT.</li>
+</ul>
+<hr />
+<h3>5. <strong>Common Tools</strong></h3><hr>
+<ul>
+<li><strong>Port Knocking Tools:</strong> <code>knockd</code>, <code>knock</code></li>
+<li><strong>SPA Tools:</strong> <code>fwknop</code> (Firewall Knock Operator), <code>Aldaba</code>, <code>Firewalls with custom iptables modules</code></li>
+</ul>
+<hr />
+<h3>6. <strong>Risks and Limitations</strong></h3><hr>
+<ul>
+<li>
+<p><strong>Port Knocking</strong></p>
+</li>
+<li>
+<p>Vulnerable to replay attacks if not randomized.</p>
+</li>
+<li>Can be logged and fingerprinted by IDS/IPS tools.</li>
+<li>
+<p>Sequences may be guessed or brute-forced if short.</p>
+</li>
+<li>
+<p><strong>SPA</strong></p>
+</li>
+<li>
+<p>Requires time synchronization (e.g., NTP) for timestamp validation.</p>
+</li>
+<li>If SPA daemon is misconfigured, it can become a DoS vector.</li>
+</ul>
+<hr />
+<h3>7. <strong>Best Practices</strong></h3><hr>
+<ul>
+<li>Prefer SPA over traditional port knocking.</li>
+<li>Use strong symmetric or asymmetric encryption (AES-256, GPG).</li>
+<li>Include timestamps and nonces in SPA payloads to prevent replay attacks.</li>
+<li>Monitor and log failed SPA attempts for intrusion detection.</li>
+<li>Use with other security mechanisms like Fail2Ban and firewalls (iptables, nftables).</li>
+</ul>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Port Knocking and SPA are not substitutes for firewalls or VPNs but serve as a valuable layer of <em>security through obscurity</em>—especially when SSH or other critical services must be hidden. SPA is the recommended modern solution due to its robustness, simplicity, and security features. When used properly, these techniques can substantially reduce attack surfaces in exposed environments.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

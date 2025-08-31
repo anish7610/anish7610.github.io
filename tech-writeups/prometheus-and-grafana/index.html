@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - prometheus-and-grafana</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>prometheus-and-grafana</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/prometheus-and-grafana/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Monitoring with Prometheus and Grafana</h1><hr>
+<p>Monitoring is a fundamental aspect of modern DevOps and SRE practices. Prometheus and Grafana are among the most widely used tools for collecting, analyzing, and visualizing system and application metrics. Together, they form a powerful, open-source monitoring stack.</p>
+<hr />
+<h2>What is Prometheus?</h2><hr>
+<p><strong>Prometheus</strong> is a time-series database and monitoring system originally developed at SoundCloud. It collects metrics from configured targets at given intervals, evaluates rule expressions, and triggers alerts when certain conditions are observed.</p>
+<h3>Key Features:</h3><hr>
+<ul>
+<li>Pull-based metrics collection via HTTP endpoints (<code>/metrics</code>)</li>
+<li>Powerful <strong>PromQL</strong> (Prometheus Query Language)</li>
+<li>Multi-dimensional data model with key-value pairs (labels)</li>
+<li>Built-in alert manager</li>
+<li>Scalable and easy to configure</li>
+</ul>
+<hr />
+<h2>What is Grafana?</h2><hr>
+<p><strong>Grafana</strong> is a multi-platform, open-source analytics and interactive visualization web application. It allows users to query, visualize, alert on, and explore metrics from various data sources, including Prometheus.</p>
+<h3>Key Features:</h3><hr>
+<ul>
+<li>Interactive dashboards</li>
+<li>Rich plugin ecosystem</li>
+<li>Alerting and notifications</li>
+<li>Role-based access control</li>
+<li>Data source agnostic (supports Prometheus, Loki, InfluxDB, MySQL, etc.)</li>
+</ul>
+<hr />
+<h2>Architecture Overview</h2><hr>
+<pre class="codehilite"><code> [ Target Services ]
+         |
+     Expose /metrics
+         ↓
+ [ Prometheus Server ] ← Pulls metrics
+         |
+ [ Time-Series DB ]
+         ↓
+ [ Grafana Dashboard ] ← Queries Prometheus
+         |
+    Visualization &amp; Alerts
+</code></pre>
+
+<hr />
+<h2>Setting Up Prometheus and Grafana</h2><hr>
+<h3>1. Export Metrics</h3><hr>
+<p>Target applications need to expose metrics at an HTTP endpoint (<code>/metrics</code>). For example, in Python using <code>prometheus_client</code>:</p>
+<pre class="codehilite"><code class="language-python">from prometheus_client import start_http_server, Summary
+
+REQUEST_TIME = Summary('request_processing_seconds', 'Time spent processing request')
+
+@REQUEST_TIME.time()
+def process_request():
+    # Simulated workload
+    pass
+
+if __name__ == '__main__':
+    start_http_server(8000)
+    while True:
+        process_request()
+</code></pre>
+
+<hr />
+<h3>2. Prometheus Configuration</h3><hr>
+<p>A minimal <code>prometheus.yml</code> config:</p>
+<pre class="codehilite"><code class="language-yaml">global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'example-app'
+    static_configs:
+      - targets: ['localhost:8000']
+</code></pre>
+
+<p>Run Prometheus with:</p>
+<pre class="codehilite"><code class="language-bash">./prometheus --config.file=prometheus.yml
+</code></pre>
+
+<hr />
+<h3>3. Grafana Setup</h3><hr>
+<ul>
+<li>Install Grafana</li>
+<li>Access at <code>http://localhost:3000</code> (default creds: admin/admin)</li>
+<li>Add Prometheus as a data source</li>
+<li>Import a dashboard or create a custom one</li>
+<li>Set alerts based on PromQL queries</li>
+</ul>
+<hr />
+<h2>Example Metrics to Monitor</h2><hr>
+<ul>
+<li><strong>System</strong>: CPU, Memory, Disk, Network (via Node Exporter)</li>
+<li><strong>Applications</strong>: Request latency, error rate, throughput</li>
+<li><strong>Databases</strong>: Connection pool usage, query performance</li>
+<li><strong>Containers</strong>: Pod health, restart counts (via kube-prometheus-stack)</li>
+</ul>
+<hr />
+<h2>️ Alerting with Prometheus</h2><hr>
+<p>Configure alert rules in <code>prometheus.yml</code>:</p>
+<pre class="codehilite"><code class="language-yaml">groups:
+  - name: instance-down
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: &quot;Instance {{ $labels.instance }} down&quot;
+</code></pre>
+
+<p>Use <strong>Alertmanager</strong> to route alerts via:</p>
+<ul>
+<li>Email</li>
+<li>Slack</li>
+<li>PagerDuty</li>
+<li>Webhooks</li>
+</ul>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li><strong>Use labels wisely</strong>: Too many labels → high cardinality</li>
+<li><strong>Alert on symptoms, not causes</strong>: e.g., “Latency &gt; 300ms”</li>
+<li><strong>Dashboard hygiene</strong>: Avoid cluttered panels, use variables</li>
+<li><strong>Thanos or Cortex</strong>: For long-term storage and federation</li>
+</ul>
+<hr />
+<h2>Use Cases</h2><hr>
+<ul>
+<li>Kubernetes monitoring (<code>kube-prometheus-stack</code>)</li>
+<li>Microservices performance visualization</li>
+<li>SLA/SLO compliance tracking</li>
+<li>Anomaly detection via Grafana + machine learning plugins</li>
+</ul>
+<hr />
+<h2>Tools and Exporters</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node Exporter</td>
+<td>OS-level metrics</td>
+</tr>
+<tr>
+<td>Blackbox Exporter</td>
+<td>Probes for endpoints (HTTP, ICMP)</td>
+</tr>
+<tr>
+<td>cAdvisor</td>
+<td>Container metrics</td>
+</tr>
+<tr>
+<td>Alertmanager</td>
+<td>Alert routing and deduplication</td>
+</tr>
+<tr>
+<td>Grafana Loki</td>
+<td>Logs aggregation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Prometheus and Grafana provide a robust, flexible, and scalable monitoring stack that’s widely adopted in cloud-native environments. Prometheus handles metric collection and alerting, while Grafana turns those metrics into rich dashboards and insights.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

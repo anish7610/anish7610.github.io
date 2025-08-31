@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - IDS/IPS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>IDS/IPS</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ids/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Intrusion Detection and Prevention Systems (IDS/IPS)</h1><hr>
+<h2>Overview</h2><hr>
+<p>Intrusion Detection and Prevention Systems (IDS/IPS) are critical components in a layered security architecture. They monitor network traffic or system activity for malicious actions or policy violations and act upon detection. While both aim to detect threats, the key difference lies in prevention: <strong>IDS detects</strong>, whereas <strong>IPS detects and blocks</strong> malicious activity in real time.</p>
+<hr />
+<h2>Types of IDS/IPS</h2><hr>
+<h3>1. <strong>Host-Based IDS/IPS (HIDS/HIPS)</strong></h3><hr>
+<ul>
+<li>Monitors a <strong>single host</strong> for suspicious activity.</li>
+<li>Examines system calls, application logs, file-system modifications, etc.</li>
+<li><strong>Example Tools:</strong> OSSEC, Tripwire</li>
+</ul>
+<h3>2. <strong>Network-Based IDS/IPS (NIDS/NIPS)</strong></h3><hr>
+<ul>
+<li>Monitors <strong>network traffic</strong> in real time.</li>
+<li>Uses packet inspection techniques to analyze network protocol behavior.</li>
+<li><strong>Example Tools:</strong> Snort, Suricata, Cisco Firepower</li>
+</ul>
+<hr />
+<h2>Key Functionalities</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>IDS</th>
+<th>IPS</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Detection</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Prevention</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>Response Type</td>
+<td>Passive (alerts/logs)</td>
+<td>Active (blocks, drops packets)</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Out-of-band</td>
+<td>Inline</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Detection Techniques</h2><hr>
+<h3>1. <strong>Signature-Based Detection</strong></h3><hr>
+<ul>
+<li>Uses known patterns of malicious behavior (signatures).</li>
+<li><strong>Pros:</strong> Fast, low false positives.</li>
+<li><strong>Cons:</strong> Cannot detect unknown (zero-day) attacks.</li>
+</ul>
+<h3>2. <strong>Anomaly-Based Detection</strong></h3><hr>
+<ul>
+<li>Establishes a baseline of "normal" behavior and flags deviations.</li>
+<li><strong>Pros:</strong> Can detect unknown threats.</li>
+<li><strong>Cons:</strong> Higher false positive rate, requires tuning.</li>
+</ul>
+<h3>3. <strong>Hybrid Detection</strong></h3><hr>
+<ul>
+<li>Combines signature and anomaly detection.</li>
+<li>Provides balanced coverage and accuracy.</li>
+</ul>
+<hr />
+<h2>IDS/IPS Lifecycle in a Network</h2><hr>
+<ol>
+<li>
+<p><strong>Traffic Capture</strong>
+   NIDS tools capture packets via network tap or span port.</p>
+</li>
+<li>
+<p><strong>Analysis</strong>
+   Data is parsed and analyzed for matches with known signatures or behavioral anomalies.</p>
+</li>
+<li>
+<p><strong>Alerting/Blocking</strong></p>
+</li>
+<li>
+<p>IDS: Sends alerts to SIEM or administrators.</p>
+</li>
+<li>
+<p>IPS: Blocks traffic, resets connections, or modifies firewall rules.</p>
+</li>
+<li>
+<p><strong>Logging and Forensics</strong>
+   Events are logged for post-incident investigation.</p>
+</li>
+</ol>
+<hr />
+<h2>Real-World Example: Snort as IDS/IPS</h2><hr>
+<ul>
+<li><strong>Snort</strong> is a popular open-source NIDS/NIPS.</li>
+<li>Uses rule-based detection:</li>
+</ul>
+<p><code>snort
+  alert tcp any any -&gt; 192.168.1.0/24 80 (msg:"Possible HTTP Attack"; content:"/cmd.exe"; nocase; sid:1000001;)</code>
+* Can operate in:</p>
+<ul>
+<li><strong>IDS mode:</strong> Logs suspicious activity.</li>
+<li><strong>IPS mode:</strong> Blocks matching packets (with tools like <code>inline</code> or <code>NFQUEUE</code>).</li>
+</ul>
+<hr />
+<h2>Use Cases</h2><hr>
+<ul>
+<li><strong>Enterprise Perimeter Defense</strong>: Detect lateral movement or external attacks.</li>
+<li><strong>Data Center Security</strong>: Monitor east-west traffic inside VLANs.</li>
+<li><strong>Cloud Security</strong>: Virtual IDS/IPS monitor traffic between virtual machines.</li>
+<li><strong>Regulatory Compliance</strong>: Enforce PCI DSS, HIPAA, and other mandates.</li>
+</ul>
+<hr />
+<h2>Limitations</h2><hr>
+<ul>
+<li><strong>Encrypted Traffic Blindness</strong>: Cannot inspect HTTPS without SSL decryption.</li>
+<li><strong>False Positives/Negatives</strong>: May miss stealthy attacks or flag benign traffic.</li>
+<li><strong>Performance Bottleneck (IPS)</strong>: Inline placement can introduce latency.</li>
+</ul>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li><strong>Regularly Update Signatures</strong>.</li>
+<li><strong>Tune Rules to Environment</strong> to reduce false positives.</li>
+<li><strong>Integrate with SIEM</strong> for centralized log management and correlation.</li>
+<li><strong>Use in conjunction with firewalls and endpoint protection</strong> for defense-in-depth.</li>
+</ul>
+<hr />
+<h2>Future of IDS/IPS</h2><hr>
+<ul>
+<li><strong>AI/ML Integration</strong> for behavioral analysis and anomaly detection.</li>
+<li><strong>Deep Packet Inspection (DPI)</strong> for more accurate threat detection.</li>
+<li><strong>Cloud-native IDS/IPS</strong> solutions like AWS GuardDuty, Azure Defender.</li>
+<li><strong>Zero Trust Architectures</strong> incorporating micro-segmentation and continuous monitoring.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>IDS and IPS are foundational tools for threat detection and network security enforcement. While IDS provides visibility and early warning, IPS adds a layer of proactive defense by blocking malicious traffic. The choice between the two—or combining both—depends on the organization’s risk posture, infrastructure complexity, and performance requirements.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

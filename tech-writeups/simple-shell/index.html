@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - simple-shell</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>simple-shell</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/simple-shell/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Writing a Simple Shell in C</h1><hr>
+<p>A <strong>shell</strong> is a command-line interpreter that provides a user interface for accessing an operating system's services. Linux shells like <code>bash</code>, <code>zsh</code>, and <code>fish</code> are sophisticated programs with features like job control, redirection, and scripting. In this writeup, we'll explore how to <strong>write a basic shell in C</strong>, explaining the core components involved.</p>
+<hr />
+<h2>Overview of a Shell's Responsibilities</h2><hr>
+<p>A simple shell performs the following tasks in a loop:</p>
+<ol>
+<li><strong>Print prompt</strong> – Show a prompt to the user.</li>
+<li><strong>Read input</strong> – Take input from the user (a command).</li>
+<li><strong>Parse input</strong> – Split the command into executable and arguments.</li>
+<li><strong>Execute command</strong> – Fork a child process, and <code>exec()</code> the command.</li>
+<li><strong>Wait</strong> – Wait for the child process to finish.</li>
+</ol>
+<hr />
+<h2>️ Required System Calls</h2><hr>
+<ul>
+<li><code>fork()</code>: Creates a new process (child).</li>
+<li><code>execvp()</code>: Replaces the current process image with a new one.</li>
+<li><code>waitpid()</code>: Parent waits for child to terminate.</li>
+<li><code>getline()</code>: Reads a line of input from the user.</li>
+</ul>
+<hr />
+<h2>Minimal Shell Code in C</h2><hr>
+<pre class="codehilite"><code class="language-c">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;string.h&gt;
+#include &lt;sys/wait.h&gt;
+
+#define MAX_ARGS 64
+
+void shell_loop() {
+    char *line = NULL;
+    size_t len = 0;
+
+    while (1) {
+        printf(&quot;mysh&gt; &quot;);
+        if (getline(&amp;line, &amp;len, stdin) == -1) {
+            perror(&quot;getline&quot;);
+            break;
+        }
+
+        // Remove newline character
+        line[strcspn(line, &quot;\n&quot;)] = 0;
+
+        // Exit command
+        if (strcmp(line, &quot;exit&quot;) == 0) {
+            break;
+        }
+
+        // Tokenize input
+        char *args[MAX_ARGS];
+        int i = 0;
+        char *token = strtok(line, &quot; &quot;);
+        while (token != NULL &amp;&amp; i &lt; MAX_ARGS - 1) {
+            args[i++] = token;
+            token = strtok(NULL, &quot; &quot;);
+        }
+        args[i] = NULL;
+
+        // Fork and execute
+        pid_t pid = fork();
+        if (pid == 0) {
+            execvp(args[0], args);
+            perror(&quot;execvp failed&quot;);
+            exit(EXIT_FAILURE);
+        } else if (pid &gt; 0) {
+            waitpid(pid, NULL, 0);
+        } else {
+            perror(&quot;fork failed&quot;);
+        }
+    }
+
+    free(line);
+}
+
+int main() {
+    shell_loop();
+    return 0;
+}
+</code></pre>
+
+<hr />
+<h2>Enhancements to Explore</h2><hr>
+<ul>
+<li><strong>Pipelines (<code>|</code>)</strong> – Use <code>pipe()</code> and <code>dup2()</code>.</li>
+<li><strong>Redirection (<code>&gt;</code>, <code>&lt;</code>)</strong> – Use <code>open()</code> and <code>dup2()</code>.</li>
+<li><strong>Built-in commands</strong> – Implement <code>cd</code>, <code>exit</code>, etc. without <code>execvp</code>.</li>
+<li><strong>Job control</strong> – Handle background execution with <code>&amp;</code>.</li>
+</ul>
+<hr />
+<h2>Key Concepts</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Concept</th>
+<th>Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fork-Exec Model</strong></td>
+<td>Splits shell and child processes cleanly.</td>
+</tr>
+<tr>
+<td><strong>Parsing</strong></td>
+<td>Converts a single input string into structured arguments.</td>
+</tr>
+<tr>
+<td><strong>System Calls</strong></td>
+<td>Interfaces with the kernel to create and control processes.</td>
+</tr>
+<tr>
+<td><strong>Waiting</strong></td>
+<td>Prevents zombie processes and keeps shell responsive.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Example Run</h2><hr>
+<pre class="codehilite"><code>mysh&gt; echo Hello, World!
+Hello, World!
+mysh&gt; ls -l
+(total output)
+mysh&gt; exit
+</code></pre>
+
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Writing a shell helps you deeply understand:</p>
+<ul>
+<li>Process creation</li>
+<li>Inter-process communication</li>
+<li>System calls</li>
+<li>Input parsing and error handling</li>
+</ul>
+<p>This exercise is an essential step for systems programmers and anyone interested in OS internals or building minimal containers, scripting environments, or DevOps tools.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

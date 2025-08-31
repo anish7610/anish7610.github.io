@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - SSL/TLS</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>SSL/TLS</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ssl/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>SSL/TLS: Secure Communication Protocols - Technical Writeup</h2><hr>
+<h3><strong>Overview</strong></h3><hr>
+<p><strong>SSL (Secure Sockets Layer)</strong> and <strong>TLS (Transport Layer Security)</strong> are cryptographic protocols designed to provide <strong>secure communication</strong> over a network, typically the internet. TLS is the modern, secure version; SSL is deprecated.</p>
+<hr />
+<h3><strong>Evolution of SSL/TLS</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Release</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SSL 2.0</td>
+<td>1995</td>
+<td>Insecure, Deprecated</td>
+</tr>
+<tr>
+<td>SSL 3.0</td>
+<td>1996</td>
+<td>Deprecated</td>
+</tr>
+<tr>
+<td>TLS 1.0</td>
+<td>1999</td>
+<td>Deprecated</td>
+</tr>
+<tr>
+<td>TLS 1.1</td>
+<td>2006</td>
+<td>Deprecated</td>
+</tr>
+<tr>
+<td>TLS 1.2</td>
+<td>2008</td>
+<td><strong>Widely used</strong></td>
+</tr>
+<tr>
+<td>TLS 1.3</td>
+<td>2018</td>
+<td><strong>Latest and most secure</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3><strong>Architecture Stack</strong></h3><hr>
+<pre class="codehilite"><code>Application Layer: HTTPS, FTPS, SMTPS
+
+TLS Layer: Encryption/Decryption, Authentication
+
+Transport Layer: TCP
+
+Network Layer: IP
+</code></pre>
+
+<hr />
+<h3><strong>Goals of SSL/TLS</strong></h3><hr>
+<ol>
+<li><strong>Confidentiality</strong> – via symmetric encryption</li>
+<li><strong>Integrity</strong> – via message authentication codes</li>
+<li><strong>Authentication</strong> – via X.509 certificates</li>
+<li><strong>Forward Secrecy</strong> – via ephemeral key exchange (TLS 1.3+)</li>
+</ol>
+<hr />
+<h2>TLS Handshake Protocol</h2><hr>
+<p>The <strong>TLS handshake</strong> establishes a secure session between the client and server. It negotiates cryptographic parameters and securely shares symmetric keys.</p>
+<hr />
+<h3>TLS 1.2 Handshake Steps</h3><hr>
+<pre class="codehilite"><code>Client                             Server
+  | -------- ClientHello --------&gt; |
+  |                                |
+  | &lt;------- ServerHello --------- |
+  | &lt;-------- Certificate -------- |
+  | &lt;--- ServerKeyExchange (if DH)|
+  | &lt;------ ServerHelloDone ------ |
+  |                                |
+  | -- ClientKeyExchange --------&gt; |
+  | -- [ChangeCipherSpec] -------&gt; |
+  | -- Finished (Encrypted) -----&gt; |
+  |                                |
+  | &lt;--- [ChangeCipherSpec] ------|
+  | &lt;--- Finished (Encrypted) ----|
+</code></pre>
+
+<hr />
+<h3>TLS 1.2 Handshake (Detailed)</h3><hr>
+<ol>
+<li>
+<p><strong>ClientHello</strong></p>
+</li>
+<li>
+<p>Client sends:</p>
+<ul>
+<li>TLS version</li>
+<li>Random value (client_random)</li>
+<li>List of supported cipher suites</li>
+<li>Session ID (if resuming)</li>
+</ul>
+</li>
+<li>
+<p><strong>ServerHello</strong></p>
+</li>
+<li>
+<p>Server responds with:</p>
+<ul>
+<li>Chosen TLS version and cipher suite</li>
+<li>Random value (server_random)</li>
+<li>Server certificate</li>
+<li>Optional: ServerKeyExchange (if using DHE/ECDHE)</li>
+</ul>
+</li>
+<li>
+<p><strong>Certificate Verification</strong></p>
+</li>
+<li>
+<p>Client verifies the server’s certificate using the CA chain.</p>
+</li>
+<li>
+<p><strong>Key Exchange</strong></p>
+</li>
+<li>
+<p><strong>RSA</strong>: Client encrypts a premaster secret using the server's public key.</p>
+</li>
+<li>
+<p><strong>ECDHE</strong>: Both parties exchange ephemeral keys and derive a shared secret.</p>
+</li>
+<li>
+<p><strong>Session Key Derivation</strong></p>
+</li>
+<li>
+<p>Both sides generate symmetric keys from premaster secret + randoms.</p>
+</li>
+<li>
+<p><strong>ChangeCipherSpec &amp; Finished</strong></p>
+</li>
+<li>
+<p>Both sides send a "ChangeCipherSpec" message and switch to encrypted communication.</p>
+</li>
+<li>"Finished" messages are encrypted and confirm handshake success.</li>
+</ol>
+<hr />
+<h3>TLS 1.3 Handshake (Simplified)</h3><hr>
+<p>TLS 1.3 removes many legacy features and reduces the handshake to <strong>1 round trip</strong>:</p>
+<pre class="codehilite"><code>Client                               Server
+  | -------- ClientHello ----------&gt; |
+  |                                  |
+  | &lt;-------- ServerHello ---------- |
+  |         (key share, cert, etc)   |
+  | &lt;----- Encrypted Extensions -----|
+  | &lt;--- Certificate + Verify -------|
+  | &lt;------ Finished (Encrypted) ----|
+  |                                  |
+  | -- Finished (Encrypted) -------&gt; |
+  |        [Start Encrypted Comm]    |
+</code></pre>
+
+<h3>TLS 1.3 Improvements</h3><hr>
+<ul>
+<li>Removes RSA key exchange and static DH</li>
+<li>Uses only forward-secure (ephemeral) key exchange</li>
+<li>Encryption starts earlier</li>
+<li>Improved performance (0-RTT support)</li>
+</ul>
+<hr />
+<h2>Cryptographic Components</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Algorithms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Key Exchange</td>
+<td>ECDHE, DHE, (RSA in TLS 1.2 only)</td>
+</tr>
+<tr>
+<td>Authentication</td>
+<td>RSA, ECDSA</td>
+</tr>
+<tr>
+<td>Encryption</td>
+<td>AES-GCM, ChaCha20-Poly1305</td>
+</tr>
+<tr>
+<td>Integrity</td>
+<td>HMAC-SHA256, AEAD (TLS 1.3)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>️ Known SSL/TLS Attacks (Historical)</h2><hr>
+<ul>
+<li><strong>POODLE</strong>: SSL 3.0 padding attack</li>
+<li><strong>BEAST</strong>: TLS 1.0 CBC vulnerability</li>
+<li><strong>Heartbleed</strong>: Memory leak in OpenSSL</li>
+<li><strong>DROWN</strong>: Weak SSLv2 support</li>
+<li><strong>CRIME/BREACH</strong>: Compression-based attacks</li>
+</ul>
+<p>️ <strong>Mitigation</strong>: Use TLS 1.3 or TLS 1.2 with strong configs only</p>
+<hr />
+<h2>️ Best Practices</h2><hr>
+<ol>
+<li><strong>Disable SSL, TLS 1.0, and 1.1</strong></li>
+<li>Prefer <strong>TLS 1.3</strong></li>
+<li>Use strong ciphers (AES-GCM, ChaCha20)</li>
+<li>Enable <strong>forward secrecy</strong> (ECDHE)</li>
+<li>Use certificates from trusted CAs (e.g., Let's Encrypt)</li>
+<li>Rotate certificates regularly</li>
+<li>Implement <strong>HSTS</strong> for HTTPS-only communication</li>
+</ol>
+<hr />
+<h2>Real-World Applications</h2><hr>
+<ul>
+<li>Web Browsing: HTTPS (TLS + HTTP)</li>
+<li>Email Security: SMTPS, IMAPS</li>
+<li>VPNs: OpenVPN, WireGuard</li>
+<li>APIs: REST over HTTPS</li>
+<li>VoIP: Secure SIP (SIPS)</li>
+</ul>
+<hr />
+<h2>References</h2><hr>
+<ul>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc8446">RFC 8446 - TLS 1.3 Specification</a></li>
+<li><a href="https://www.ssllabs.com/ssltest/">SSL Labs Test Tool</a></li>
+<li><a href="https://ssl-config.mozilla.org/">Mozilla TLS Config Generator</a></li>
+<li><a href="https://www.openssl.org/docs/">OpenSSL Docs</a></li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

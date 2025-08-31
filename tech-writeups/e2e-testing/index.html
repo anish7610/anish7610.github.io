@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - e2e-testing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>e2e-testing</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/e2e-testing/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<hr />
+<h1>End-to-End (E2E) Testing with Selenium and Playwright</h1><hr>
+<h2>Overview</h2><hr>
+<p><strong>End-to-End Testing (E2E)</strong> is a software testing methodology that validates the complete flow of an application—from start to finish—to ensure the system behaves as expected. It simulates real user scenarios and interacts with the app via UI, backend services, and databases.</p>
+<p>Two popular tools for E2E testing of web applications are <strong>Selenium</strong> and <strong>Playwright</strong>.</p>
+<hr />
+<h2>What is Selenium?</h2><hr>
+<p><strong>Selenium</strong> is a mature and widely-used automation framework that allows testers to write tests in multiple languages (Java, Python, C#, etc.) and run them on various browsers.</p>
+<ul>
+<li><strong>Language Support</strong>: Java, Python, C#, Ruby, JavaScript</li>
+<li><strong>Browser Support</strong>: Chrome, Firefox, Safari, Edge, IE</li>
+<li><strong>Execution Layer</strong>: WebDriver Protocol</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>Mature ecosystem with wide community support</li>
+<li>BrowserStack, SauceLabs integration</li>
+<li>Supports parallel and distributed testing via Selenium Grid</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>Slower execution due to reliance on the WebDriver</li>
+<li>Complex setup for browser drivers</li>
+<li>Flaky tests due to asynchronous browser behavior</li>
+</ul>
+<hr />
+<h2>What is Playwright?</h2><hr>
+<p><strong>Playwright</strong> is a modern automation library developed by Microsoft for fast and reliable E2E testing. It supports multi-browser automation and is known for its fast execution, auto-wait features, and headless testing capabilities.</p>
+<ul>
+<li><strong>Language Support</strong>: JavaScript/TypeScript, Python, Java, C#</li>
+<li><strong>Browser Support</strong>: Chromium, Firefox, WebKit</li>
+<li><strong>Execution Layer</strong>: Direct browser control via DevTools Protocol</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>Automatic waiting and intelligent retries</li>
+<li>Single API for multiple browsers</li>
+<li>Built-in tracing, screenshots, and video recording</li>
+<li>Faster and more resilient compared to Selenium</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>Smaller community compared to Selenium</li>
+<li>Limited support for legacy browsers (e.g., IE)</li>
+</ul>
+<hr />
+<h2>Typical Use Cases</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Selenium</th>
+<th>Playwright</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cross-browser testing (including IE)</td>
+<td>Yes</td>
+<td>No IE support</td>
+</tr>
+<tr>
+<td>Fast feedback with modern browsers</td>
+<td>️ Slower</td>
+<td>Fast</td>
+</tr>
+<tr>
+<td>CI/CD Integration</td>
+<td>Well-supported</td>
+<td>Seamless</td>
+</tr>
+<tr>
+<td>Test flakiness reduction</td>
+<td>️ Manual waits required</td>
+<td>Auto-waiting</td>
+</tr>
+<tr>
+<td>Mobile web testing</td>
+<td>With Appium</td>
+<td>️ Limited support</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>️ Setup</h2><hr>
+<h3>▶️ Selenium (Python Example)</h3><hr>
+<pre class="codehilite"><code class="language-bash">pip install selenium
+</code></pre>
+
+<pre class="codehilite"><code class="language-python">from selenium import webdriver
+from selenium.webdriver.common.by import By
+
+driver = webdriver.Chrome()
+driver.get(&quot;https://example.com&quot;)
+assert &quot;Example Domain&quot; in driver.title
+driver.quit()
+</code></pre>
+
+<h3>▶️ Playwright (Python Example)</h3><hr>
+<pre class="codehilite"><code class="language-bash">pip install playwright
+playwright install
+</code></pre>
+
+<pre class="codehilite"><code class="language-python">from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=True)
+    page = browser.new_page()
+    page.goto(&quot;https://example.com&quot;)
+    assert &quot;Example Domain&quot; in page.title()
+    browser.close()
+</code></pre>
+
+<hr />
+<h2>Real-World Test Scenario Example</h2><hr>
+<h3>Scenario: User Login Flow</h3><hr>
+<h4>Selenium Example (Python)</h4>
+<pre class="codehilite"><code class="language-python">driver.get(&quot;https://myapp.com/login&quot;)
+driver.find_element(By.ID, &quot;username&quot;).send_keys(&quot;admin&quot;)
+driver.find_element(By.ID, &quot;password&quot;).send_keys(&quot;password&quot;)
+driver.find_element(By.ID, &quot;submit&quot;).click()
+assert &quot;Dashboard&quot; in driver.title
+</code></pre>
+
+<h4>Playwright Example (Python)</h4>
+<pre class="codehilite"><code class="language-python">page.goto(&quot;https://myapp.com/login&quot;)
+page.fill(&quot;#username&quot;, &quot;admin&quot;)
+page.fill(&quot;#password&quot;, &quot;password&quot;)
+page.click(&quot;#submit&quot;)
+page.wait_for_url(&quot;**/dashboard&quot;)
+assert &quot;Dashboard&quot; in page.title()
+</code></pre>
+
+<hr />
+<h2>Parallel Testing and CI</h2><hr>
+<h3>Selenium</h3><hr>
+<ul>
+<li>Integrate with <strong>Selenium Grid</strong> or use services like <strong>BrowserStack/SauceLabs</strong></li>
+<li>TestNG or Pytest-xdist for parallel execution</li>
+</ul>
+<h3>Playwright</h3><hr>
+<ul>
+<li>Built-in support for parallel execution via <code>pytest-playwright</code> or Playwright Test runner</li>
+</ul>
+<pre class="codehilite"><code class="language-bash"># Playwright Test Runner
+npx playwright test --project=chromium
+</code></pre>
+
+<hr />
+<h2>Comparison Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Selenium</th>
+<th>Playwright</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Browser Support</td>
+<td>Broad (incl. IE)</td>
+<td>Modern browsers only</td>
+</tr>
+<tr>
+<td>Execution Speed</td>
+<td>️ Slower</td>
+<td>Faster</td>
+</tr>
+<tr>
+<td>Auto-wait for Elements</td>
+<td>Manual waits</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Setup Complexity</td>
+<td>️ Driver configuration</td>
+<td>One-liner setup</td>
+</tr>
+<tr>
+<td>Test Stability</td>
+<td>️ Flaky at times</td>
+<td>More stable</td>
+</tr>
+<tr>
+<td>Debugging Tools</td>
+<td>️ Manual logs</td>
+<td>Tracing, video, screenshots</td>
+</tr>
+<tr>
+<td>Mobile/Web Hybrid</td>
+<td>With Appium</td>
+<td>️ Limited</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li>Use <strong>data-testid</strong> or custom selectors instead of brittle CSS selectors</li>
+<li>Run tests in <strong>headless mode</strong> for CI, but enable video/tracing for debugging</li>
+<li>Use <strong>environment-specific configs</strong> (dev, staging, prod)</li>
+<li>Avoid hard-coded waits (<code>time.sleep()</code>); prefer <strong>explicit waits</strong> in Selenium and <strong>auto-waiting</strong> in Playwright</li>
+<li>Structure tests using <strong>Page Object Model (POM)</strong> for reusability</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Both <strong>Selenium</strong> and <strong>Playwright</strong> are powerful tools for E2E testing. If you're working with legacy browsers or enterprise stacks, Selenium remains a solid choice. However, for modern web applications, <strong>Playwright offers a faster, more reliable</strong>, and <strong>developer-friendly</strong> testing experience.</p>
+<blockquote>
+<p><strong>Recommendation</strong>:
+Choose <strong>Playwright</strong> for modern applications and CI-first pipelines. Choose <strong>Selenium</strong> if you require legacy browser support or have an existing large test suite in Selenium.</p>
+</blockquote>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

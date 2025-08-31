@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - process-vs-threads</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>process-vs-threads</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/process-vs-threads/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>️ Process vs Thread vs Coroutine: Memory and Scheduling Differences</h1><hr>
+<p>Understanding the distinctions between <strong>processes</strong>, <strong>threads</strong>, and <strong>coroutines</strong> is crucial in systems programming, performance tuning, and concurrent application design. Each model has unique characteristics in terms of memory isolation, execution context, and scheduling behavior.</p>
+<hr />
+<h2>1. Processes</h2><hr>
+<h3>Definition:</h3><hr>
+<p>A <strong>process</strong> is an independent, self-contained unit of execution with its <strong>own memory space</strong>, system resources, and at least one thread (main thread).</p>
+<h3>Memory:</h3><hr>
+<ul>
+<li>Completely <strong>separate address space</strong>.</li>
+<li>No shared heap or global variables with other processes.</li>
+<li><strong>Inter-Process Communication (IPC)</strong> is needed to share data (e.g., pipes, sockets, shared memory).</li>
+</ul>
+<h3>⏱ Scheduling:</h3><hr>
+<ul>
+<li>Scheduled by the <strong>Operating System kernel</strong>.</li>
+<li>Preemptive multitasking: OS can interrupt and switch between processes.</li>
+<li>
+<p>Context switch is <strong>expensive</strong> due to:</p>
+</li>
+<li>
+<p>Saving/restoring CPU registers</p>
+</li>
+<li>Switching memory address spaces</li>
+<li>Flushing TLB (Translation Lookaside Buffer)</li>
+</ul>
+<h3>Use Cases:</h3><hr>
+<ul>
+<li>Strong isolation needed (e.g., browsers spawning processes per tab, microservices)</li>
+<li>Crashes don't affect others</li>
+</ul>
+<hr />
+<h2>2. Threads</h2><hr>
+<h3>Definition:</h3><hr>
+<p>A <strong>thread</strong> is a lightweight unit of execution within a process. Threads share the <strong>same memory space</strong> but have separate stacks and registers.</p>
+<h3>Memory:</h3><hr>
+<ul>
+<li>Threads within the same process <strong>share heap and global memory</strong>.</li>
+<li>Each thread has its own <strong>stack</strong> and <strong>thread-local storage</strong>.</li>
+<li>Synchronization primitives (mutex, semaphore) are needed to avoid race conditions.</li>
+</ul>
+<h3>⏱ Scheduling:</h3><hr>
+<ul>
+<li>Also scheduled by the OS.</li>
+<li>Lighter than processes but still requires kernel-level context switching.</li>
+<li>Can run concurrently on multi-core CPUs.</li>
+</ul>
+<h3>Use Cases:</h3><hr>
+<ul>
+<li>Tasks requiring parallel computation or background work</li>
+<li>Web servers (handling multiple client connections)</li>
+</ul>
+<hr />
+<h2>3. Coroutines</h2><hr>
+<h3>Definition:</h3><hr>
+<p>A <strong>coroutine</strong> is a <strong>cooperative</strong> (non-preemptive) unit of execution that runs in user space. It's a generalization of a function that can <strong>pause and resume</strong> its execution.</p>
+<h3>Memory:</h3><hr>
+<ul>
+<li>Lives in <strong>user space</strong> and consumes very little memory (just stack + state).</li>
+<li>All coroutines typically share the same thread’s memory space.</li>
+<li>Lightweight: thousands of coroutines can exist simultaneously.</li>
+</ul>
+<h3>⏱ Scheduling:</h3><hr>
+<ul>
+<li><strong>User-space scheduling</strong> — managed by a coroutine framework (e.g., Python asyncio, Go runtime).</li>
+<li>No kernel context switching → <strong>very fast</strong> to switch between coroutines.</li>
+<li>Must explicitly yield control (<code>await</code>, <code>yield</code>, etc.) — no preemption.</li>
+</ul>
+<h3>Use Cases:</h3><hr>
+<ul>
+<li>High-concurrency I/O-bound applications</li>
+<li>Network servers, web scraping, UI event loops</li>
+</ul>
+<hr />
+<h2>️ Comparison Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Process</th>
+<th>Thread</th>
+<th>Coroutine</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Memory Space</td>
+<td>Separate</td>
+<td>Shared</td>
+<td>Shared (same thread)</td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td>High</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Scheduling</td>
+<td>OS Kernel</td>
+<td>OS Kernel</td>
+<td>User-space (cooperative)</td>
+</tr>
+<tr>
+<td>Context Switch Cost</td>
+<td>High</td>
+<td>Medium</td>
+<td>Low</td>
+</tr>
+<tr>
+<td>Creation Overhead</td>
+<td>High</td>
+<td>Medium</td>
+<td>Very Low</td>
+</tr>
+<tr>
+<td>Scalability</td>
+<td>Low (limited)</td>
+<td>Medium</td>
+<td>High (thousands possible)</td>
+</tr>
+<tr>
+<td>Communication</td>
+<td>IPC (complex)</td>
+<td>Shared memory</td>
+<td>Shared state</td>
+</tr>
+<tr>
+<td>Preemption</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>No (manual yield/await)</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>Isolation, security</td>
+<td>Parallel compute</td>
+<td>Async I/O, high concurrency</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Example Scenarios</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Recommended Approach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Image processing pipeline</td>
+<td>Threads or processes</td>
+</tr>
+<tr>
+<td>Web crawler (I/O-bound)</td>
+<td>Coroutines (<code>asyncio</code>)</td>
+</tr>
+<tr>
+<td>Multi-user terminal shell</td>
+<td>Threads or coroutines</td>
+</tr>
+<tr>
+<td>Running untrusted code</td>
+<td>Processes (sandboxing)</td>
+</tr>
+<tr>
+<td>HTTP server handling 10K+ requests</td>
+<td>Coroutines (e.g., FastAPI + uvicorn)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Python Code Glimpse</h2><hr>
+<pre class="codehilite"><code class="language-python"># Coroutine Example (asyncio)
+import asyncio
+
+async def say_hello():
+    await asyncio.sleep(1)
+    print(&quot;Hello&quot;)
+
+async def main():
+    await asyncio.gather(say_hello(), say_hello())
+
+asyncio.run(main())
+</code></pre>
+
+<pre class="codehilite"><code class="language-python"># Thread Example
+from threading import Thread
+
+def say_hello():
+    import time
+    time.sleep(1)
+    print(&quot;Hello&quot;)
+
+t1 = Thread(target=say_hello)
+t2 = Thread(target=say_hello)
+t1.start()
+t2.start()
+t1.join()
+t2.join()
+</code></pre>
+
+<hr />
+<h2>Key Takeaways</h2><hr>
+<ul>
+<li><strong>Processes</strong> offer <strong>isolation</strong> but at a higher cost.</li>
+<li><strong>Threads</strong> enable <strong>true parallelism</strong>, but require synchronization.</li>
+<li><strong>Coroutines</strong> are ideal for <strong>scalable concurrency</strong> with minimal overhead, especially in <strong>I/O-bound</strong> programs.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

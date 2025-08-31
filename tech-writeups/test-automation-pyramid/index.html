@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - test-automation-pyramid</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>test-automation-pyramid</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/test-automation-pyramid/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Test Automation Pyramid: Unit, Integration, End-to-End</h1><hr>
+<h2>Introduction</h2><hr>
+<p>The <strong>Test Automation Pyramid</strong> is a software testing strategy that helps teams achieve <strong>fast feedback</strong>, <strong>high coverage</strong>, and <strong>efficient test maintenance</strong>. It proposes a layered testing approach, advocating <strong>more low-level (unit) tests</strong> and <strong>fewer high-level (E2E) tests</strong> to optimize quality and speed.</p>
+<p><img alt="Test Automation Pyramid" src="https://martinfowler.com/articles/practical-test-pyramid/test-pyramid.png" />
+<em>Source: Martin Fowler</em></p>
+<hr />
+<h2>The Layers of the Pyramid</h2><hr>
+<h3>1.  <strong>Unit Tests</strong> (Bottom Layer)</h3><hr>
+<ul>
+<li><strong>Purpose:</strong> Test individual components or functions in isolation.</li>
+<li><strong>Tools:</strong> Pytest, JUnit, NUnit, Mocha, etc.</li>
+<li>
+<p><strong>Characteristics:</strong></p>
+</li>
+<li>
+<p>Fast and cheap to run.</p>
+</li>
+<li>No external dependencies (e.g., databases, services).</li>
+<li>Easy to debug and maintain.</li>
+<li><strong>Example:</strong></li>
+</ul>
+<pre class="codehilite"><code class="language-python">def add(a, b):
+    return a + b
+
+def test_add():
+    assert add(2, 3) == 5
+</code></pre>
+
+<hr />
+<h3>2.  <strong>Integration Tests</strong> (Middle Layer)</h3><hr>
+<ul>
+<li><strong>Purpose:</strong> Test interactions between components/modules.</li>
+<li><strong>Scope:</strong> May include database, APIs, or services.</li>
+<li><strong>Tools:</strong> Pytest + requests, Spring Test, Postman, Docker Compose.</li>
+<li>
+<p><strong>Characteristics:</strong></p>
+</li>
+<li>
+<p>Slower than unit tests.</p>
+</li>
+<li>Validates real interactions (e.g., API ↔ DB).</li>
+<li>Can fail due to infrastructure issues.</li>
+<li><strong>Example:</strong></li>
+</ul>
+<pre class="codehilite"><code class="language-python">def test_user_login_flow():
+    response = client.post(&quot;/login&quot;, json={&quot;user&quot;: &quot;admin&quot;, &quot;pass&quot;: &quot;secret&quot;})
+    assert response.status_code == 200
+</code></pre>
+
+<hr />
+<h3>3.  <strong>End-to-End (E2E) Tests</strong> (Top Layer)</h3><hr>
+<ul>
+<li><strong>Purpose:</strong> Simulate real user scenarios across the full stack (UI → Backend → DB).</li>
+<li><strong>Tools:</strong> Selenium, Cypress, Playwright.</li>
+<li>
+<p><strong>Characteristics:</strong></p>
+</li>
+<li>
+<p>Slow and expensive.</p>
+</li>
+<li>High flakiness if not maintained well.</li>
+<li>Essential for catching regressions in user flows.</li>
+<li><strong>Example:</strong></li>
+</ul>
+<pre class="codehilite"><code class="language-python">def test_login_ui():
+    browser.get(&quot;https://example.com/login&quot;)
+    browser.find_element(By.ID, &quot;username&quot;).send_keys(&quot;admin&quot;)
+    browser.find_element(By.ID, &quot;password&quot;).send_keys(&quot;secret&quot;)
+    browser.find_element(By.ID, &quot;submit&quot;).click()
+    assert &quot;Dashboard&quot; in browser.page_source
+</code></pre>
+
+<hr />
+<h2>Why the Pyramid Structure?</h2><hr>
+<ul>
+<li><strong>More Unit Tests:</strong> They're fast and give quick feedback.</li>
+<li><strong>Fewer E2E Tests:</strong> High maintenance cost and longer run times.</li>
+<li><strong>Balanced Middle Layer:</strong> Integration tests validate cross-component behavior without the full stack overhead.</li>
+</ul>
+<hr />
+<h2>Best Practices</h2><hr>
+<ol>
+<li><strong>Mock External Dependencies</strong> in unit tests.</li>
+<li><strong>Use CI/CD pipelines</strong> to automate test stages.</li>
+<li><strong>Tag or isolate slow tests</strong> (e.g., <code>@pytest.mark.slow</code>) to run selectively.</li>
+<li><strong>Monitor test flakiness</strong> and stability regularly.</li>
+<li><strong>Use Docker/Compose</strong> for reproducible integration environments.</li>
+</ol>
+<hr />
+<h2>Common Pitfalls</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Pitfall</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Over-reliance on E2E tests</td>
+<td>Shift testing lower in the pyramid</td>
+</tr>
+<tr>
+<td>Flaky tests causing CI failures</td>
+<td>Stabilize environments, retry logic, or parallelize safely</td>
+</tr>
+<tr>
+<td>No clear test boundaries</td>
+<td>Define what goes into unit, integration, and E2E explicitly</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>The <strong>Test Automation Pyramid</strong> is a <strong>guiding principle</strong>, not a hard rule. The goal is to <strong>optimize test speed, reliability, and coverage</strong> by using the right tests at the right layer. Investing wisely in <strong>unit and integration tests</strong>, while keeping E2E tests lean and focused, leads to <strong>robust and scalable test automation</strong>.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

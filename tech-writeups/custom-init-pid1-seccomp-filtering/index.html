@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - custom-init-pid1-seccomp-filtering</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>custom-init-pid1-seccomp-filtering</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/custom-init-pid1-seccomp-filtering/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<p>Creating a <strong>custom init system with PID 1 and syscall filtering using seccomp</strong> is a niche but powerful exercise in systems programming and Linux security. It gives insight into how init systems like <code>systemd</code>, <code>SysVinit</code>, and others orchestrate process lifecycle and apply security hardening.</p>
+<hr />
+<h3>Why Create a Custom Init System?</h3><hr>
+<p>The <code>init</code> system (PID 1) is the first userspace process started by the kernel after boot and is responsible for starting all other processes. Writing your own gives you control over:</p>
+<ul>
+<li><strong>Process supervision</strong></li>
+<li><strong>Minimal environments for containers or embedded systems</strong></li>
+<li><strong>Applying security policies early (e.g., seccomp filters)</strong></li>
+</ul>
+<hr />
+<h3>Basic Responsibilities of an Init Process</h3><hr>
+<p>A minimal init process in Linux must:</p>
+<ol>
+<li>Be assigned PID 1.</li>
+<li>Reap zombie child processes.</li>
+<li>Spawn and supervise key daemons or shells.</li>
+<li>Optionally handle signals like <code>SIGTERM</code>, <code>SIGCHLD</code>.</li>
+</ol>
+<hr />
+<h3>Basic C Implementation of Custom Init</h3><hr>
+<pre class="codehilite"><code class="language-c">#define _GNU_SOURCE
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;sys/wait.h&gt;
+#include &lt;signal.h&gt;
+#include &lt;seccomp.h&gt;
+
+void reap_zombies(int signum) {
+    while (waitpid(-1, NULL, WNOHANG) &gt; 0);
+}
+
+void setup_seccomp() {
+    scmp_filter_ctx ctx = seccomp_init(SCMP_ACT_KILL); // Kill by default
+    if (!ctx) {
+        perror(&quot;seccomp_init&quot;);
+        exit(1);
+    }
+
+    // Allow some syscalls
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(exit), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(fork), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(execve), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(wait4), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(write), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(nanosleep), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigreturn), 0);
+    seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(rt_sigaction), 0);
+
+    if (seccomp_load(ctx) &lt; 0) {
+        perror(&quot;seccomp_load&quot;);
+        seccomp_release(ctx);
+        exit(1);
+    }
+
+    seccomp_release(ctx);
+}
+
+int main() {
+    if (getpid() != 1) {
+        fprintf(stderr, &quot;Must be run as PID 1!\n&quot;);
+        return 1;
+    }
+
+    signal(SIGCHLD, reap_zombies);
+    setup_seccomp();
+
+    pid_t pid = fork();
+    if (pid == 0) {
+        // Child - run a shell or target daemon
+        execl(&quot;/bin/sh&quot;, &quot;/bin/sh&quot;, NULL);
+        perror(&quot;execl&quot;);
+        exit(1);
+    }
+
+    // Init loop
+    while (1) {
+        pause(); // Wait for signals (e.g., SIGCHLD)
+    }
+
+    return 0;
+}
+</code></pre>
+
+<hr />
+<h3>Running Your Init in a Container</h3><hr>
+<p>You can test it inside a minimal Docker container:</p>
+<pre class="codehilite"><code class="language-Dockerfile">FROM alpine
+COPY myinit /sbin/init
+ENTRYPOINT [&quot;/sbin/init&quot;]
+</code></pre>
+
+<pre class="codehilite"><code class="language-bash">docker build -t custom-init .
+docker run --rm -it --init=false custom-init
+</code></pre>
+
+<p>Note: <code>--init=false</code> disables Docker's own tini init process.</p>
+<hr />
+<h3>️ Adding More Syscall Filters</h3><hr>
+<p>Use <code>strace</code> or <code>seccomp-tools</code> to monitor what syscalls your process actually makes, and refine the filter to allow only necessary ones:</p>
+<pre class="codehilite"><code class="language-bash">strace -f -e trace=all ./myinit
+</code></pre>
+
+<hr />
+<h3>Security Hardening Additions</h3><hr>
+<ul>
+<li>Use <code>prctl(PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0)</code> before applying filters.</li>
+<li>Use <code>capset</code> to drop capabilities.</li>
+<li>Mount <code>/proc</code>, <code>/sys</code> manually if you're in a custom namespace.</li>
+<li>Apply seccomp at a per-process level to children.</li>
+</ul>
+<hr />
+<h3>Summary</h3><hr>
+<p>A custom init with syscall filtering:</p>
+<ul>
+<li>Helps understand low-level Linux process management.</li>
+<li>Provides security isolation for minimal environments.</li>
+<li>Can serve as a lightweight replacement for full init systems in containers.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

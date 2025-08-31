@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - embedded-protocols</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>embedded-protocols</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/embedded-protocols/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>UART, SPI, I2C Protocols in Embedded Systems</h1><hr>
+<p>Communication between microcontrollers and peripheral devices is a cornerstone of embedded systems. Three widely used communication protocols for this purpose are <strong>UART</strong>, <strong>SPI</strong>, and <strong>I2C</strong>. Each protocol has distinct characteristics, trade-offs, and use cases.</p>
+<hr />
+<h2>1. UART (Universal Asynchronous Receiver/Transmitter)</h2><hr>
+<h3>Overview</h3><hr>
+<p>UART is a <strong>full-duplex</strong>, <strong>asynchronous</strong> serial communication protocol that transmits data <strong>bit by bit</strong> between two devices — a <strong>transmitter</strong> and a <strong>receiver</strong>.</p>
+<h3>Characteristics</h3><hr>
+<ul>
+<li><strong>Lines Required</strong>: 2 (TX, RX)</li>
+<li><strong>Speed</strong>: Typically up to 1 Mbps (can vary by hardware)</li>
+<li><strong>Synchronous?</strong>:  No clock line, uses start/stop bits and baud rate</li>
+<li><strong>Point-to-Point</strong>:  Only 1-to-1 communication</li>
+</ul>
+<h3>Frame Format</h3><hr>
+<ul>
+<li>Start bit → Data bits (usually 8) → Optional parity → Stop bit(s)</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>Simple and widely supported</li>
+<li>Good for short-distance communication</li>
+<li>Works well for console/debug logging</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>No built-in addressing → only one device can be connected per UART port</li>
+<li>Baud rate must be matched between devices</li>
+</ul>
+<hr />
+<h2>2. SPI (Serial Peripheral Interface)</h2><hr>
+<h3>Overview</h3><hr>
+<p>SPI is a <strong>synchronous</strong>, <strong>full-duplex</strong> protocol typically used for high-speed communication between a master device and one or more slaves.</p>
+<h3>Characteristics</h3><hr>
+<ul>
+<li>
+<p><strong>Lines Required</strong>: 4+</p>
+</li>
+<li>
+<p>MOSI (Master Out Slave In)</p>
+</li>
+<li>MISO (Master In Slave Out)</li>
+<li>SCLK (Serial Clock)</li>
+<li>SS/CS (Slave Select)</li>
+<li><strong>Speed</strong>: Typically up to 10+ Mbps</li>
+<li><strong>Multi-Device</strong>:  Yes, using separate SS lines or daisy-chaining</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>High-speed communication</li>
+<li>Simple protocol, low overhead</li>
+<li>Full-duplex (can send and receive simultaneously)</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>Requires more GPIOs for multiple devices</li>
+<li>No error checking or acknowledgment</li>
+<li>No formal standard, leading to compatibility issues</li>
+</ul>
+<hr />
+<h2>3. I2C (Inter-Integrated Circuit)</h2><hr>
+<h3>Overview</h3><hr>
+<p>I2C is a <strong>synchronous</strong>, <strong>half-duplex</strong>, <strong>multi-master</strong> serial protocol designed for communication over short distances between ICs on the same PCB.</p>
+<h3>Characteristics</h3><hr>
+<ul>
+<li><strong>Lines Required</strong>: 2 (SDA – data, SCL – clock)</li>
+<li>
+<p><strong>Speed</strong>:</p>
+</li>
+<li>
+<p>Standard: 100 kbps</p>
+</li>
+<li>Fast: 400 kbps</li>
+<li>Fast Mode Plus: 1 Mbps</li>
+<li>High-speed: 3.4 Mbps</li>
+<li><strong>Multi-Device</strong>:  Yes, using 7-bit or 10-bit addressing</li>
+</ul>
+<h3>Pros</h3><hr>
+<ul>
+<li>Only two wires for many devices</li>
+<li>Supports multi-master communication</li>
+<li>Built-in addressing and acknowledgment</li>
+<li>Great for sensor networks or EEPROMs</li>
+</ul>
+<h3>Cons</h3><hr>
+<ul>
+<li>Slower than SPI</li>
+<li>Susceptible to noise due to open-drain lines</li>
+<li>More complex to implement (start/stop conditions, ACK/NACK, etc.)</li>
+</ul>
+<hr />
+<h2>Protocol Comparison Table</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>UART</th>
+<th>SPI</th>
+<th>I2C</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wires Required</td>
+<td>2 (TX, RX)</td>
+<td>4+ (MOSI, MISO, SCLK, SS)</td>
+<td>2 (SDA, SCL)</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Medium</td>
+<td>High</td>
+<td>Low to Medium</td>
+</tr>
+<tr>
+<td>Duplex Mode</td>
+<td>Full</td>
+<td>Full</td>
+<td>Half</td>
+</tr>
+<tr>
+<td>Clock Sync</td>
+<td>No</td>
+<td>Yes (Master)</td>
+<td>Yes (Master)</td>
+</tr>
+<tr>
+<td>Multiple Devices</td>
+<td></td>
+<td>(with multiple SS)</td>
+<td>(with addressing)</td>
+</tr>
+<tr>
+<td>Complexity</td>
+<td>Low</td>
+<td>Medium</td>
+<td>High</td>
+</tr>
+<tr>
+<td>Use Case Examples</td>
+<td>Debug UART, GPS</td>
+<td>Flash memory, LCD</td>
+<td>Sensors, RTC, EEPROM</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>When to Use What?</h2><hr>
+<ul>
+<li><strong>UART</strong>: Use for <strong>console communication</strong>, <strong>GPS modules</strong>, or where simple one-to-one connection is enough.</li>
+<li><strong>SPI</strong>: Ideal for <strong>high-speed</strong>, <strong>low-pin-count</strong> communication with <strong>displays</strong>, <strong>flash memory</strong>, or <strong>high-speed ADCs</strong>.</li>
+<li><strong>I2C</strong>: Best for connecting <strong>multiple low-speed peripherals</strong> like <strong>temperature sensors</strong>, <strong>RTC</strong>, or <strong>EEPROM</strong> on the same bus.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

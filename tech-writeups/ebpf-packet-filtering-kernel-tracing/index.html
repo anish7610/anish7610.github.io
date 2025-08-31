@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - ebpf-packet-filtering-kernel-tracing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>ebpf-packet-filtering-kernel-tracing</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ebpf-packet-filtering-kernel-tracing/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>BPF (eBPF) for Packet Filtering and Kernel Tracing</h2><hr>
+<p>eBPF (Extended Berkeley Packet Filter) is a revolutionary technology in the Linux kernel that allows safe and efficient execution of user-defined programs in kernel space. Initially designed for packet filtering (classic BPF), eBPF has evolved into a powerful sandboxed virtual machine inside the Linux kernel that supports networking, security, tracing, and performance profiling.</p>
+<hr />
+<h3>Origins and Evolution of BPF</h3><hr>
+<ul>
+<li><strong>Classic BPF (cBPF):</strong> Introduced for efficient packet filtering in tools like <code>tcpdump</code>, providing a low-level in-kernel VM to evaluate packet headers.</li>
+<li><strong>Extended BPF (eBPF):</strong> Introduced in Linux 3.15+ with a more expressive instruction set, ability to hook into various kernel subsystems (e.g., network stack, syscalls), and support for safe memory access and JIT compilation.</li>
+</ul>
+<hr />
+<h3>Use Cases of eBPF</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Example Use Cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Packet Filtering</strong></td>
+<td>Firewall rules (e.g., XDP), DDoS mitigation</td>
+</tr>
+<tr>
+<td><strong>Tracing &amp; Observability</strong></td>
+<td>System call tracing, performance monitoring (<code>bcc</code>, <code>bpftrace</code>)</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Syscall filtering, process activity monitoring (<code>seccomp</code>, <code>Tetragon</code>)</td>
+</tr>
+<tr>
+<td><strong>Performance Tuning</strong></td>
+<td>CPU/memory profiling, disk I/O latency debugging</td>
+</tr>
+<tr>
+<td><strong>Networking</strong></td>
+<td>Load balancing (Cilium), deep packet inspection</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>eBPF for Packet Filtering</h3><hr>
+<h4>Mechanisms:</h4>
+<ul>
+<li>
+<p><strong>XDP (eXpress Data Path):</strong></p>
+</li>
+<li>
+<p>Attaches eBPF programs directly to the network driver receive path.</p>
+</li>
+<li>Enables ultra-low-latency packet processing before it enters the kernel networking stack.</li>
+<li>
+<p>Used for packet drop, redirect, or pass decisions.</p>
+</li>
+<li>
+<p><strong>tc (Traffic Control) eBPF:</strong></p>
+</li>
+<li>
+<p>Allows attaching eBPF programs at various points in the Linux traffic control pipeline.</p>
+</li>
+<li>More flexible than XDP; operates further up the stack, suitable for QoS or shaping.</li>
+</ul>
+<h4>Example: Drop all ICMP packets using XDP</h4>
+<pre class="codehilite"><code class="language-c">SEC(&quot;xdp&quot;)
+int xdp_drop_icmp(struct xdp_md *ctx) {
+    void *data = (void *)(long)ctx-&gt;data;
+    void *data_end = (void *)(long)ctx-&gt;data_end;
+
+    struct ethhdr *eth = data;
+    if ((void *)eth + sizeof(*eth) &gt; data_end) return XDP_PASS;
+
+    if (eth-&gt;h_proto == htons(ETH_P_IP)) {
+        struct iphdr *ip = data + sizeof(*eth);
+        if ((void *)ip + sizeof(*ip) &gt; data_end) return XDP_PASS;
+
+        if (ip-&gt;protocol == IPPROTO_ICMP) return XDP_DROP;
+    }
+
+    return XDP_PASS;
+}
+</code></pre>
+
+<hr />
+<h3>eBPF for Kernel Tracing</h3><hr>
+<p>eBPF can attach probes to various kernel or user-space events:</p>
+<ul>
+<li><strong>kprobes / kretprobes:</strong> Attach to kernel function entry/exit.</li>
+<li><strong>uprobes:</strong> Attach to user-space binary functions.</li>
+<li><strong>tracepoints:</strong> Static instrumentation points in kernel code.</li>
+<li><strong>perf events:</strong> CPU performance counters.</li>
+</ul>
+<h4>Tools &amp; Frameworks:</h4>
+<ul>
+<li><strong>BCC (BPF Compiler Collection):</strong> Python-based front end for writing and running eBPF tracing programs.</li>
+<li><strong>bpftrace:</strong> High-level tracing language similar to <code>awk</code>, great for one-liners.</li>
+<li><strong>Perf / SystemTap:</strong> Older tools, partially superseded by eBPF.</li>
+</ul>
+<h4>Example: Trace open syscalls with <code>bpftrace</code></h4>
+<pre class="codehilite"><code class="language-bash">bpftrace -e 'tracepoint:syscalls:sys_enter_openat { printf(&quot;%s opened %s\n&quot;, comm, str(args-&gt;filename)); }'
+</code></pre>
+
+<hr />
+<h3>Safety and Verification</h3><hr>
+<ul>
+<li>
+<p>eBPF programs are <strong>verified</strong> before execution to ensure:</p>
+</li>
+<li>
+<p>No loops (bounded execution).</p>
+</li>
+<li>Valid memory accesses.</li>
+<li>Stack size constraints.</li>
+<li>Programs are <strong>JIT-compiled</strong> to native instructions for performance.</li>
+</ul>
+<hr />
+<h3>Real-World Applications</h3><hr>
+<ul>
+<li><strong>Cilium:</strong> Kubernetes CNI plugin that uses eBPF for load balancing, network policy enforcement, and observability.</li>
+<li><strong>Falco:</strong> Runtime security tool using eBPF to detect suspicious syscalls.</li>
+<li><strong>Facebook / Netflix:</strong> Use eBPF extensively for performance debugging and latency tracing at scale.</li>
+</ul>
+<hr />
+<h3>Advantages of eBPF</h3><hr>
+<ul>
+<li>No kernel changes needed to add tracing/logging.</li>
+<li>Efficient and safe (runs in a VM with strict safety checks).</li>
+<li>Dynamically insert logic into kernel at runtime.</li>
+<li>High performance: low overhead JIT-compiled programs.</li>
+</ul>
+<hr />
+<h3>Development Toolchain</h3><hr>
+<ul>
+<li><strong>LLVM/Clang:</strong> For compiling C code into eBPF bytecode.</li>
+<li><strong>libbpf:</strong> C API to load and interact with eBPF programs.</li>
+<li><strong>bpftool:</strong> CLI for inspecting and managing eBPF programs.</li>
+<li><strong>CO-RE (Compile Once – Run Everywhere):</strong> Mechanism to write portable eBPF programs that adapt to kernel versions.</li>
+</ul>
+<hr />
+<h3>Summary</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Packet Filtering</strong></td>
+<td>Drop or reroute packets in kernel space (XDP, tc)</td>
+</tr>
+<tr>
+<td><strong>Tracing</strong></td>
+<td>Kernel/user-space visibility without recompiling kernel</td>
+</tr>
+<tr>
+<td><strong>Security</strong></td>
+<td>Runtime process and syscall monitoring</td>
+</tr>
+<tr>
+<td><strong>Performance</strong></td>
+<td>Minimal overhead; safe and fast execution</td>
+</tr>
+</tbody>
+</table>
+<p>eBPF represents a paradigm shift in systems programming by safely extending kernel capabilities <strong>without writing kernel modules</strong>, enabling deep observability, fine-grained control, and performance that rivals native code.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

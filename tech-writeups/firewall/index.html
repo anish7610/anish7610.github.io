@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - Firewall</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>Firewall</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/firewall/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Firewall Architectures: A Technical Overview</h1><hr>
+<p>Firewalls form the cornerstone of any organization’s network security. Their evolution spans from simple packet-filtering devices to intelligent systems that perform deep inspection and integrate with broader security frameworks.</p>
+<p>This writeup explores the <strong>core types of firewall architectures</strong>:</p>
+<ul>
+<li>Stateless vs Stateful Firewalls</li>
+<li>Unified Threat Management (UTM)</li>
+<li>Next-Generation Firewalls (NGFW)</li>
+</ul>
+<hr />
+<h2>1.  Stateless vs Stateful Firewalls</h2><hr>
+<h3>Stateless Firewalls (Packet Filtering Firewalls)</h3><hr>
+<p><strong>Definition:</strong>
+Stateless firewalls evaluate each packet independently without regard to the context of the traffic flow.</p>
+<p><strong>Key Characteristics:</strong></p>
+<ul>
+<li>Operate at <strong>Layer 3 (Network)</strong> and <strong>Layer 4 (Transport)</strong> of the OSI model.</li>
+<li>Use <strong>static rules</strong> based on IP addresses, ports, and protocols.</li>
+<li>Do not maintain <strong>connection state</strong>.</li>
+</ul>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Fast and simple.</li>
+<li>Lightweight and low resource consumption.</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Cannot detect spoofed packets or track sessions.</li>
+<li>Prone to misidentifying malicious traffic as legitimate.</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Perimeter filtering in low-risk environments.</li>
+<li>Routers and simple embedded systems.</li>
+</ul>
+<p><strong>Example Rule:</strong>
+Allow TCP traffic from 192.168.1.10:1024 → 172.16.0.1:80</p>
+<hr />
+<h3>Stateful Firewalls</h3><hr>
+<p><strong>Definition:</strong>
+Stateful firewalls monitor the full state of active connections and make decisions based on the <strong>context</strong> of traffic.</p>
+<p><strong>Key Characteristics:</strong></p>
+<ul>
+<li>Track connection <strong>state tables</strong> (e.g., SYN/ACK flags).</li>
+<li>Can dynamically allow return traffic.</li>
+<li>Better suited to protect internal systems from unauthorized access.</li>
+</ul>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>More secure than stateless firewalls.</li>
+<li>Can enforce <strong>session-level security</strong>.</li>
+<li>Handles NAT and dynamic port mapping better.</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>More resource-intensive (needs RAM and CPU).</li>
+<li>Vulnerable to state-table exhaustion (DoS attack vector).</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Enterprise networks.</li>
+<li>Internal segmentation and DMZ protection.</li>
+</ul>
+<p><strong>Example:</strong>
+If a client sends a SYN to a server, the firewall remembers the session and allows the SYN-ACK reply.</p>
+<hr />
+<h2>2.  Unified Threat Management (UTM)</h2><hr>
+<p><strong>Definition:</strong>
+UTM is an <strong>all-in-one</strong> security solution that integrates multiple security functions into a <strong>single appliance</strong>.</p>
+<h3>Features:</h3><hr>
+<ul>
+<li><strong>Firewall (stateful/stateless)</strong></li>
+<li><strong>Intrusion Detection/Prevention (IDS/IPS)</strong></li>
+<li><strong>Antivirus/Antimalware scanning</strong></li>
+<li><strong>Web and Email filtering</strong></li>
+<li><strong>VPN support</strong></li>
+<li><strong>Data Loss Prevention (DLP)</strong></li>
+</ul>
+<h3>Advantages:</h3><hr>
+<ul>
+<li>Centralized management.</li>
+<li>Simplifies deployment and policy enforcement.</li>
+<li>Cost-effective for small to mid-sized organizations.</li>
+</ul>
+<h3>️ Limitations:</h3><hr>
+<ul>
+<li>Single point of failure.</li>
+<li>May underperform in high-traffic enterprise networks.</li>
+<li>Limited customization compared to best-of-breed systems.</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Small and medium-sized businesses (SMBs).</li>
+<li>Branch offices with limited IT staff.</li>
+</ul>
+<hr />
+<h2>3.  Next-Generation Firewalls (NGFW)</h2><hr>
+<p><strong>Definition:</strong>
+NGFWs combine traditional firewall functions with <strong>deep packet inspection</strong>, <strong>application-level awareness</strong>, and <strong>threat intelligence integration</strong>.</p>
+<h3>Core Capabilities:</h3><hr>
+<ul>
+<li>Deep Packet Inspection (DPI) to look beyond ports/protocols.</li>
+<li><strong>Application awareness and control</strong> (e.g., block Dropbox, allow Google Drive).</li>
+<li><strong>User identity integration</strong> (Active Directory, LDAP).</li>
+<li><strong>Advanced threat protection</strong> with sandboxing.</li>
+<li><strong>SSL/TLS decryption</strong> and inspection.</li>
+<li>Built-in <strong>IPS/IDS</strong>.</li>
+</ul>
+<h3>Architecture:</h3><hr>
+<ul>
+<li>Operates at <strong>Layers 3–7</strong>.</li>
+<li>Uses behavioral analytics and threat intelligence feeds.</li>
+<li>Can enforce granular policies by user, group, or application.</li>
+</ul>
+<h3>Benefits:</h3><hr>
+<ul>
+<li>Enhanced visibility and control.</li>
+<li>Detects sophisticated threats (e.g., zero-days, encrypted malware).</li>
+<li>Integrated logging and analytics dashboards.</li>
+</ul>
+<h3>️ Drawbacks:</h3><hr>
+<ul>
+<li>More expensive than traditional firewalls.</li>
+<li>Requires skilled personnel to configure and maintain.</li>
+<li>Can impact performance if DPI and SSL inspection are fully enabled.</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Large enterprises.</li>
+<li>Regulated environments (e.g., finance, healthcare).</li>
+<li>Cloud and hybrid infrastructure security.</li>
+</ul>
+<hr />
+<h2>Comparison Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Stateless FW</th>
+<th>Stateful FW</th>
+<th>UTM</th>
+<th>NGFW</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connection Awareness</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Performance</td>
+<td>High</td>
+<td>Moderate</td>
+<td>Moderate</td>
+<td>Variable (can be high)</td>
+</tr>
+<tr>
+<td>Application Layer Control</td>
+<td>No</td>
+<td>No</td>
+<td>Limited</td>
+<td>Full (Layer 7)</td>
+</tr>
+<tr>
+<td>Malware/AV Inspection</td>
+<td>No</td>
+<td>No</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Threat Intelligence</td>
+<td>No</td>
+<td>No</td>
+<td>Optional</td>
+<td>Integrated</td>
+</tr>
+<tr>
+<td>Best for</td>
+<td>Basic filtering</td>
+<td>Traditional networks</td>
+<td>SMBs</td>
+<td>Enterprises, Cloud, Zero Trust</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Firewall technologies have matured from <strong>simple packet filters</strong> to <strong>context-aware, intelligent defense systems</strong> that play a central role in modern cybersecurity strategies.</p>
+<ul>
+<li><strong>Stateless firewalls</strong> are fast but primitive.</li>
+<li><strong>Stateful firewalls</strong> offer contextual tracking and are still common.</li>
+<li><strong>UTMs</strong> provide bundled security for smaller environments.</li>
+<li><strong>NGFWs</strong> are the gold standard for sophisticated threat detection and application control.</li>
+</ul>
+<p>In today’s landscape of <strong>zero-trust architectures, encrypted traffic, and hybrid networks</strong>, organizations are increasingly shifting toward <strong>NGFWs</strong> for their advanced capabilities and layered protection.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

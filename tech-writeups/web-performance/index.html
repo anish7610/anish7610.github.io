@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - web-performance</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>web-performance</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/web-performance/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Web Performance Optimization (Lighthouse, Web Vitals)</h1><hr>
+<p>In an era where milliseconds matter, optimizing web performance is crucial not only for user satisfaction but also for SEO, retention, and revenue. Modern tools like <strong>Lighthouse</strong> and <strong>Web Vitals</strong> provide detailed metrics and actionable feedback to developers. This writeup explores these tools, key metrics, and effective strategies for improving site performance.</p>
+<hr />
+<h2>Why Performance Matters</h2><hr>
+<ul>
+<li><strong>User Experience</strong>: Fast-loading websites improve user satisfaction and lower bounce rates.</li>
+<li><strong>SEO</strong>: Google uses Core Web Vitals as ranking signals.</li>
+<li><strong>Accessibility</strong>: Performance affects how quickly users with limited bandwidth or older devices can access content.</li>
+<li><strong>Conversions</strong>: Speed improvements can directly lead to better business outcomes.</li>
+</ul>
+<hr />
+<h2>Lighthouse: Auditing Your Site</h2><hr>
+<p><strong>Lighthouse</strong> is an open-source tool from Google that audits websites for performance, accessibility, SEO, best practices, and PWA capabilities.</p>
+<h3>Key Lighthouse Metrics:</h3><hr>
+<ol>
+<li><strong>Performance</strong>: Measures page speed and interactivity.</li>
+<li><strong>Accessibility</strong>: Checks for ARIA roles, color contrast, semantic HTML.</li>
+<li><strong>Best Practices</strong>: Security, HTTPS, deprecated APIs, etc.</li>
+<li><strong>SEO</strong>: Valid HTML, meta tags, canonical links.</li>
+<li><strong>Progressive Web App (PWA)</strong> readiness.</li>
+</ol>
+<h3>How to Use:</h3><hr>
+<ul>
+<li><strong>Chrome DevTools</strong> &gt; Lighthouse tab.</li>
+<li>CLI: <code>npx lighthouse https://your-site.com</code></li>
+<li>CI integration via GitHub Actions or custom pipelines.</li>
+</ul>
+<hr />
+<h2>Core Web Vitals (CWV)</h2><hr>
+<p><strong>Web Vitals</strong> are a set of metrics from Google to quantify real-world UX. The <strong>Core Web Vitals</strong> focus on three key aspects:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Description</th>
+<th>Good Threshold</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Largest Contentful Paint (LCP)</strong></td>
+<td>Loading speed of main content</td>
+<td>≤ 2.5 seconds</td>
+</tr>
+<tr>
+<td><strong>First Input Delay (FID)</strong></td>
+<td>Responsiveness to first interaction</td>
+<td>≤ 100 ms</td>
+</tr>
+<tr>
+<td><strong>Cumulative Layout Shift (CLS)</strong></td>
+<td>Visual stability during load</td>
+<td>≤ 0.1</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: <strong>Interaction to Next Paint (INP)</strong> will replace FID in the future.</p>
+</blockquote>
+<h3>Measurement Tools:</h3><hr>
+<ul>
+<li><strong>PageSpeed Insights</strong> (uses real-world CrUX data)</li>
+<li><strong>Web Vitals JS library</strong></li>
+<li><strong>Chrome DevTools &gt; Performance</strong></li>
+<li><strong>Google Search Console &gt; Core Web Vitals report</strong></li>
+</ul>
+<hr />
+<h2>Optimization Techniques</h2><hr>
+<h3>1. <strong>Reduce Initial Load Time</strong></h3><hr>
+<ul>
+<li>Minimize JavaScript and CSS bundles (tree-shaking, code splitting).</li>
+<li>Lazy-load images and components.</li>
+<li>Compress assets (gzip, Brotli).</li>
+</ul>
+<h3>2. <strong>Improve LCP</strong></h3><hr>
+<ul>
+<li>Serve critical content early (above-the-fold).</li>
+<li>Optimize server response time (TTFB).</li>
+<li>Use CDN for static resources.</li>
+</ul>
+<h3>3. <strong>Reduce FID / INP</strong></h3><hr>
+<ul>
+<li>Minimize long JavaScript tasks.</li>
+<li>Use <code>requestIdleCallback</code> and <code>web workers</code>.</li>
+<li>Defer non-essential scripts.</li>
+</ul>
+<h3>4. <strong>Minimize CLS</strong></h3><hr>
+<ul>
+<li>Set dimensions for all images, ads, and iframes.</li>
+<li>Avoid layout shifts from font loading using <code>font-display: swap</code>.</li>
+</ul>
+<hr />
+<h2>CI/CD Integration</h2><hr>
+<ul>
+<li>Integrate Lighthouse and Web Vitals checks into your deployment pipelines.</li>
+<li>Block deploys if performance budgets (e.g., LCP &gt; 3s) are exceeded.</li>
+<li>Use plugins like <strong>Lighthouse CI</strong> or <strong>Calibre</strong>, <strong>SpeedCurve</strong>, etc.</li>
+</ul>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li>Monitor both <strong>lab data</strong> (controlled testing) and <strong>field data</strong> (real-user metrics).</li>
+<li>Use lazy hydration and progressive enhancement techniques.</li>
+<li>Regularly audit 3rd-party scripts (ads, analytics) for performance impact.</li>
+<li>Keep your Lighthouse score ≥ 90 for best UX and SEO results.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Web performance is a critical pillar of modern web development. By leveraging tools like <strong>Lighthouse</strong> and tracking <strong>Core Web Vitals</strong>, developers can ensure their applications deliver a fast, accessible, and user-friendly experience. Continuous monitoring and optimization will not only boost user engagement but also provide a competitive SEO edge.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

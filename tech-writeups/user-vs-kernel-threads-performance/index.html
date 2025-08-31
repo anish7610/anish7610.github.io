@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - user-vs-kernel-threads-performance</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>user-vs-kernel-threads-performance</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/user-vs-kernel-threads-performance/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2><strong>User-space vs Kernel-space Threads: Performance Implications</strong></h2><hr>
+<p>Multithreading is essential for parallelism and responsiveness. Threads can be implemented either entirely in user space or with kernel support. Each approach has trade-offs in performance, flexibility, and complexity.</p>
+<hr />
+<h3>1. <strong>Overview: User vs Kernel Threads</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>User-space Threads (Green Threads)</th>
+<th>Kernel-space Threads (Native Threads)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Managed by</td>
+<td>User-space library (e.g., <code>pthreads</code>, Go runtime)</td>
+<td>Kernel (e.g., Linux scheduler)</td>
+</tr>
+<tr>
+<td>Kernel Awareness</td>
+<td>No</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Scheduling</td>
+<td>Done in user space</td>
+<td>Done by OS kernel scheduler</td>
+</tr>
+<tr>
+<td>System Calls</td>
+<td>Block all user threads if one blocks</td>
+<td>Only the blocking thread is paused</td>
+</tr>
+<tr>
+<td>Portability</td>
+<td>More portable across OSes</td>
+<td>OS-specific implementation</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>2. <strong>User-space Threads: Advantages and Disadvantages</strong></h3><hr>
+<h4>Advantages:</h4>
+<ul>
+<li><strong>Fast context switching</strong>: No kernel mode switch → low overhead.</li>
+<li><strong>Custom scheduling</strong>: Can use cooperative or application-specific strategies.</li>
+<li><strong>Lightweight</strong>: No need to allocate kernel data structures per thread.</li>
+</ul>
+<h4>Disadvantages:</h4>
+<ul>
+<li><strong>Blocking system calls block all threads</strong> unless wrapped or multiplexed (e.g., using <code>select</code>/<code>epoll</code>).</li>
+<li><strong>No parallelism on multicore</strong> unless multiplexed on kernel threads (e.g., M\:N model).</li>
+<li><strong>Difficult debugging and profiling</strong>.</li>
+</ul>
+<hr />
+<h3>3. <strong>Kernel-space Threads: Advantages and Disadvantages</strong></h3><hr>
+<h4>Advantages:</h4>
+<ul>
+<li><strong>True parallelism</strong>: Threads can run concurrently on multiple cores.</li>
+<li><strong>Better system call handling</strong>: Blocking I/O affects only the calling thread.</li>
+<li><strong>Leverages OS scheduler</strong>: More robust with time-sharing, fairness, priority scheduling.</li>
+</ul>
+<h4>Disadvantages:</h4>
+<ul>
+<li><strong>Higher context switch overhead</strong>: Kernel transitions are expensive.</li>
+<li><strong>Heavyweight</strong>: OS must manage and maintain thread metadata.</li>
+</ul>
+<hr />
+<h3>4. <strong>Hybrid Models (M\:N Threading)</strong></h3><hr>
+<p>Used by:</p>
+<ul>
+<li><strong>Java</strong> (older JVMs), <strong>Go</strong>, and <strong>Erlang</strong> runtimes.</li>
+</ul>
+<p><strong>Model</strong>:</p>
+<ul>
+<li>Map M user threads onto N kernel threads.</li>
+<li>Balances the efficiency of user threads with the robustness of kernel threads.</li>
+<li>Scheduler must manage thread multiplexing.</li>
+</ul>
+<hr />
+<h3>5. <strong>Performance Implications</strong></h3><hr>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Winner</th>
+<th>Why?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Short-lived threads</td>
+<td>User-space threads</td>
+<td>Lower overhead for creation/destruction</td>
+</tr>
+<tr>
+<td>I/O-bound concurrency</td>
+<td>Kernel threads (or M\:N)</td>
+<td>Avoid blocking entire runtime</td>
+</tr>
+<tr>
+<td>CPU-bound parallelism</td>
+<td>Kernel threads</td>
+<td>Can utilize multiple cores</td>
+</tr>
+<tr>
+<td>Fine-grained task switching</td>
+<td>User threads</td>
+<td>Faster context switching</td>
+</tr>
+<tr>
+<td>High throughput I/O + parallelism</td>
+<td>M\:N or kernel threads</td>
+<td>Best of both worlds with good schedulers</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>6. <strong>Real-world Examples</strong></h3><hr>
+<ul>
+<li><strong>Go</strong>: M\:N goroutines with internal scheduler.</li>
+<li><strong>Python (CPython)</strong>: OS threads but limited by Global Interpreter Lock (GIL).</li>
+<li><strong>Java</strong>: Uses OS threads; used to be green threads in early JVMs.</li>
+<li><strong>Node.js</strong>: Single-threaded event loop with async I/O (user-level concurrency).</li>
+</ul>
+<hr />
+<h3>7. <strong>Conclusion</strong></h3><hr>
+<p>The choice between user-space and kernel-space threads hinges on the workload:</p>
+<ul>
+<li>For <strong>lightweight, cooperative concurrency</strong>: user-space threads are ideal.</li>
+<li>For <strong>blocking operations and multicore usage</strong>: kernel threads excel.</li>
+<li>For <strong>balanced performance</strong>, languages often build <strong>hybrid models</strong>.</li>
+</ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

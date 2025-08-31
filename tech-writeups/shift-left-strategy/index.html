@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - shift-left-strategy</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>shift-left-strategy</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/shift-left-strategy/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Shift Left Testing in Agile Development Cycles</h1><hr>
+<h2>Introduction</h2><hr>
+<p>In traditional software development models, testing is often performed as a final stage before release. However, this can lead to late discovery of defects, increased costs, and delayed delivery. <strong>Shift Left Testing</strong> is a proactive approach that addresses these issues by integrating testing early and continuously throughout the software development lifecycle (SDLC), especially within <strong>Agile</strong> frameworks.</p>
+<hr />
+<h2>What is Shift Left Testing?</h2><hr>
+<p><strong>Shift Left Testing</strong> means moving the testing process “to the left” on the project timeline—i.e., starting it earlier in the lifecycle. It emphasizes early collaboration between <strong>developers, testers, and business stakeholders</strong> to identify and fix defects as soon as possible.</p>
+<p>Traditionally:</p>
+<pre class="codehilite"><code>| Requirements → Design → Develop → Test → Deploy |
+</code></pre>
+
+<p>With Shift Left:</p>
+<pre class="codehilite"><code>| Test/Plan ← Requirements ← Design ← Develop ← Deploy |
+</code></pre>
+
+<hr />
+<h2>Why Shift Left in Agile?</h2><hr>
+<p>Agile methodology promotes <strong>continuous integration, short iterations (sprints)</strong>, and <strong>cross-functional teams</strong>. Shift Left Testing complements Agile by:</p>
+<ul>
+<li>Enabling <strong>faster feedback loops</strong></li>
+<li>Catching bugs early to reduce cost of rework</li>
+<li>Supporting <strong>test automation and CI/CD</strong></li>
+<li>Encouraging <strong>collaborative quality ownership</strong></li>
+</ul>
+<hr />
+<h2>Key Principles of Shift Left Testing</h2><hr>
+<ol>
+<li>
+<p><strong>Early Involvement</strong>:</p>
+</li>
+<li>
+<p>Testers are involved during requirement discussions and backlog grooming.</p>
+</li>
+<li>
+<p>Test cases can be derived from user stories and acceptance criteria.</p>
+</li>
+<li>
+<p><strong>Test-Driven Development (TDD)</strong>:</p>
+</li>
+<li>
+<p>Writing tests <strong>before</strong> code ensures clarity of functionality.</p>
+</li>
+<li>
+<p>Helps prevent over-engineering and drives cleaner design.</p>
+</li>
+<li>
+<p><strong>Behavior-Driven Development (BDD)</strong>:</p>
+</li>
+<li>
+<p>Encourages collaboration using <strong>Given-When-Then</strong> syntax.</p>
+</li>
+<li>
+<p>Enhances communication among team members using shared scenarios.</p>
+</li>
+<li>
+<p><strong>Continuous Integration &amp; Automation</strong>:</p>
+</li>
+<li>
+<p>Automated unit, integration, and UI tests are run on each code commit.</p>
+</li>
+<li>
+<p>Supports fast feedback and rapid regression detection.</p>
+</li>
+<li>
+<p><strong>Static Code Analysis &amp; Code Reviews</strong>:</p>
+</li>
+<li>
+<p>Quality gates such as linters and code scanning tools are used during coding.</p>
+</li>
+<li>Prevents low-quality code from progressing further in the pipeline.</li>
+</ol>
+<hr />
+<h2>Benefits of Shift Left Testing</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Benefit</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Early Defect Detection</td>
+<td>Bugs are found when they are cheaper and easier to fix.</td>
+</tr>
+<tr>
+<td>Faster Time to Market</td>
+<td>Shorter test/fix cycles accelerate delivery.</td>
+</tr>
+<tr>
+<td>Reduced Cost of Quality</td>
+<td>Preventing defects is significantly cheaper than correcting them later.</td>
+</tr>
+<tr>
+<td>Better Collaboration</td>
+<td>Encourages dev-test alignment and team ownership of quality.</td>
+</tr>
+<tr>
+<td>Increased Test Coverage</td>
+<td>Early test planning ensures edge cases and negative tests aren’t missed.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Real-World Application Example</h2><hr>
+<p>Let’s say a team is developing a <strong>banking app feature</strong> for fund transfers:</p>
+<ul>
+<li><strong>Requirement Phase</strong>: QA and developers collaborate to define acceptance criteria.</li>
+<li><strong>Design Phase</strong>: QA starts preparing test cases and identifying possible edge cases.</li>
+<li><strong>Development Phase</strong>: Developers write unit tests using TDD.</li>
+<li><strong>Build Phase</strong>: Automated tests (unit + API + UI) are run as part of CI pipeline.</li>
+<li><strong>Before Sprint Demo</strong>: QA runs exploratory tests; bugs are fixed in the same sprint.</li>
+</ul>
+<p>This tightly integrated workflow is a practical example of Shift Left Testing in Agile.</p>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li><strong>Pair programming or dev-tester pairing</strong></li>
+<li>Use of <strong>mock services</strong> and <strong>contract testing</strong> for microservices</li>
+<li>Automate <strong>smoke, regression, and performance tests</strong></li>
+<li>Maintain a strong <strong>Definition of Done (DoD)</strong> that includes test completion</li>
+<li>Track test metrics (pass rate, code coverage, defect leakage) early in sprints</li>
+</ul>
+<hr />
+<h2>Challenges</h2><hr>
+<ul>
+<li><strong>Mindset shift</strong>: Teams must embrace quality as a shared responsibility.</li>
+<li><strong>Tooling</strong>: Need robust CI/CD infrastructure and test automation frameworks.</li>
+<li><strong>Upfront investment</strong>: Time and effort required early on may seem higher initially.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Shift Left Testing is a critical practice in Agile development cycles. It improves software quality, shortens delivery timelines, and fosters a culture of collaboration and continuous feedback. By testing early and often, teams can build <strong>resilient, high-quality applications</strong> that meet user expectations with reduced risk and cost.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

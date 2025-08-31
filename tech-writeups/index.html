@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Writeups</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #0a0a0a;
+            color: #00ff41;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .back-link {
+            color: #4ecdc4;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+        }
+
+        .section-list {
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            color: #00ff41;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            border: 1px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            margin: 5px 0;
+            font-size: 1.2em;
+            text-transform: uppercase;
+            z-index: 1; /* Ensure headers are above title */
+        }
+
+        .section-header:hover {
+            border: 1px solid #00ff41;
+            background: rgba(0, 255, 65, 0.1);
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.8);
+        }
+
+        .section-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff41;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+        }
+
+        .prompt {
+            color: #00ff41;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1, h2, h3 {
+            color: #00ff41;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            margin-bottom: 60px; /* Increased to avoid interference with first header */
+        }
+
+        .writeup-list {
+            list-style: none;
+            margin-left: 20px;
+        }
+
+        .writeup-list li {
+            margin: 10px 0;
+        }
+
+        .writeup-list a {
+            color: #4ecdc4;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .writeup-list a:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+        }
+
+        .typing-animation {
+            border-right: 2px solid #00ff41;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50% { border-color: #00ff41; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        .glitch {
+            color: #00ff41;
+            position: relative;
+            display: inline-block;
+        }
+
+        /* .glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.8;
+            animation: glitch2 0.5s infinite;
+            color: #00ffff;
+            z-index: -2;
+        } */
+
+        /* @keyframes glitch2 {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(-2px, -2px); }
+        } */
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #00ff41;
+            margin-top: 50px;
+            color: #666;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+                margin-bottom: 40px; /* Adjusted for smaller screens */
+            }
+            
+            .section-list {
+                width: 100%;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #00ff41;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% {
+                opacity: 1;
+                transform: translateY(-100vh);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100vh);
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/" class="back-link">← Back to Home</a>
+        
+        <h1 class="glitch" data-text="Tech Writeups">Tech Writeups</h1>
+
+        <div class="section-list">
+            <a class="section-header" data-section="security-networking">Security and Networking</a>
+            <div class="section-content" id="security-networking-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /security-networking/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssh" target="_blank">SSH</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssl" target="_blank">SSL/TLS</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/layer-2-protocols" target="_blank">Layer 2 Protocols</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/firewall" target="_blank">Firewall</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/secure-coding" target="_blank">Secure Coding</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/vpn" target="_blank">VPN</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/auth" target="_blank">Auth</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/zta" target="_blank">ZTA</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ids" target="_blank">IDS</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/soc" target="_blank">SOC</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/arp-spoofing-and-detection" target="_blank">ARP Spoofing and Detection</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/port-knocking-and-spa" target="_blank">Port Knocking and SPA</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssl-tls-handshake-packet-capture" target="_blank">SSL/TLS Handshake with Packet Capture</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssh-key-forwarding-agent-hijacking" target="_blank">SSH Key Forwarding and Agent Hijacking</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/doh-vs-dot" target="_blank">DoH vs DoT</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/macsec-enterprise-lan-security" target="_blank">MACSec in Enterprise LAN Security</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/custom-vpn-wireguard-routing-tables" target="_blank">Custom VPN with WireGuard and Routing Tables</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/red-vs-blue-team-mitre-attck" target="_blank">Red Team vs Blue Team with MITRE ATT&CK</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/tcpip-stack-hardening-zero-trust" target="_blank">TCP/IP Stack Hardening for Zero Trust</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/secure-boot-measured-boot-uefi" target="_blank">Secure Boot and Measured Boot in UEFI</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ebpf-packet-filtering-kernel-tracing" target="_blank">eBPF for Packet Filtering and Tracing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/detecting-lateral-movement-pass-the-hash" target="_blank">Detecting Lateral Movement and Pass-the-Hash</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/tcp-fragmentation" target="_blank">TCP Fragmentation</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="testing-qa">Testing and QA</a>
+            <div class="section-content" id="testing-qa-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /testing-qa/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/shift-left-strategy" target="_blank">Shift Left Strategy</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mocks" target="_blank">Mocks</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/integration-testing" target="_blank">Integration Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/e2e-testing" target="_blank">E2E Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ci-integration" target="_blank">CI Integration</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/microservices-testing" target="_blank">Microservices Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/test-data-management-integration-pipelines" target="_blank">Test Data Management in Integration Pipelines</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/pytest-fixtures-layered-test-abstractions" target="_blank">Layered Test Abstractions with Pytest Fixtures</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/visual-regression-testing-percy-playwright" target="_blank">Visual Regression Testing with Percy or Playwright</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/contract-testing-with-pact" target="_blank">Contract Testing with Pact (Consumer/Provider Flow)</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mutation-testing-test-suite-effectiveness" target="_blank">Mutation Testing for Test Suite Effectiveness</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd-testrail-jira-webhooks" target="_blank">CI/CD Integration with TestRail and JIRA using Webhooks</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/chaos-testing-apis-fault-network" target="_blank">Chaos Testing APIs with Fault Injection and Network Partitioning</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/test-sharding-parallel-monorepos" target="_blank">Test Sharding and Parallelization in Large Monorepos</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/flaky-test-detection-history-analysis" target="_blank">Flaky Test Detection with Historical Test Analysis</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/synthetic-monitoring-canary-tests" target="_blank">Synthetic Monitoring and Canary Tests in Production</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="os-kernel">Operating Systems and Kernel</a>
+            <div class="section-content" id="os-kernel-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /os-kernel/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/linux-boot-process" target="_blank">Linux Boot Process</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/process-vs-threads" target="_blank">Process vs Threads</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/virtual-memory" target="_blank">Virtual Memory</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/cgroups-and-namespaces" target="_blank">Cgroups And Namespaces</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/system-calls" target="_blank">System Calls</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/filesystem-internals" target="_blank">FileSystem Internals</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-handling" target="_blank">Interrupt Handling</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/simple-shell" target="_blank">Simple Shell</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/linux-process-lifecycle" target="_blank">Linux Process Lifecycle: fork-exec-wait</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ipc-patterns-shared-memory-pipes-queues" target="_blank">IPC Patterns: Shared Memory, Pipes, and Queues</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mounting-filesystems-with-mount-and-loop-devices" target="_blank">Mounting File Systems with mount and Loop Devices</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/debugging-with-strace-lsof-gdb" target="_blank">System Debugging with strace, lsof, and gdb</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/multithreaded-scheduling-and-context-switches" target="_blank">Multi-threaded Scheduling and Context Switches</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/writing-linux-kernel-module" target="_blank">Writing a Kernel Module in C for Linux</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/user-vs-kernel-threads-performance" target="_blank">User-space vs Kernel-space Threads: Performance Implications</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/numa-and-memory-pinning" target="_blank">NUMA and Memory Pinning</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/kernel-bypass-networking-dpdk-netmap" target="_blank">Kernel Bypass Networking: DPDK and Netmap</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/custom-init-pid1-seccomp-filtering" target="_blank">Custom init System with PID 1 and seccomp Filtering</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/unix-domain-sockets" target="_blank">Unix Domain Sockets</a></li>
+                    <li><a href="https://code.tools/" target="_blank">Linux Man Pages</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="software-dev">Software Development</a>
+            <div class="section-content" id="software-dev-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /software-dev/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/rest-vs-graphql" target="_blank">REST vs GraphQL</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/multithreading-vs-asyncio" target="_blank">Multithreading vs AsyncIO</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/test-automation-pyramid" target="_blank">Test Automation Pyramid</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/api-contract-testing" target="_blank">API Contract Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/clean-architecture" target="_blank">Clean Architecture</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/dependency-injection" target="_blank">Dependency Injection</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/design-patterns" target="_blank">Design Patterns</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/git-internals" target="_blank">Git Internals</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="cloud-devops">Cloud and DevOps</a>
+            <div class="section-content" id="cloud-devops-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /cloud-devops/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd" target="_blank">CI/CD</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/docker-internals" target="_blank">Docker Internals</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/elk-stack" target="_blank">ELK Stack</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/prometheus-and-grafana" target="_blank">Prometheus and Grafana</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/terraform-vs-ansible" target="_blank">Terraform vs Ansible</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/aws-vs-gcp-azure" target="_blank">AWS vs GCP vs Azure</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/kubernetes" target="_blank">Kubernetes</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/secrets-management" target="_blank">Secrets Management</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="systems-embedded">Systems and Embedded</a>
+            <div class="section-content" id="systems-embedded-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /systems-embedded/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/embedded-protocols" target="_blank">Embedded Protocols</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/rtos-basics" target="_blank">RTOS Basics</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/device-drivers" target="_blank">Device Drivers</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-driven-vs-polling" target="_blank">Interrupt Driven vs Polling</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/firmware-over-the-air" target="_blank">Firmware Over The Air</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="frontend-uiux">Frontend and UI/UX</a>
+            <div class="section-content" id="frontend-uiux-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /frontend-uiux/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/web-performance" target="_blank">Web Performance</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/progressive-web-apps" target="_blank">Progressive Web Apps</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/react-redux-state-management" target="_blank">React Redux State Management</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/react-vs-svelte-vs-vue" target="_blank">React vs Svelte vs Vue</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/tailwind-vs-bootstrap" target="_blank">Tailwind vs Bootstrap</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/wcag" target="_blank">WCAG</a></li>
+                </ul>
+            </div>
+            <a class="section-header" data-section="ml-data">Machine Learning and Data Engineering</a>
+            <div class="section-content" id="ml-data-content">
+                <div class="prompt">root@writeups:~$ <span class="command">ls -la /ml-data/</span></div>
+                <ul class="writeup-list">
+                    <li><a href="https://anish7600.github.io/tech-writeups/kafka" target="_blank">Kafka</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/feature-engineering" target="_blank">Feature Engineering</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/data-pipelines" target="_blank">Data Pipelines</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mlops" target="_blank">MLOps</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/recommendation-engine" target="_blank">Recommendation Engine</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/vector-embeddings" target="_blank">Vector Embeddings</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/xai-techniques" target="_blank">XAI Techniques</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/xgboost-internals" target="_blank">XGBoost Internals</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeups:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ff41';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            const headers = document.querySelectorAll('.section-header[data-section]');
+            headers.forEach(header => {
+                header.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const section = header.getAttribute('data-section');
+                    const content = document.getElementById(`${section}-content`);
+                    if (!content) {
+                        console.error(`Content element for section ${section} not found`);
+                        return;
+                    }
+                    const isActive = content.classList.contains('active');
+
+                    document.querySelectorAll('.section-content.active').forEach(activeContent => {
+                        activeContent.classList.remove('active');
+                    });
+
+                    if (!isActive) {
+                        content.classList.add('active');
+                        setTimeout(() => {
+                            header.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }, 100);
+                    }
+                });
+            });
+
+            const title = document.querySelector('h1');
+            if (!title) {
+                console.error('Title element not found');
+                return;
+            }
+            const text = title.getAttribute('data-text') || '';
+            title.textContent = '';
+            title.classList.add('typing-animation');
+
+            let i = 0;
+            function typeWriter() {
+                if (i < text.length) {
+                    title.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                } else {
+                    title.classList.remove('typing-animation');
+                }
+            }
+
+            setTimeout(typeWriter, 1000);
+            const defaultSection = document.getElementById('security-networking-content');
+            if (defaultSection) {
+                defaultSection.classList.add('inactive');
+            }
+
+            const prompts = document.querySelectorAll('.prompt');
+            prompts.forEach((prompt, index) => {
+                if (prompt) {
+                    setTimeout(() => {
+                        prompt.style.opacity = '0';
+                        prompt.style.animation = 'fadeIn 0.5s ease forwards';
+                    }, index * 200);
+                }
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('matrixCanvas');
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(20px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

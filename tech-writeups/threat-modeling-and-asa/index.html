@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - Threat Modeling And ASA</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>Threat Modeling And ASA</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/threat-modeling-and-asa/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Threat Modeling and Attack Surface Analysis: A Technical Overview</h1><hr>
+<h2>Introduction</h2><hr>
+<p>In today's cybersecurity landscape, understanding <em>how</em> attackers might target your systems is just as important as securing them. <strong>Threat Modeling</strong> and <strong>Attack Surface Analysis (ASA)</strong> are two proactive techniques used during software development and security assessments to identify and mitigate potential vulnerabilities before they are exploited.</p>
+<hr />
+<h2>What is Threat Modeling?</h2><hr>
+<p><strong>Threat Modeling</strong> is a structured process for identifying potential threats to a system and developing mitigations to prevent or minimize their impact.</p>
+<h3>️ Key Goals</h3><hr>
+<ul>
+<li>Understand what you're building.</li>
+<li>Identify security risks and vulnerabilities.</li>
+<li>Enumerate potential attackers and their goals.</li>
+<li>Prioritize mitigations early in the development lifecycle (Shift-Left Security).</li>
+</ul>
+<h3>When to Perform Threat Modeling?</h3><hr>
+<ul>
+<li>During design phase of software/system development (ideal).</li>
+<li>After major architectural changes.</li>
+<li>Before deployment to production.</li>
+</ul>
+<hr />
+<h2>Core Components of Threat Modeling</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Assets</strong></td>
+<td>What are we trying to protect? (e.g., PII, credentials, IP)</td>
+</tr>
+<tr>
+<td><strong>Threats</strong></td>
+<td>What can go wrong? (e.g., SQLi, XSS, privilege escalation)</td>
+</tr>
+<tr>
+<td><strong>Attackers</strong></td>
+<td>Who might try to attack the system? (e.g., insiders, hackers, competitors)</td>
+</tr>
+<tr>
+<td><strong>Entry Points</strong></td>
+<td>How might an attacker gain access? (e.g., APIs, UI, open ports)</td>
+</tr>
+<tr>
+<td><strong>Mitigations</strong></td>
+<td>How can we reduce the risk? (e.g., validation, authN, monitoring)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>️ Common Threat Modeling Methodologies</h2><hr>
+<h3>1. <strong>STRIDE (by Microsoft)</strong></h3><hr>
+<p>Used to identify typical security threats:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S – Spoofing</td>
+<td>Impersonating something or someone else</td>
+</tr>
+<tr>
+<td>T – Tampering</td>
+<td>Unauthorized changes to data</td>
+</tr>
+<tr>
+<td>R – Repudiation</td>
+<td>Denial of actions</td>
+</tr>
+<tr>
+<td>I – Information Disclosure</td>
+<td>Leaking sensitive information</td>
+</tr>
+<tr>
+<td>D – Denial of Service</td>
+<td>Making resources unavailable</td>
+</tr>
+<tr>
+<td>E – Elevation of Privilege</td>
+<td>Gaining higher access than permitted</td>
+</tr>
+</tbody>
+</table>
+<h3>2. <strong>PASTA</strong> <em>(Process for Attack Simulation and Threat Analysis)</em></h3><hr>
+<p>A risk-centric approach focusing on attacker motivations and likelihood.</p>
+<h3>3. <strong>LINDDUN</strong> <em>(Privacy threat modeling)</em></h3><hr>
+<p>Focuses on identifying privacy-related threats like data linkability and unawareness.</p>
+<hr />
+<h2>What is Attack Surface Analysis?</h2><hr>
+<p><strong>Attack Surface Analysis (ASA)</strong> involves identifying all the points where an attacker could interact with your system — also known as <strong>attack vectors</strong>.</p>
+<blockquote>
+<p>Think of ASA as mapping the doors and windows into your digital "house."</p>
+</blockquote>
+<h3>Goals of ASA</h3><hr>
+<ul>
+<li>Minimize entry points.</li>
+<li>Harden each entry point with security controls.</li>
+<li>Continuously monitor for surface changes (e.g., via CI/CD pipelines).</li>
+</ul>
+<hr />
+<h2>Types of Attack Surfaces</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Network</strong></td>
+<td>Open ports, exposed services (e.g., SSH, HTTP, DB)</td>
+</tr>
+<tr>
+<td><strong>Software/API</strong></td>
+<td>REST endpoints, SOAP APIs, RPC interfaces</td>
+</tr>
+<tr>
+<td><strong>Human/Social</strong></td>
+<td>Phishing vectors, insider threats, misconfigurations</td>
+</tr>
+<tr>
+<td><strong>Physical</strong></td>
+<td>USB ports, local consoles, building access</td>
+</tr>
+<tr>
+<td><strong>Third-party</strong></td>
+<td>Dependencies, SaaS integrations, cloud misconfigurations</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Tools for Threat Modeling &amp; ASA</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Microsoft Threat Modeling Tool</td>
+<td>STRIDE-based diagrams</td>
+</tr>
+<tr>
+<td>OWASP Threat Dragon</td>
+<td>Open-source threat modeling tool</td>
+</tr>
+<tr>
+<td>attack surface analyzer</td>
+<td>Microsoft's ASA CLI/GUI tool</td>
+</tr>
+<tr>
+<td>Burp Suite/ZAP</td>
+<td>Active web/API surface discovery</td>
+</tr>
+<tr>
+<td>Nmap</td>
+<td>Network port scanning</td>
+</tr>
+<tr>
+<td>Shodan</td>
+<td>External internet-exposed surfaces</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Real-World Example: Web Application</h2><hr>
+<p><strong>Scenario</strong>: An online banking portal.</p>
+<h3>Threat Modeling</h3><hr>
+<ul>
+<li><strong>Assets</strong>: User credentials, account info, transaction history.</li>
+<li><strong>Attackers</strong>: Hacktivists, cybercriminals, insider threats.</li>
+<li>
+<p><strong>Threats (STRIDE)</strong>:</p>
+</li>
+<li>
+<p><strong>Spoofing</strong>: Attacker mimics login page (phishing).</p>
+</li>
+<li><strong>Tampering</strong>: Modify transaction amounts via intercepted API call.</li>
+<li><strong>Repudiation</strong>: Malicious user denies a fraudulent transaction.</li>
+<li><strong>Information Disclosure</strong>: Improper access control leaks PII.</li>
+<li><strong>DoS</strong>: Flood login page with fake requests.</li>
+<li><strong>EoP</strong>: Gain admin access via insecure cookies.</li>
+</ul>
+<h3>Attack Surface Analysis</h3><hr>
+<ul>
+<li>
+<p><strong>External attack surface</strong>:</p>
+</li>
+<li>
+<p>HTTPS Web UI</p>
+</li>
+<li>RESTful API endpoints</li>
+<li>Email communication</li>
+<li>
+<p><strong>Internal attack surface</strong>:</p>
+</li>
+<li>
+<p>Admin dashboard</p>
+</li>
+<li>Database connections</li>
+<li>
+<p><strong>Minimization strategies</strong>:</p>
+</li>
+<li>
+<p>Limit open ports (close SSH on public interface).</p>
+</li>
+<li>Harden API with authentication and rate-limiting.</li>
+<li>Remove unused endpoints.</li>
+</ul>
+<hr />
+<h2>Threat Modeling vs Attack Surface Analysis</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Threat Modeling</th>
+<th>Attack Surface Analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Focus</strong></td>
+<td>Identifying threats</td>
+<td>Identifying entry points</td>
+</tr>
+<tr>
+<td><strong>Goal</strong></td>
+<td>Understand attacker motivations &amp; defenses</td>
+<td>Map and reduce exposure</td>
+</tr>
+<tr>
+<td><strong>Timing</strong></td>
+<td>During design or review phase</td>
+<td>During design and during/after deployment</td>
+</tr>
+<tr>
+<td><strong>Approach</strong></td>
+<td>Conceptual + diagram-based</td>
+<td>Empirical + discovery</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li>Perform both threat modeling and ASA <strong>early and often</strong>.</li>
+<li>Integrate into <strong>SDLC</strong> (Shift-left security).</li>
+<li><strong>Document</strong> findings and update models after each major change.</li>
+<li>Use <strong>automated scanners</strong> alongside manual reviews.</li>
+<li>Involve <strong>cross-functional teams</strong>: devs, testers, security, ops.</li>
+</ul>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Threat Modeling and Attack Surface Analysis are complementary practices that together build a resilient security posture. By identifying <em>what can go wrong</em> and <em>how attackers could break in</em>, teams can proactively defend systems — reducing costly vulnerabilities and protecting critical assets.</p>
+<blockquote>
+<p>In the battle for secure systems, knowing your enemy—and how they might attack—is half the fight.</p>
+</blockquote>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

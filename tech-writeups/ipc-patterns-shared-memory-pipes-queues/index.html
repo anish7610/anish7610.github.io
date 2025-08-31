@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - ipc-patterns-shared-memory-pipes-queues</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>ipc-patterns-shared-memory-pipes-queues</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/ipc-patterns-shared-memory-pipes-queues/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h3>Shared Memory, Pipes, and Message Queues: IPC Patterns in Linux</h3><hr>
+<p>Interprocess Communication (IPC) is essential in multitasking operating systems like Linux where processes often need to coordinate or share data. Linux offers several IPC mechanisms, each with trade-offs in speed, complexity, and use cases. Three of the most commonly used IPC methods are <strong>Shared Memory</strong>, <strong>Pipes</strong>, and <strong>Message Queues</strong>.</p>
+<hr />
+<h2>1. <strong>Pipes</strong></h2><hr>
+<h3>Overview:</h3><hr>
+<p>Pipes provide a unidirectional communication channel between processes. They are commonly used between related processes like a parent and its child.</p>
+<h3>Types:</h3><hr>
+<ul>
+<li><strong>Anonymous Pipes</strong>: Exist only while the process is alive. Typically used for parent-child communication.</li>
+<li><strong>Named Pipes (FIFOs)</strong>: Persist in the file system and allow communication between unrelated processes.</li>
+</ul>
+<h3>Example:</h3><hr>
+<pre class="codehilite"><code class="language-c">int pipefd[2];
+pipe(pipefd); // pipefd[0] for reading, pipefd[1] for writing
+
+if (fork() == 0) {
+    // Child
+    close(pipefd[1]);
+    read(pipefd[0], buffer, sizeof(buffer));
+} else {
+    // Parent
+    close(pipefd[0]);
+    write(pipefd[1], &quot;hello&quot;, 5);
+}
+</code></pre>
+
+<h3>Pros:</h3><hr>
+<ul>
+<li>Simple to use.</li>
+<li>Supported in all POSIX systems.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Unidirectional.</li>
+<li>Limited buffer size.</li>
+<li>Only suitable for byte-stream communication.</li>
+</ul>
+<hr />
+<h2>2. <strong>Shared Memory</strong></h2><hr>
+<h3>Overview:</h3><hr>
+<p>Allows multiple processes to access the same physical memory space. It’s the fastest IPC mechanism because it avoids kernel/user space copying once mapped.</p>
+<h3>Usage Steps:</h3><hr>
+<ol>
+<li>Create/obtain a shared memory segment using <code>shmget()</code>.</li>
+<li>Attach it to process memory space using <code>shmat()</code>.</li>
+<li>Use normal memory operations to access it.</li>
+<li>Detach and delete using <code>shmdt()</code> and <code>shmctl()</code>.</li>
+</ol>
+<h3>Example:</h3><hr>
+<pre class="codehilite"><code class="language-c">int shmid = shmget(IPC_PRIVATE, 1024, IPC_CREAT | 0666);
+char *data = (char *)shmat(shmid, NULL, 0);
+strcpy(data, &quot;Shared Data&quot;);
+shmdt(data);
+shmctl(shmid, IPC_RMID, NULL);
+</code></pre>
+
+<h3>Pros:</h3><hr>
+<ul>
+<li>Very fast data transfer.</li>
+<li>Efficient for large datasets.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>No synchronization—must use semaphores/mutexes externally.</li>
+<li>More complex to manage lifecycle and cleanup.</li>
+</ul>
+<hr />
+<h2>3. <strong>Message Queues</strong></h2><hr>
+<h3>Overview:</h3><hr>
+<p>Message queues allow processes to exchange discrete messages via the kernel. Each message has a type and content.</p>
+<h3>Usage:</h3><hr>
+<ul>
+<li>Create using <code>msgget()</code>.</li>
+<li>Send using <code>msgsnd()</code>.</li>
+<li>Receive using <code>msgrcv()</code>.</li>
+</ul>
+<h3>Example:</h3><hr>
+<pre class="codehilite"><code class="language-c">struct msgbuf {
+    long mtype;
+    char mtext[100];
+};
+
+int msgid = msgget(IPC_PRIVATE, IPC_CREAT | 0666);
+struct msgbuf msg = {1, &quot;Hello&quot;};
+msgsnd(msgid, &amp;msg, sizeof(msg.mtext), 0);
+msgrcv(msgid, &amp;msg, sizeof(msg.mtext), 1, 0);
+</code></pre>
+
+<h3>Pros:</h3><hr>
+<ul>
+<li>Messages are typed and buffered by the kernel.</li>
+<li>Can be prioritized and selectively received.</li>
+</ul>
+<h3>Cons:</h3><hr>
+<ul>
+<li>Slower than shared memory.</li>
+<li>Kernel-imposed size and message limits.</li>
+</ul>
+<hr />
+<h2>Choosing the Right IPC Mechanism</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Pipes</th>
+<th>Shared Memory</th>
+<th>Message Queues</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Speed</td>
+<td>Moderate</td>
+<td>Fastest</td>
+<td>Slower</td>
+</tr>
+<tr>
+<td>Direction</td>
+<td>Uni (or bi for socketpair)</td>
+<td>Bi-directional (needs sync)</td>
+<td>Bi-directional</td>
+</tr>
+<tr>
+<td>Synchronization</td>
+<td>No</td>
+<td>External needed</td>
+<td>Built-in</td>
+</tr>
+<tr>
+<td>Suitable for</td>
+<td>Simple data</td>
+<td>Large data</td>
+<td>Discrete messages</td>
+</tr>
+<tr>
+<td>Related processes</td>
+<td>Required (anonymous)</td>
+<td>Not required</td>
+<td>Not required</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Conclusion</h2><hr>
+<p>Understanding IPC patterns is crucial for building efficient and responsive systems, especially in OS-level programming, system services, and performance-critical applications. Shared memory is ideal for large, fast data exchange (with synchronization), pipes are great for simple parent-child workflows, and message queues offer flexibility and safety when message ordering and delivery are important.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

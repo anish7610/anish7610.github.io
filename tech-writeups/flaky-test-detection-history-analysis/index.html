@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - flaky-test-detection-history-analysis</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>flaky-test-detection-history-analysis</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/flaky-test-detection-history-analysis/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Flaky Test Detection with Historical Test Analysis</h2><hr>
+<h3>Overview</h3><hr>
+<p><strong>Flaky tests</strong> are tests that fail non-deterministically — they fail sometimes and pass at other times without any change in the underlying code. These are major productivity killers in CI/CD pipelines and can erode developer trust in test results. A robust flaky test detection strategy involves <strong>historical test analysis</strong>, statistical modeling, and automated quarantine systems.</p>
+<hr />
+<h3>Causes of Flaky Tests</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Common Issues</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Async/Timing</strong></td>
+<td>Race conditions, delayed assertions, improper waits</td>
+</tr>
+<tr>
+<td><strong>Order-dependence</strong></td>
+<td>Shared state or bad test isolation</td>
+</tr>
+<tr>
+<td><strong>Environment</strong></td>
+<td>Resource contention, ports, network dependencies</td>
+</tr>
+<tr>
+<td><strong>External systems</strong></td>
+<td>DBs, APIs, queues that behave unpredictably</td>
+</tr>
+<tr>
+<td><strong>Unclean teardown</strong></td>
+<td>Residual state leaking into next test</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Historical Analysis for Flake Detection</h3><hr>
+<h4>1. <strong>Test Result Logging</strong></h4>
+<p>Track the result of each test over time:</p>
+<ul>
+<li>Test name</li>
+<li>Commit hash or build ID</li>
+<li>Pass/Fail status</li>
+<li>Execution time</li>
+<li>Platform/Environment details</li>
+</ul>
+<p>Store in a structured format (e.g., Postgres, Elasticsearch, or BigQuery).</p>
+<h4>2. <strong>Flake Scoring</strong></h4>
+<p>Define metrics such as:</p>
+<ul>
+<li><strong>Flake rate</strong>: <code>Failures / Total runs</code></li>
+<li><strong>Bounce rate</strong>: Failures followed by pass in next retry</li>
+<li><strong>Intermittency score</strong>: Normalized standard deviation of results</li>
+</ul>
+<blockquote>
+<p>Example:</p>
+<p><code>test_login_flow:
+  15 runs → [              ]
+  Flake Rate = 3/15 = 20%</code></p>
+</blockquote>
+<hr />
+<h3>Visualization</h3><hr>
+<ul>
+<li>Heatmaps of flaky test frequency across time or branches</li>
+<li>Time-series dashboards (Grafana, Kibana) for flake trends</li>
+<li>Test correlation graphs (e.g., if test A often fails near test B)</li>
+</ul>
+<hr />
+<h3>Tools for Flake Detection</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Features</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>FlakyBot</strong> (Google)</td>
+<td>GitHub Action that detects and quarantines flaky tests</td>
+</tr>
+<tr>
+<td><strong>BuildPulse</strong></td>
+<td>SaaS that collects CI data, ranks flaky tests</td>
+</tr>
+<tr>
+<td><strong>pytest-rerunfailures</strong></td>
+<td>Useful for retry logic and detection support</td>
+</tr>
+<tr>
+<td><strong>TestAnalytics</strong> (CircleCI)</td>
+<td>Test insights with flake analysis</td>
+</tr>
+<tr>
+<td><strong>Custom ELK Stack</strong></td>
+<td>Aggregates test logs and applies heuristics</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Retry Logic &amp; Detection</h3><hr>
+<p>Incorporate retries <em>only</em> for detection (not masking flakiness):</p>
+<pre class="codehilite"><code class="language-bash">pytest --reruns 2 --only-rerun &quot;.*&quot;
+</code></pre>
+
+<p>If a test passes after 1 or 2 reruns — flag it as potentially flaky.</p>
+<hr />
+<h3>Automated Flaky Test Quarantine</h3><hr>
+<ol>
+<li>Label flake candidates via thresholds (<code>flake_rate &gt; 10%</code>)</li>
+<li>Auto-quarantine in CI (e.g., skip unless manually invoked)</li>
+<li>Notify developers with links to analysis</li>
+<li>Periodically reintroduce and retest quarantined tests</li>
+</ol>
+<blockquote>
+<p>GitHub Actions Example:</p>
+</blockquote>
+<pre class="codehilite"><code class="language-yaml">if: steps.detect-flake.outputs.flaky == 'true'
+run: echo &quot;Quarantining test ${{ matrix.test }}&quot;
+</code></pre>
+
+<hr />
+<h3>Best Practices</h3><hr>
+<ul>
+<li>Run tests in isolation and with random seeds</li>
+<li>Record test metadata: CPU load, memory, container ID</li>
+<li>Use <code>--random-order-bucket=module</code> (pytest-randomly)</li>
+<li>Separate slow/integration tests into a different job</li>
+</ul>
+<hr />
+<h3>Conclusion</h3><hr>
+<p>Historical test analysis is essential for proactively identifying and managing flaky tests. By collecting long-term data, computing flake scores, and integrating detection into CI, teams can prevent unreliable tests from blocking deploys and eroding confidence. The key is <strong>detection, isolation, and continuous cleanup</strong>.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - integration-testing</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>integration-testing</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/integration-testing/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h1>Integration Testing with Docker Compose</h1><hr>
+<h2>Overview</h2><hr>
+<p><strong>Integration testing</strong> verifies that multiple components or services in a system work together as expected. When dealing with containerized applications—especially microservices—each service often runs in isolation using Docker. <strong>Docker Compose</strong> makes it easy to spin up all dependent services for integration testing in a consistent and reproducible environment.</p>
+<h2>Why Use Docker Compose for Integration Testing?</h2><hr>
+<p>Docker Compose allows defining multi-container applications in a single YAML file. For integration testing, it provides:</p>
+<ul>
+<li><strong>Dependency orchestration</strong>: Easily define databases, APIs, message queues, etc.</li>
+<li><strong>Repeatability</strong>: Same environment across CI/CD and local dev.</li>
+<li><strong>Isolation</strong>: Test environment doesn’t affect production data.</li>
+<li><strong>Lifecycle management</strong>: Tear down containers after tests complete.</li>
+</ul>
+<hr />
+<h2>️ Basic Setup</h2><hr>
+<h3>1. <code>docker-compose.yml</code> Example</h3><hr>
+<pre class="codehilite"><code class="language-yaml">version: &quot;3.8&quot;
+
+services:
+  web:
+    build: .
+    ports:
+      - &quot;8000:8000&quot;
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+
+  redis:
+    image: redis:7
+</code></pre>
+
+<p>This sets up a web service dependent on PostgreSQL and Redis, useful for backend API tests.</p>
+<hr />
+<h2>Integration Test Workflow</h2><hr>
+<h3>Step-by-step Flow:</h3><hr>
+<ol>
+<li><strong>Start services</strong> with Docker Compose:</li>
+</ol>
+<p><code>bash
+   docker-compose up -d</code></p>
+<ol>
+<li>
+<p><strong>Wait for services to be healthy</strong> (PostgreSQL might take a few seconds).</p>
+</li>
+<li>
+<p><strong>Run test scripts</strong> (e.g., using <code>pytest</code>, <code>unittest</code>, or a custom test runner).</p>
+</li>
+<li>
+<p><strong>Clean up</strong>:</p>
+</li>
+</ol>
+<p><code>bash
+   docker-compose down -v</code></p>
+<hr />
+<h2>Sample Test (Using Pytest)</h2><hr>
+<pre class="codehilite"><code class="language-python">import psycopg2
+import redis
+
+def test_postgres_connection():
+    conn = psycopg2.connect(
+        host=&quot;localhost&quot;, port=5432,
+        user=&quot;test_user&quot;, password=&quot;test_pass&quot;, dbname=&quot;test_db&quot;
+    )
+    cursor = conn.cursor()
+    cursor.execute(&quot;SELECT 1;&quot;)
+    result = cursor.fetchone()
+    assert result == (1,)
+    conn.close()
+
+def test_redis_connection():
+    r = redis.Redis(host=&quot;localhost&quot;, port=6379)
+    r.set(&quot;key&quot;, &quot;value&quot;)
+    assert r.get(&quot;key&quot;) == b&quot;value&quot;
+</code></pre>
+
+<blockquote>
+<p>If running tests inside the container, use service names (<code>db</code>, <code>redis</code>) as hostnames.</p>
+</blockquote>
+<hr />
+<h2>Running Tests in CI (e.g., GitHub Actions)</h2><hr>
+<pre class="codehilite"><code class="language-yaml">jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+        ports: [5432:5432]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run tests
+        run: pytest tests/
+</code></pre>
+
+<p>Alternatively, use <code>docker-compose</code> in CI:</p>
+<pre class="codehilite"><code class="language-bash">docker-compose up -d
+pytest tests/
+docker-compose down -v
+</code></pre>
+
+<hr />
+<h2>Best Practices</h2><hr>
+<ul>
+<li>Use <strong>health checks</strong> in your <code>docker-compose.yml</code> to ensure services are ready.</li>
+<li>Tag tests as <code>integration</code> so they can be excluded during unit test runs.</li>
+<li>Clean up volumes (<code>-v</code>) to avoid leftover data between runs.</li>
+<li>Use <strong>network aliases</strong> and consistent ports.</li>
+<li>For large test suites, consider <strong>parallel test execution</strong> (e.g., <code>pytest-xdist</code>).</li>
+</ul>
+<hr />
+<h2>Tear Down and Cleanup</h2><hr>
+<p>Always shut down containers and clean up resources:</p>
+<pre class="codehilite"><code class="language-bash">docker-compose down -v --remove-orphans
+</code></pre>
+
+<p>Use a trap or teardown fixture in test runners to automate this.</p>
+<hr />
+<h2>Advanced Topics</h2><hr>
+<ul>
+<li>Use <strong>seed data</strong> containers (e.g., init scripts for PostgreSQL).</li>
+<li>Mock external APIs using containers like <code>wiremock</code>.</li>
+<li>Integrate <strong>Kafka</strong>, <strong>RabbitMQ</strong>, or other brokers as services.</li>
+<li>Use <strong>Testcontainers</strong> (Java, Python, Go) for programmatically managing containers inside tests.</li>
+</ul>
+<hr />
+<h2>Summary</h2><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Benefit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Docker Compose</td>
+<td>Simplifies multi-service orchestration</td>
+</tr>
+<tr>
+<td>Repeatability</td>
+<td>Same test environment across platforms</td>
+</tr>
+<tr>
+<td>Isolation</td>
+<td>No pollution of prod data</td>
+</tr>
+<tr>
+<td>CI/CD Friendly</td>
+<td>Easily integrated into pipelines</td>
+</tr>
+</tbody>
+</table>
+<p>Docker Compose makes integration testing both <strong>scalable and maintainable</strong>, especially for microservices and modern cloud-native apps.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>

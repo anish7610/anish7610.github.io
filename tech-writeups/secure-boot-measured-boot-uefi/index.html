@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anish - secure-boot-measured-boot-uefi</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/monokai.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e1e2e;
+            color: #e0e0e0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .back-link {
+            color: #5bc0de;
+            text-decoration: none;
+            padding: 10px;
+            display: block;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+        }
+
+        .back-link:hover {
+            color: #ff6b6b;
+            text-shadow: 0 0 5px rgba(255, 107, 107, 0.5);
+        }
+
+        .terminal-window {
+            background: #2a2a3a;
+            border: 2px solid #5bc0de;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 0 15px rgba(91, 192, 222, 0.2);
+        }
+
+        .terminal-header {
+            background: #3a3a4a;
+            padding: 10px;
+            border-bottom: 1px solid #5bc0de;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .terminal-title {
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .terminal-content {
+            padding: 20px;
+        }
+
+        .terminal-content pre {
+            background: #1e1e2e;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+
+        .terminal-content code {
+            font-family: 'Courier New', monospace;
+        }
+
+        .terminal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .terminal-content th, .terminal-content td {
+            border: 1px solid #5bc0de;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .terminal-content th {
+            background: #3a3a4a;
+            color: #e0e0e0;
+        }
+
+        .terminal-content td {
+            background: #2a2a3a;
+        }
+
+        .prompt {
+            color: #5bc0de;
+            margin-bottom: 10px;
+        }
+
+        .command {
+            color: #ff6b6b;
+        }
+
+        h1 {
+            color: #e0e0e0;
+            font-weight: normal;
+            text-shadow: 0 0 5px rgba(91, 192, 222, 0.3);
+            font-size: 2.2em;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h3 {
+            color: #e0e0e0;
+            font-weight: normal;
+            margin-bottom: 10px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #5bc0de;
+            margin: 10px 0 20px 0;
+            opacity: 0.5;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 5px rgba(91, 192, 222, 0.3); }
+            to { text-shadow: 0 0 10px rgba(91, 192, 222, 0.5); }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            border-top: 1px solid #5bc0de;
+            margin-top: 50px;
+            color: #a0a0a0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8em;
+                margin-bottom: 15px;
+            }
+
+            h2, h3 {
+                margin-bottom: 8px;
+            }
+
+            hr {
+                margin: 8px 0 15px 0;
+            }
+
+            .terminal-content table {
+                font-size: 0.9em;
+            }
+        }
+
+        .matrix-char {
+            position: absolute;
+            color: #5bc0de;
+            font-family: monospace;
+            font-size: 14px;
+            animation: matrix-fall linear infinite;
+        }
+
+        @keyframes matrix-fall {
+            0% { opacity: 1; transform: translateY(-100vh); }
+            100% { opacity: 0; transform: translateY(100vh); }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+
+    <div class="container">
+        <a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>
+        
+        <h1>secure-boot-measured-boot-uefi</h1>
+        <hr>
+
+        <div class="terminal-window">
+            <div class="terminal-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="terminal-title">~/technical-writeups/secure-boot-measured-boot-uefi/index.sh</div>
+            </div>
+            <div class="terminal-content">
+                <p><a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a></p>
+<h2>Secure Boot and Measured Boot in UEFI Systems</h2><hr>
+<p>Secure Boot and Measured Boot are two critical components in the UEFI (Unified Extensible Firmware Interface) specification that enhance the integrity and trustworthiness of a system during the boot process. While both aim to protect against rootkits and bootkits, they operate with different mechanisms and goals.</p>
+<hr />
+<h3>Secure Boot</h3><hr>
+<p><strong>Objective:</strong> Prevent unauthorized or malicious bootloaders, kernels, or OS components from executing during system startup.</p>
+<h4>How It Works:</h4>
+<ol>
+<li><strong>Digital Signature Verification:</strong> UEFI firmware verifies the signature of the next component (e.g., bootloader). Only signed and trusted binaries, according to the UEFI firmware’s database (<code>db</code>), are allowed to load.</li>
+<li>
+<p><strong>Key Management:</strong></p>
+</li>
+<li>
+<p><strong>Platform Key (PK):</strong> Establishes platform ownership.</p>
+</li>
+<li><strong>Key Exchange Key (KEK):</strong> Used to manage updates to the <code>db</code> and <code>dbx</code>.</li>
+<li><strong>db:</strong> List of trusted signatures.</li>
+<li><strong>dbx:</strong> List of revoked (blacklisted) signatures.</li>
+<li><strong>Chain of Trust:</strong> Begins at the firmware and proceeds through the bootloader, kernel, and OS components—each component must be signed and verified.</li>
+</ol>
+<h4>Benefits:</h4>
+<ul>
+<li>Prevents rootkits and early-boot malware.</li>
+<li>Ensures only vendor-trusted software runs during startup.</li>
+</ul>
+<h4>Limitations:</h4>
+<ul>
+<li>May restrict use of unsigned or custom OS kernels unless enrolled manually.</li>
+<li>Can be disabled in BIOS/UEFI settings (unless locked by vendor policy).</li>
+</ul>
+<hr />
+<h3>Measured Boot</h3><hr>
+<p><strong>Objective:</strong> Record and report the integrity of the boot process, allowing detection of unauthorized modifications.</p>
+<h4>How It Works:</h4>
+<ol>
+<li><strong>TPM (Trusted Platform Module):</strong> Each stage of the boot process calculates a hash of the next stage and stores it in TPM Platform Configuration Registers (PCRs).</li>
+<li><strong>Measurements:</strong> Include UEFI firmware, bootloaders, kernel, and critical configuration files.</li>
+<li><strong>Remote Attestation:</strong> A remote system (e.g., enterprise attestation server) can request a quote of the TPM PCR values to verify boot integrity.</li>
+<li><strong>Integrity Validation:</strong> Based on known-good hashes (golden measurements), an enterprise system can determine if the boot process was tampered with.</li>
+</ol>
+<h4>Benefits:</h4>
+<ul>
+<li>Detects unauthorized changes even if Secure Boot was bypassed.</li>
+<li>Enables remote auditing and policy enforcement (e.g., deny network access to tampered systems).</li>
+</ul>
+<h4>Limitations:</h4>
+<ul>
+<li>Requires TPM hardware and proper attestation infrastructure.</li>
+<li>Doesn’t block execution; it only records for later analysis.</li>
+</ul>
+<hr />
+<h3>Secure Boot vs Measured Boot</h3><hr>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Secure Boot</th>
+<th>Measured Boot</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Purpose</td>
+<td>Prevent execution of untrusted code</td>
+<td>Record integrity for later validation</td>
+</tr>
+<tr>
+<td>Mechanism</td>
+<td>Signature verification</td>
+<td>Hash measurement into TPM</td>
+</tr>
+<tr>
+<td>Enforcement</td>
+<td>Active (blocks bad code)</td>
+<td>Passive (logs bad code)</td>
+</tr>
+<tr>
+<td>Dependency</td>
+<td>UEFI, signed binaries</td>
+<td>TPM hardware</td>
+</tr>
+<tr>
+<td>Use Case</td>
+<td>End-user security (consumer PCs)</td>
+<td>Enterprise policy enforcement</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Real-World Example</h3><hr>
+<p><strong>Secure Boot in Action:</strong> On a Windows 11 machine, the bootloader and kernel are signed by Microsoft. If a rootkit modifies the bootloader, the signature won’t match, and the firmware blocks it.</p>
+<p><strong>Measured Boot in Action:</strong> In an enterprise network, the TPM records boot measurements. During login, the enterprise server checks the TPM quote. If bootloader hashes don’t match the golden image, access is denied or flagged.</p>
+<hr />
+<h3>Implementation Tips</h3><hr>
+<ul>
+<li>Enable Secure Boot in UEFI BIOS settings.</li>
+<li>Maintain updated keys and revocation lists.</li>
+<li>Use tools like <code>tpm2-tools</code> to inspect PCR values on Linux.</li>
+<li>Integrate Measured Boot with Microsoft Defender for Endpoint or Linux attestation frameworks for centralized monitoring.</li>
+</ul>
+<hr />
+<p>By combining Secure Boot and Measured Boot, modern systems gain both <strong>protection</strong> and <strong>visibility</strong>—one prevents threats at the source, the other detects them when prevention fails.</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="prompt">root@writeup:~$ <span class="command">echo "End of transmission"</span></div>
+            <p>&copy; 2025 Anish. All rights reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Highlight.js
+            hljs.highlightAll();
+
+            const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) {
+                console.error('Canvas element not found');
+                return;
+            }
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Canvas context not available');
+                return;
+            }
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
+            const charArray = chars.split('');
+            const fontSize = 14;
+            const columns = Math.floor(canvas.width / fontSize);
+            const drops = Array(columns).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(30, 30, 46, 0.04)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#5bc0de';
+                ctx.font = `${fontSize}px monospace`;
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = charArray[Math.floor(Math.random() * charArray.length)];
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+
+            setInterval(draw, 35);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        });
+    </script>
+</body>
+</html>
