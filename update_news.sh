@@ -10,7 +10,7 @@ TECH_DIR="${1:-$(pwd)}"
 
 # Check if we're in the right directory structure
 if [[ ! -d "$TECH_DIR/all-things-tech" ]]; then
-    echo "❌ Error: all-things-tech directory not found in $TECH_DIR"
+    echo " Error: all-things-tech directory not found in $TECH_DIR"
     echo "Usage: $0 [path_to_github_pages_directory]"
     echo "Example: $0 /path/to/anish7605.github.io"
     exit 1
@@ -21,11 +21,11 @@ TECH_NEWS_DIR="$TECH_DIR/all-things-tech"
 
 # Check if index.md exists
 if [[ ! -f "$INDEX_FILE" ]]; then
-    echo "❌ Error: $INDEX_FILE not found"
+    echo " Error: $INDEX_FILE not found"
     exit 1
 fi
 
-echo "🔍 Scanning for new tech news HTML files in $TECH_NEWS_DIR..."
+echo " Scanning for new tech news HTML files in $TECH_NEWS_DIR..."
 
 # Find all HTML files that match news patterns
 html_files=($(find "$TECH_NEWS_DIR" -name "tech_news_*.html" -o -name "tech_news_security_*.html" -o -name "linux_news_*.html" -o -name "robotics_news_*.html" -o -name "security_news_*.html" -o -name "combined_news_*.html" | sort -r))
@@ -35,12 +35,12 @@ if [[ ${#html_files[@]} -eq 0 ]]; then
     exit 0
 fi
 
-echo "📄 Found ${#html_files[@]} HTML file(s)"
+echo " Found ${#html_files[@]} HTML file(s)"
 
 # Create a backup of the current index.md
 backup_file="$INDEX_FILE.backup.$(date +%Y%m%d_%H%M%S)"
 cp "$INDEX_FILE" "$backup_file"
-echo "💾 Created backup: $backup_file"
+echo " Created backup: $backup_file"
 
 # Read the current index.md and extract existing entries
 existing_entries=()
@@ -52,7 +52,7 @@ while IFS= read -r line; do
     fi
 done < "$INDEX_FILE"
 
-echo "📋 Found ${#existing_entries[@]} existing entries in index"
+echo " Found ${#existing_entries[@]} existing entries in index"
 
 # Process each HTML file and collect entries
 new_entries_added=0
@@ -82,35 +82,35 @@ for html_file in "${html_files[@]}"; do
     elif [[ "$filename" =~ ^linux_news_([0-9]{8})_[0-9]{6}\.html$ ]]; then
         # Linux news file
         date_str="${BASH_REMATCH[1]}"
-        file_type="🐧 Linux"
+        file_type=" Linux"
         priority="4"  # Linux goes last
-        echo "🔍 Matched linux pattern: $filename -> $date_str"
+        echo " Matched linux pattern: $filename -> $date_str"
     elif [[ "$filename" =~ ^robotics_news_([0-9]{8})_[0-9]{6}\.html$ ]]; then
         # Robotics news file
         date_str="${BASH_REMATCH[1]}"
-        file_type="🤖 Robotics"
+        file_type=" Robotics"
         priority="3"
-        echo "🔍 Matched robotics pattern: $filename -> $date_str"
+        echo " Matched robotics pattern: $filename -> $date_str"
     elif [[ "$filename" =~ ^security_news_([0-9]{8})_[0-9]{6}\.html$ ]]; then
         # Security news file (new format)
         date_str="${BASH_REMATCH[1]}"
-        file_type="🔒 Security"
+        file_type=" Security"
         priority="2"
-        echo "🔍 Matched security pattern: $filename -> $date_str"
+        echo " Matched security pattern: $filename -> $date_str"
     elif [[ "$filename" =~ ^tech_news_security_([0-9]{8})_[0-9]{6}\.html$ ]]; then
         # Security news file (old format)
         date_str="${BASH_REMATCH[1]}"
-        file_type="🔒 Security"
+        file_type=" Security"
         priority="2"
-        echo "🔍 Matched tech security pattern: $filename -> $date_str"
+        echo " Matched tech security pattern: $filename -> $date_str"
     elif [[ "$filename" =~ ^tech_news_([0-9]{8})_[0-9]{6}\.html$ ]]; then
         # Regular tech news file
         date_str="${BASH_REMATCH[1]}"
-        file_type="🚀 Tech"
+        file_type=" Tech"
         priority="1"  # Tech goes first
-        echo "🔍 Matched tech pattern: $filename -> $date_str"
+        echo " Matched tech pattern: $filename -> $date_str"
     else
-        echo "⚠️  Warning: Cannot parse date from $filename, skipping"
+        echo "️  Warning: Cannot parse date from $filename, skipping"
         continue
     fi
     
@@ -122,7 +122,7 @@ for html_file in "${html_files[@]}"; do
         # Format as MM/DD/YYYY for display (matching your existing format)
         display_date="$(printf "%02d/%02d/%s" $((10#$month)) $((10#$day)) $year)"
     else
-        echo "⚠️  Warning: Invalid date format in $filename, skipping"
+        echo "️  Warning: Invalid date format in $filename, skipping"
         continue
     fi
     
@@ -131,7 +131,7 @@ for html_file in "${html_files[@]}"; do
     entry_text="- [$file_type $display_date](https://anish7600.github.io/$url_path/$filename)"
     temp_entries_raw+=("$sort_key|$entry_text")
     
-    echo "✅ Prepared entry: $file_type $display_date (priority: $priority)"
+    echo " Prepared entry: $file_type $display_date (priority: $priority)"
     ((new_entries_added++))
 done
 
@@ -149,7 +149,7 @@ if [[ $new_entries_added -eq 0 ]]; then
 fi
 
 # Update the index.md file
-echo "📝 Updating $INDEX_FILE with $new_entries_added new entries..."
+echo " Updating $INDEX_FILE with $new_entries_added new entries..."
 
 # Create new index content
 {
@@ -189,8 +189,8 @@ echo "📝 Updating $INDEX_FILE with $new_entries_added new entries..."
 # Replace the original file
 mv "$INDEX_FILE.tmp" "$INDEX_FILE"
 
-echo "✅ Successfully updated $INDEX_FILE"
-echo "📊 Summary:"
+echo " Successfully updated $INDEX_FILE"
+echo " Summary:"
 echo "   • Added: $new_entries_added new entries"
 echo "   • Processed HTML files: ${#html_files[@]}"
 echo "   • Skipped existing entries: $((${#html_files[@]} - $new_entries_added))"
@@ -198,17 +198,17 @@ echo "   • Backup saved: $backup_file"
 
 # Show the updated content
 echo ""
-echo "📄 Updated index content (Tech News section):"
+echo " Updated index content (Tech News section):"
 echo "============================================="
 sed -n '/^## Tech News/,/^## /p' "$INDEX_FILE" | head -n -1
 
 # Optional: Show git status if we're in a git repo
 if git rev-parse --git-dir > /dev/null 2>&1; then
     echo ""
-    echo "📋 Git status:"
+    echo " Git status:"
     git status --porcelain "$INDEX_FILE"
     echo ""
-    echo "💡 To commit changes:"
+    echo " To commit changes:"
     echo "   git add $INDEX_FILE"
     echo "   git commit -m 'Update tech news index with $new_entries_added new entries'"
     echo "   git push"
