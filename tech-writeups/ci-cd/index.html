@@ -91,7 +91,8 @@
 
         .terminal-content {
             padding: 20px;
-        }
+            padding: 20px 30px;
+}
 
         .terminal-content pre {
             background: #1e1e2e;
@@ -172,7 +173,15 @@
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+            
+            .terminal-content {
+                padding: 15px 20px;
             }
+
+            .terminal-content ol {
+                margin-left: 10px;
+            }
+}
             
             h1 {
                 font-size: 1.8em;
@@ -204,7 +213,15 @@
             0% { opacity: 1; transform: translateY(-100vh); }
             100% { opacity: 0; transform: translateY(100vh); }
         }
-    </style>
+    
+        .terminal-content ol {
+            margin-left: 15px;
+        }
+
+        .terminal-content ol li {
+            margin-bottom: 10px;
+        }
+</style>
 </head>
 <body>
     <canvas class="matrix-bg" id="matrixCanvas"></canvas>

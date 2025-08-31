@@ -185,7 +185,15 @@
         @media (max-width: 768px) {
             .container {
                 padding: 10px;
+            
+            .terminal-content {
+                padding: 15px 20px;
             }
+
+            .terminal-content ol {
+                margin-left: 10px;
+            }
+}
             
             h1 {
                 font-size: 2em;
@@ -215,7 +223,19 @@
                 transform: translateY(100vh);
             }
         }
-    </style>
+    
+.terminal-content {
+    padding: 20px 30px;
+}
+
+        .terminal-content ol {
+            margin-left: 15px;
+        }
+
+        .terminal-content ol li {
+            margin-bottom: 10px;
+        }
+</style>
 </head>
 <body>
     <canvas class="matrix-bg" id="matrixCanvas"></canvas>
@@ -230,142 +250,142 @@
             <div class="section-content" id="security-networking-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /security-networking/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssh" target="_blank">SSH</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssl" target="_blank">SSL/TLS</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/layer-2-protocols" target="_blank">Layer 2 Protocols</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/firewall" target="_blank">Firewall</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/secure-coding" target="_blank">Secure Coding</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/vpn" target="_blank">VPN</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/auth" target="_blank">Auth</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/zta" target="_blank">ZTA</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ids" target="_blank">IDS</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/soc" target="_blank">SOC</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/arp-spoofing-and-detection" target="_blank">ARP Spoofing and Detection</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/port-knocking-and-spa" target="_blank">Port Knocking and SPA</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssl-tls-handshake-packet-capture" target="_blank">SSL/TLS Handshake with Packet Capture</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssh-key-forwarding-agent-hijacking" target="_blank">SSH Key Forwarding and Agent Hijacking</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/doh-vs-dot" target="_blank">DoH vs DoT</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/macsec-enterprise-lan-security" target="_blank">MACSec in Enterprise LAN Security</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/custom-vpn-wireguard-routing-tables" target="_blank">Custom VPN with WireGuard and Routing Tables</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/red-vs-blue-team-mitre-attck" target="_blank">Red Team vs Blue Team with MITRE ATT&CK</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/tcpip-stack-hardening-zero-trust" target="_blank">TCP/IP Stack Hardening for Zero Trust</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/secure-boot-measured-boot-uefi" target="_blank">Secure Boot and Measured Boot in UEFI</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ebpf-packet-filtering-kernel-tracing" target="_blank">eBPF for Packet Filtering and Tracing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/detecting-lateral-movement-pass-the-hash" target="_blank">Detecting Lateral Movement and Pass-the-Hash</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/tcp-fragmentation" target="_blank">TCP Fragmentation</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssh" target="_blank">$ SSH</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssl" target="_blank">$ SSL/TLS</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/layer-2-protocols" target="_blank">$ Layer 2 Protocols</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/firewall" target="_blank">$ Firewall</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/secure-coding" target="_blank">$ Secure Coding</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/vpn" target="_blank">$ VPN</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/auth" target="_blank">$ Auth</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/zta" target="_blank">$ ZTA</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ids" target="_blank">$ IDS</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/soc" target="_blank">$ SOC</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/arp-spoofing-and-detection" target="_blank">$ ARP Spoofing and Detection</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/port-knocking-and-spa" target="_blank">$ Port Knocking and SPA</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssl-tls-handshake-packet-capture" target="_blank">$ SSL/TLS Handshake with Packet Capture</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ssh-key-forwarding-agent-hijacking" target="_blank">$ SSH Key Forwarding and Agent Hijacking</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/doh-vs-dot" target="_blank">$ DoH vs DoT</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/macsec-enterprise-lan-security" target="_blank">$ MACSec in Enterprise LAN Security</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/custom-vpn-wireguard-routing-tables" target="_blank">$ Custom VPN with WireGuard and Routing Tables</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/red-vs-blue-team-mitre-attck" target="_blank">$ Red Team vs Blue Team with MITRE ATT&CK</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/tcpip-stack-hardening-zero-trust" target="_blank">$ TCP/IP Stack Hardening for Zero Trust</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/secure-boot-measured-boot-uefi" target="_blank">$ Secure Boot and Measured Boot in UEFI</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ebpf-packet-filtering-kernel-tracing" target="_blank">$ eBPF for Packet Filtering and Tracing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/detecting-lateral-movement-pass-the-hash" target="_blank">$ Detecting Lateral Movement and Pass-the-Hash</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/tcp-fragmentation" target="_blank">$ TCP Fragmentation</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="testing-qa">Testing and QA</a>
             <div class="section-content" id="testing-qa-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /testing-qa/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/shift-left-strategy" target="_blank">Shift Left Strategy</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mocks" target="_blank">Mocks</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/integration-testing" target="_blank">Integration Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/e2e-testing" target="_blank">E2E Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ci-integration" target="_blank">CI Integration</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/microservices-testing" target="_blank">Microservices Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/test-data-management-integration-pipelines" target="_blank">Test Data Management in Integration Pipelines</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/pytest-fixtures-layered-test-abstractions" target="_blank">Layered Test Abstractions with Pytest Fixtures</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/visual-regression-testing-percy-playwright" target="_blank">Visual Regression Testing with Percy or Playwright</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/contract-testing-with-pact" target="_blank">Contract Testing with Pact (Consumer/Provider Flow)</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mutation-testing-test-suite-effectiveness" target="_blank">Mutation Testing for Test Suite Effectiveness</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd-testrail-jira-webhooks" target="_blank">CI/CD Integration with TestRail and JIRA using Webhooks</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/chaos-testing-apis-fault-network" target="_blank">Chaos Testing APIs with Fault Injection and Network Partitioning</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/test-sharding-parallel-monorepos" target="_blank">Test Sharding and Parallelization in Large Monorepos</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/flaky-test-detection-history-analysis" target="_blank">Flaky Test Detection with Historical Test Analysis</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/synthetic-monitoring-canary-tests" target="_blank">Synthetic Monitoring and Canary Tests in Production</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/shift-left-strategy" target="_blank">$ Shift Left Strategy</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mocks" target="_blank">$ Mocks</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/integration-testing" target="_blank">$ Integration Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/e2e-testing" target="_blank">$ E2E Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ci-integration" target="_blank">$ CI Integration</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/microservices-testing" target="_blank">$ Microservices Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/test-data-management-integration-pipelines" target="_blank">$ Test Data Management in Integration Pipelines</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/pytest-fixtures-layered-test-abstractions" target="_blank">$ Layered Test Abstractions with Pytest Fixtures</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/visual-regression-testing-percy-playwright" target="_blank">$ Visual Regression Testing with Percy or Playwright</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/contract-testing-with-pact" target="_blank">$ Contract Testing with Pact (Consumer/Provider Flow)</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mutation-testing-test-suite-effectiveness" target="_blank">$ Mutation Testing for Test Suite Effectiveness</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd-testrail-jira-webhooks" target="_blank">$ CI/CD Integration with TestRail and JIRA using Webhooks</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/chaos-testing-apis-fault-network" target="_blank">$ Chaos Testing APIs with Fault Injection and Network Partitioning</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/test-sharding-parallel-monorepos" target="_blank">$ Test Sharding and Parallelization in Large Monorepos</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/flaky-test-detection-history-analysis" target="_blank">$ Flaky Test Detection with Historical Test Analysis</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/synthetic-monitoring-canary-tests" target="_blank">$ Synthetic Monitoring and Canary Tests in Production</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="os-kernel">Operating Systems and Kernel</a>
             <div class="section-content" id="os-kernel-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /os-kernel/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/linux-boot-process" target="_blank">Linux Boot Process</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/process-vs-threads" target="_blank">Process vs Threads</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/virtual-memory" target="_blank">Virtual Memory</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/cgroups-and-namespaces" target="_blank">Cgroups And Namespaces</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/system-calls" target="_blank">System Calls</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/filesystem-internals" target="_blank">FileSystem Internals</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-handling" target="_blank">Interrupt Handling</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/simple-shell" target="_blank">Simple Shell</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/linux-process-lifecycle" target="_blank">Linux Process Lifecycle: fork-exec-wait</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ipc-patterns-shared-memory-pipes-queues" target="_blank">IPC Patterns: Shared Memory, Pipes, and Queues</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mounting-filesystems-with-mount-and-loop-devices" target="_blank">Mounting File Systems with mount and Loop Devices</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/debugging-with-strace-lsof-gdb" target="_blank">System Debugging with strace, lsof, and gdb</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/multithreaded-scheduling-and-context-switches" target="_blank">Multi-threaded Scheduling and Context Switches</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/writing-linux-kernel-module" target="_blank">Writing a Kernel Module in C for Linux</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/user-vs-kernel-threads-performance" target="_blank">User-space vs Kernel-space Threads: Performance Implications</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/numa-and-memory-pinning" target="_blank">NUMA and Memory Pinning</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/kernel-bypass-networking-dpdk-netmap" target="_blank">Kernel Bypass Networking: DPDK and Netmap</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/custom-init-pid1-seccomp-filtering" target="_blank">Custom init System with PID 1 and seccomp Filtering</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/unix-domain-sockets" target="_blank">Unix Domain Sockets</a></li>
-                    <li><a href="https://code.tools/" target="_blank">Linux Man Pages</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/linux-boot-process" target="_blank">$ Linux Boot Process</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/process-vs-threads" target="_blank">$ Process vs Threads</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/virtual-memory" target="_blank">$ Virtual Memory</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/cgroups-and-namespaces" target="_blank">$ Cgroups And Namespaces</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/system-calls" target="_blank">$ System Calls</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/filesystem-internals" target="_blank">$ FileSystem Internals</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-handling" target="_blank">$ Interrupt Handling</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/simple-shell" target="_blank">$ Simple Shell</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/linux-process-lifecycle" target="_blank">$ Linux Process Lifecycle: fork-exec-wait</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ipc-patterns-shared-memory-pipes-queues" target="_blank">$ IPC Patterns: Shared Memory, Pipes, and Queues</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mounting-filesystems-with-mount-and-loop-devices" target="_blank">$ Mounting File Systems with mount and Loop Devices</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/debugging-with-strace-lsof-gdb" target="_blank">$ System Debugging with strace, lsof, and gdb</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/multithreaded-scheduling-and-context-switches" target="_blank">$ Multi-threaded Scheduling and Context Switches</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/writing-linux-kernel-module" target="_blank">$ Writing a Kernel Module in C for Linux</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/user-vs-kernel-threads-performance" target="_blank">$ User-space vs Kernel-space Threads: Performance Implications</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/numa-and-memory-pinning" target="_blank">$ NUMA and Memory Pinning</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/kernel-bypass-networking-dpdk-netmap" target="_blank">$ Kernel Bypass Networking: DPDK and Netmap</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/custom-init-pid1-seccomp-filtering" target="_blank">$ Custom init System with PID 1 and seccomp Filtering</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/unix-domain-sockets" target="_blank">$ Unix Domain Sockets</a></li>
+                    <li><a href="https://code.tools/" target="_blank">$ Linux Man Pages</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="software-dev">Software Development</a>
             <div class="section-content" id="software-dev-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /software-dev/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/rest-vs-graphql" target="_blank">REST vs GraphQL</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/multithreading-vs-asyncio" target="_blank">Multithreading vs AsyncIO</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/test-automation-pyramid" target="_blank">Test Automation Pyramid</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/api-contract-testing" target="_blank">API Contract Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/clean-architecture" target="_blank">Clean Architecture</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/dependency-injection" target="_blank">Dependency Injection</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/design-patterns" target="_blank">Design Patterns</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/git-internals" target="_blank">Git Internals</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/rest-vs-graphql" target="_blank">$ REST vs GraphQL</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/multithreading-vs-asyncio" target="_blank">$ Multithreading vs AsyncIO</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/test-automation-pyramid" target="_blank">$ Test Automation Pyramid</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/api-contract-testing" target="_blank">$ API Contract Testing</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/clean-architecture" target="_blank">$ Clean Architecture</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/dependency-injection" target="_blank">$ Dependency Injection</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/design-patterns" target="_blank">$ Design Patterns</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/git-internals" target="_blank">$ Git Internals</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="cloud-devops">Cloud and DevOps</a>
             <div class="section-content" id="cloud-devops-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /cloud-devops/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd" target="_blank">CI/CD</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/docker-internals" target="_blank">Docker Internals</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/elk-stack" target="_blank">ELK Stack</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/prometheus-and-grafana" target="_blank">Prometheus and Grafana</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/terraform-vs-ansible" target="_blank">Terraform vs Ansible</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/aws-vs-gcp-azure" target="_blank">AWS vs GCP vs Azure</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/kubernetes" target="_blank">Kubernetes</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/secrets-management" target="_blank">Secrets Management</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd" target="_blank">$ CI/CD</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/docker-internals" target="_blank">$ Docker Internals</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/elk-stack" target="_blank">$ ELK Stack</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/prometheus-and-grafana" target="_blank">$ Prometheus and Grafana</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/terraform-vs-ansible" target="_blank">$ Terraform vs Ansible</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/aws-vs-gcp-azure" target="_blank">$ AWS vs GCP vs Azure</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/kubernetes" target="_blank">$ Kubernetes</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/secrets-management" target="_blank">$ Secrets Management</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="systems-embedded">Systems and Embedded</a>
             <div class="section-content" id="systems-embedded-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /systems-embedded/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/embedded-protocols" target="_blank">Embedded Protocols</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/rtos-basics" target="_blank">RTOS Basics</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/device-drivers" target="_blank">Device Drivers</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-driven-vs-polling" target="_blank">Interrupt Driven vs Polling</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/firmware-over-the-air" target="_blank">Firmware Over The Air</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/embedded-protocols" target="_blank">$ Embedded Protocols</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/rtos-basics" target="_blank">$ RTOS Basics</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/device-drivers" target="_blank">$ Device Drivers</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-driven-vs-polling" target="_blank">$ Interrupt Driven vs Polling</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/firmware-over-the-air" target="_blank">$ Firmware Over The Air</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="frontend-uiux">Frontend and UI/UX</a>
             <div class="section-content" id="frontend-uiux-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /frontend-uiux/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/web-performance" target="_blank">Web Performance</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/progressive-web-apps" target="_blank">Progressive Web Apps</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/react-redux-state-management" target="_blank">React Redux State Management</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/react-vs-svelte-vs-vue" target="_blank">React vs Svelte vs Vue</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/tailwind-vs-bootstrap" target="_blank">Tailwind vs Bootstrap</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/wcag" target="_blank">WCAG</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/web-performance" target="_blank">$ Web Performance</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/progressive-web-apps" target="_blank">$ Progressive Web Apps</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/react-redux-state-management" target="_blank">$ React Redux State Management</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/react-vs-svelte-vs-vue" target="_blank">$ React vs Svelte vs Vue</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/tailwind-vs-bootstrap" target="_blank">$ Tailwind vs Bootstrap</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/wcag" target="_blank">$ WCAG</a></li>
                 </ul>
             </div>
             <a class="section-header" data-section="ml-data">Machine Learning and Data Engineering</a>
             <div class="section-content" id="ml-data-content">
                 <div class="prompt">root@writeups:~$ <span class="command">ls -la /ml-data/</span></div>
                 <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/kafka" target="_blank">Kafka</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/feature-engineering" target="_blank">Feature Engineering</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/data-pipelines" target="_blank">Data Pipelines</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mlops" target="_blank">MLOps</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/recommendation-engine" target="_blank">Recommendation Engine</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/vector-embeddings" target="_blank">Vector Embeddings</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/xai-techniques" target="_blank">XAI Techniques</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/xgboost-internals" target="_blank">XGBoost Internals</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/kafka" target="_blank">$ Kafka</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/feature-engineering" target="_blank">$ Feature Engineering</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/data-pipelines" target="_blank">$ Data Pipelines</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/mlops" target="_blank">$ MLOps</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/recommendation-engine" target="_blank">$ Recommendation Engine</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/vector-embeddings" target="_blank">$ Vector Embeddings</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/xai-techniques" target="_blank">$ XAI Techniques</a></li>
+                    <li><a href="https://anish7600.github.io/tech-writeups/xgboost-internals" target="_blank">$ XGBoost Internals</a></li>
                 </ul>
             </div>
         </div>
