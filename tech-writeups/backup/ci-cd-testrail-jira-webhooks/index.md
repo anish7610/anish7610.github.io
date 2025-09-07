@@ -3,7 +3,7 @@ layout: default
 title: ci-cd-testrail-jira-webhooks
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## CI/CD Integration with TestRail and JIRA using Webhooks

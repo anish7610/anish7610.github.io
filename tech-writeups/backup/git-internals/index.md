@@ -3,7 +3,7 @@ layout: default
 title: git-internals 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Git Internals: How Commits, Trees, and Refs Work

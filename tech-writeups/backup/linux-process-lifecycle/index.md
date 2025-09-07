@@ -3,7 +3,7 @@ layout: default
 title: linux-process-lifecycle
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Linux Process Lifecycle: `fork`–`exec`–`wait` Mechanics

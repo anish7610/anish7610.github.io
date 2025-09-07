@@ -3,7 +3,7 @@ layout: default
 title: chaos-testing-apis-fault-network
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Chaos Testing APIs with Fault Injection and Network Partitioning

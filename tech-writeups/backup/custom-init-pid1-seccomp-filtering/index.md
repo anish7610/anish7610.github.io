@@ -3,7 +3,7 @@ layout: default
 title: custom-init-pid1-seccomp-filtering
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 Creating a **custom init system with PID 1 and syscall filtering using seccomp** is a niche but powerful exercise in systems programming and Linux security. It gives insight into how init systems like `systemd`, `SysVinit`, and others orchestrate process lifecycle and apply security hardening.

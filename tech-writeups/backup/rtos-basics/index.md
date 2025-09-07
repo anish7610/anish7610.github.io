@@ -3,7 +3,7 @@ layout: default
 title: rtos-basics 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Real-Time Operating Systems (RTOS) Basics

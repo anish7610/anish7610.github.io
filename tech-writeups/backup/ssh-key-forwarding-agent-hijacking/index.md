@@ -3,7 +3,7 @@ layout: default
 title: ssh-key-forwarding-agent-hijacking
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ### SSH Key Forwarding and Agent Hijacking Risks

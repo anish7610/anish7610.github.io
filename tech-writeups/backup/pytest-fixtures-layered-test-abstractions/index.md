@@ -3,7 +3,7 @@ layout: default
 title: pytest-fixtures-layered-test-abstractions
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Using Pytest Fixtures for Layered Test Abstractions

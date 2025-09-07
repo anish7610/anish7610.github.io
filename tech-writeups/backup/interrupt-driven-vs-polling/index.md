@@ -3,7 +3,7 @@ layout: default
 title: interrupt-driven-vs-polling 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Interrupt-Driven vs Polling in Embedded Design

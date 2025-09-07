@@ -221,7 +221,7 @@ layout: none
     <canvas class="matrix-bg" id="matrixCanvas"></canvas>
 
     <div class="container">
-        <a href="https://anish7600.github.io/technical-writeups" class="back-link">← Back</a>
+        <a href="https://anish7610.github.io/technical-writeups" class="back-link">← Back</a>
         
         <h1>{title}</h1>
         <hr>

@@ -3,7 +3,7 @@ layout: default
 title: kernel-bypass-networking-dpdk-netmap
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ### Kernel Bypass Networking: DPDK and Netmap

@@ -3,7 +3,7 @@ layout: default
 title: Layer 2 Protocols
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 #  **L2 Networking Protocols - Technical Writeup**

@@ -3,7 +3,7 @@ layout: default
 title: secure-boot-measured-boot-uefi
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Secure Boot and Measured Boot in UEFI Systems

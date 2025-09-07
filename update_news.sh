@@ -148,7 +148,7 @@ for html_file in html_files:
         continue
     
     # Create new entry
-    entry = f'                    <li><a href="https://anish7600.github.io/news/{filename}" target="_blank">{display_name} {formatted_date}</a></li>'
+    entry = f'                    <li><a href="https://anish7610.github.io/news/{filename}" target="_blank">{display_name} {formatted_date}</a></li>'
     new_entries_by_section[section].insert(0, entry)  # Insert at beginning for newest first
     
     processed_files.append(f"{display_name} {formatted_date} -> {section}")
@@ -277,7 +277,7 @@ for html_file in html_files:
         print(f'⏭️  Skipping {filename} (already in {section} section)')
         continue
     
-    entry = f'                    <li><a href=\"https://anish7600.github.io/news/{filename}\" target=\"_blank\">{display_name} {formatted_date}</a></li>'
+    entry = f'                    <li><a href=\"https://anish7610.github.io/news/{filename}\" target=\"_blank\">{display_name} {formatted_date}</a></li>'
     new_entries_by_section[section].insert(0, entry)
     
     processed_files.append(f'{display_name} {formatted_date} -> {section}')

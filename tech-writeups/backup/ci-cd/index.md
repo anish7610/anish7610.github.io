@@ -3,7 +3,7 @@ layout: default
 title: ci-cd 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # CI/CD Pipelines with Jenkins, GitLab, and GitHub Actions

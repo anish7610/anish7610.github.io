@@ -3,7 +3,7 @@ layout: default
 title: test-automation-pyramid 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 #  Test Automation Pyramid: Unit, Integration, End-to-End

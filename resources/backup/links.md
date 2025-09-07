@@ -3,7 +3,7 @@ layout: default
 title: Links
 ---
 
-<a href="https://anish7600.github.io/" style="text-decoration: none;">← Back to Home</a>
+<a href="https://anish7610.github.io/" style="text-decoration: none;">← Back to Home</a>
 
 
 ## Links

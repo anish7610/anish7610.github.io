@@ -3,7 +3,7 @@ layout: default
 title: virtual-memory 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 #  Virtual Memory, Paging, and Swapping Explained

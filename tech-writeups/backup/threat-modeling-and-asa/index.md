@@ -3,7 +3,7 @@ layout: default
 title: Threat Modeling And ASA
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 #  Threat Modeling and Attack Surface Analysis: A Technical Overview

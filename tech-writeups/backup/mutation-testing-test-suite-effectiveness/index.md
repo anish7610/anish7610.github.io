@@ -3,7 +3,7 @@ layout: default
 title: mutation-testing-test-suite-effectiveness
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Mutation Testing to Measure Test Suite Effectiveness

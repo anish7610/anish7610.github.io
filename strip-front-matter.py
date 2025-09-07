@@ -8,8 +8,8 @@ root_dir = 'tech-writeups'
 front_matter_pattern = r'^\s*---\s*\n\s*layout:\s*none\s*\n\s*---\s*\n'
 
 # Old and new back link URLs (for optional back link update)
-old_link = '<a href="https://anish7600.github.io/technical-writeups" class="back-link">← Back</a>'
-new_link = '<a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>'
+old_link = '<a href="https://anish7610.github.io/technical-writeups" class="back-link">← Back</a>'
+new_link = '<a href="https://anish7610.github.io/tech-writeups" class="back-link">← Back</a>'
 
 # Iterate through subdirectories
 for subdir in os.listdir(root_dir):

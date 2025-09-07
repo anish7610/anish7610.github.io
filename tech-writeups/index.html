@@ -13,510 +13,1141 @@
         }
 
         body {
-            background: #0a0a0a;
-            color: #00ff41;
-            font-family: 'Courier New', monospace;
-            line-height: 1.6;
+            background: #fef7f0;
+            color: #2d1810;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.7;
             overflow-x: hidden;
-        }
-
-        .matrix-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            opacity: 0.1;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            padding: 40px 20px;
         }
 
         .back-link {
-            color: #4ecdc4;
+            color: #cc6a00;
             text-decoration: none;
-            padding: 10px;
-            display: block;
-            transition: all 0.3s ease;
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.1em;
+            padding: 12px 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #f4a460;
+            font-weight: 500;
+            margin-bottom: 32px;
+            box-shadow: 0 1px 3px rgba(204, 106, 0, 0.1);
         }
 
         .back-link:hover {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+            background: #fff4e6;
+            border-color: #cc6a00;
+            box-shadow: 0 4px 12px rgba(204, 106, 0, 0.15);
         }
 
-        .section-list {
-            width: 100%;
-            max-width: 800px;
-            margin-bottom: 20px;
-        }
-
-        .section-header {
-            color: #00ff41;
-            text-decoration: none;
-            padding: 10px;
-            display: block;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            text-align: center;
-            margin: 5px 0;
-            font-size: 1.2em;
-            text-transform: uppercase;
-            z-index: 1; /* Ensure headers are above title */
-        }
-
-        .section-header:hover {
-            border: 1px solid #00ff41;
-            background: rgba(0, 255, 65, 0.1);
-            text-shadow: 0 0 5px rgba(0, 255, 65, 0.8);
-        }
-
-        .section-content {
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #00ff41;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
-            display: none;
-        }
-
-        .section-content.active {
-            display: block;
-        }
-
-        .prompt {
-            color: #00ff41;
-            margin-bottom: 10px;
-        }
-
-        .command {
-            color: #ff6b6b;
-        }
-
-        h1, h2, h3 {
-            color: #00ff41;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-            margin-bottom: 15px;
+        .back-link i {
+            font-size: 16px;
         }
 
         h1 {
-            font-size: 2.5em;
+            color: #cc6a00;
+            font-size: 3rem;
+            font-weight: 700;
             text-align: center;
-            margin-bottom: 60px; /* Increased to avoid interference with first header */
+            margin-bottom: 60px;
+            letter-spacing: -0.025em;
+        }
+
+        .sections-grid {
+            display: grid;
+            gap: 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(204, 106, 0, 0.1);
+            border: 1px solid #f4a460;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(204, 106, 0, 0.15);
+            border-color: #cc6a00;
+        }
+
+        .section-header {
+            padding: 20px 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .section-header:hover {
+            background: #fff4e6;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #cc6a00;
+        }
+
+        .section-icon {
+            font-size: 1.2rem;
+        }
+
+        .section-arrow {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+            color: #d2691e;
+        }
+
+        .section-card.active .section-arrow {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            background: #fff9f5;
+            border-top: 1px solid #f4a460;
+        }
+
+        .section-content.active {
+            max-height: 800px;
+        }
+
+        .section-meta {
+            color: #8b4513;
+            font-size: 0.9rem;
+            padding: 16px 24px;
+            background: #fef7f0;
+            border-bottom: 1px solid #f4a460;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .writeup-list {
             list-style: none;
-            margin-left: 20px;
+            padding: 0;
         }
 
         .writeup-list li {
-            margin: 10px 0;
+            border-bottom: 1px solid #f4a460;
+        }
+
+        .writeup-list li:last-child {
+            border-bottom: none;
         }
 
         .writeup-list a {
-            color: #4ecdc4;
+            color: #2d1810;
             text-decoration: none;
-            transition: all 0.3s ease;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         .writeup-list a:hover {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+            background: white;
+            color: #cc6a00;
+            padding-left: 32px;
         }
 
-        .typing-animation {
-            border-right: 2px solid #00ff41;
-            animation: blink 1s infinite;
+        .writeup-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        @keyframes blink {
-            0%, 50% { border-color: #00ff41; }
-            51%, 100% { border-color: transparent; }
+        .writeup-icon {
+            color: #cc6a00;
+            font-size: 0.9rem;
         }
 
-        .glitch {
-            color: #00ff41;
-            position: relative;
-            display: inline-block;
+        .writeup-arrow {
+            font-size: 0.9rem;
+            color: #d2691e;
+            transition: all 0.2s ease;
         }
 
-        /* .glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            opacity: 0.8;
-            animation: glitch2 0.5s infinite;
-            color: #00ffff;
-            z-index: -2;
-        } */
-
-        /* @keyframes glitch2 {
-            0%, 100% { transform: translate(0); }
-            20% { transform: translate(2px, 2px); }
-            40% { transform: translate(2px, -2px); }
-            60% { transform: translate(-2px, 2px); }
-            80% { transform: translate(-2px, -2px); }
-        } */
+        .writeup-list a:hover .writeup-arrow {
+            color: #cc6a00;
+            transform: translateX(4px);
+        }
 
         .footer {
             text-align: center;
-            padding: 20px;
-            border-top: 1px solid #00ff41;
-            margin-top: 50px;
-            color: #666;
-            width: 100%;
-            max-width: 800px;
+            padding: 40px 20px;
+            margin-top: 80px;
+            color: #8b4513;
+            border-top: 1px solid #f4a460;
+            background: white;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .footer-meta {
+            color: #d2691e;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Category-specific gradient headers */
+        .security-networking .section-header {
+            background: linear-gradient(135deg, #cc6a00 0%, #ff8c42 100%);
+            color: white;
+        }
+
+        .testing-qa .section-header {
+            background: linear-gradient(135deg, #e67e22 0%, #ff9500 100%);
+            color: white;
+        }
+
+        .os-kernel .section-header {
+            background: linear-gradient(135deg, #d35400 0%, #ff6600 100%);
+            color: white;
+        }
+
+        .software-dev .section-header {
+            background: linear-gradient(135deg, #ff8c42 0%, #ffa500 100%);
+            color: white;
+        }
+
+        .cloud-devops .section-header {
+            background: linear-gradient(135deg, #cc6a00 0%, #e67e22 100%);
+            color: white;
+        }
+
+        .systems-embedded .section-header {
+            background: linear-gradient(135deg, #d35400 0%, #cc6a00 100%);
+            color: white;
+        }
+
+        .frontend-uiux .section-header {
+            background: linear-gradient(135deg, #ff9500 0%, #ff8c42 100%);
+            color: white;
+        }
+
+        .ml-data .section-header {
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            color: white;
+        }
+
+        /* Override hover for gradient headers */
+        .security-networking .section-header:hover,
+        .testing-qa .section-header:hover,
+        .os-kernel .section-header:hover,
+        .software-dev .section-header:hover,
+        .cloud-devops .section-header:hover,
+        .systems-embedded .section-header:hover,
+        .frontend-uiux .section-header:hover,
+        .ml-data .section-header:hover {
+            background: linear-gradient(135deg, #b85a00 0%, #e67832 100%);
+        }
+
+        .security-networking .section-title,
+        .testing-qa .section-title,
+        .os-kernel .section-title,
+        .software-dev .section-title,
+        .cloud-devops .section-title,
+        .systems-embedded .section-title,
+        .frontend-uiux .section-title,
+        .ml-data .section-title {
+            color: white;
+        }
+
+        .security-networking .section-arrow,
+        .testing-qa .section-arrow,
+        .os-kernel .section-arrow,
+        .software-dev .section-arrow,
+        .cloud-devops .section-arrow,
+        .systems-embedded .section-arrow,
+        .frontend-uiux .section-arrow,
+        .ml-data .section-arrow {
+            color: rgba(255, 255, 255, 0.8);
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
-            
-            .terminal-content {
-                padding: 15px 20px;
+                padding: 24px 16px;
             }
-
-            .terminal-content ol {
-                margin-left: 10px;
-            }
-}
             
             h1 {
-                font-size: 2em;
-                margin-bottom: 40px; /* Adjusted for smaller screens */
+                font-size: 2.25rem;
+                margin-bottom: 40px;
             }
             
-            .section-list {
-                width: 100%;
+            .section-header {
+                padding: 16px 20px;
+            }
+            
+            .section-title {
+                font-size: 1.1rem;
+            }
+            
+            .section-meta {
+                padding: 12px 20px;
+                font-size: 0.85rem;
+            }
+            
+            .writeup-list a {
+                padding: 10px 20px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .writeup-list a:hover {
+                padding-left: 20px;
+            }
+            
+            .writeup-arrow {
+                align-self: flex-end;
             }
         }
 
-        .matrix-char {
-            position: absolute;
-            color: #00ff41;
-            font-family: monospace;
-            font-size: 14px;
-            animation: matrix-fall linear infinite;
-        }
-
-        @keyframes matrix-fall {
-            0% {
-                opacity: 1;
-                transform: translateY(-100vh);
-            }
-            100% {
+        @keyframes fadeInUp {
+            from {
                 opacity: 0;
-                transform: translateY(100vh);
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
-    
-.terminal-content {
-    padding: 20px 30px;
-}
 
-        .terminal-content ol {
-            margin-left: 15px;
+        .section-card {
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        .terminal-content ol li {
-            margin-bottom: 10px;
-        }
-</style>
+        .section-card:nth-child(1) { animation-delay: 0.1s; }
+        .section-card:nth-child(2) { animation-delay: 0.2s; }
+        .section-card:nth-child(3) { animation-delay: 0.3s; }
+        .section-card:nth-child(4) { animation-delay: 0.4s; }
+        .section-card:nth-child(5) { animation-delay: 0.5s; }
+        .section-card:nth-child(6) { animation-delay: 0.6s; }
+        .section-card:nth-child(7) { animation-delay: 0.7s; }
+        .section-card:nth-child(8) { animation-delay: 0.8s; }
+    </style>
 </head>
 <body>
-    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
-
     <div class="container">
-        <a href="https://anish7600.github.io/" class="back-link">← Back to Home</a>
+        <a href="https://anish7610.github.io/" class="back-link">
+            <i class="fas fa-arrow-left"></i>
+            Back to Home
+        </a>
         
-        <h1 class="glitch" data-text="Tech Writeups">Tech Writeups</h1>
+        <h1>Tech Writeups</h1>
 
-        <div class="section-list">
-            <a class="section-header" data-section="security-networking">Security and Networking</a>
-            <div class="section-content" id="security-networking-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /security-networking/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssh" target="_blank">$ SSH</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssl" target="_blank">$ SSL/TLS</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/layer-2-protocols" target="_blank">$ Layer 2 Protocols</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/firewall" target="_blank">$ Firewall</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/secure-coding" target="_blank">$ Secure Coding</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/vpn" target="_blank">$ VPN</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/auth" target="_blank">$ Auth</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/zta" target="_blank">$ ZTA</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ids" target="_blank">$ IDS</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/soc" target="_blank">$ SOC</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/arp-spoofing-and-detection" target="_blank">$ ARP Spoofing and Detection</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/port-knocking-and-spa" target="_blank">$ Port Knocking and SPA</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssl-tls-handshake-packet-capture" target="_blank">$ SSL/TLS Handshake with Packet Capture</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ssh-key-forwarding-agent-hijacking" target="_blank">$ SSH Key Forwarding and Agent Hijacking</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/doh-vs-dot" target="_blank">$ DoH vs DoT</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/macsec-enterprise-lan-security" target="_blank">$ MACSec in Enterprise LAN Security</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/custom-vpn-wireguard-routing-tables" target="_blank">$ Custom VPN with WireGuard and Routing Tables</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/red-vs-blue-team-mitre-attck" target="_blank">$ Red Team vs Blue Team with MITRE ATT&CK</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/tcpip-stack-hardening-zero-trust" target="_blank">$ TCP/IP Stack Hardening for Zero Trust</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/secure-boot-measured-boot-uefi" target="_blank">$ Secure Boot and Measured Boot in UEFI</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ebpf-packet-filtering-kernel-tracing" target="_blank">$ eBPF for Packet Filtering and Tracing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/detecting-lateral-movement-pass-the-hash" target="_blank">$ Detecting Lateral Movement and Pass-the-Hash</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/tcp-fragmentation" target="_blank">$ TCP Fragmentation</a></li>
-                </ul>
+        <div class="sections-grid">
+            <div class="section-card security-networking">
+                <div class="section-header" data-section="security-networking">
+                    <div class="section-title">
+                        <i class="fas fa-shield-alt section-icon"></i>
+                        Security & Networking
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="security-networking-content">
+                    <div class="section-meta">
+                        <i class="fas fa-lock"></i>
+                        <span>Cybersecurity, network protocols, and security implementations</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/ssh" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-terminal writeup-icon"></i>
+                                    SSH
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/ssl" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-certificate writeup-icon"></i>
+                                    SSL/TLS
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/layer-2-protocols" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-network-wired writeup-icon"></i>
+                                    Layer 2 Protocols
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/firewall" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-fire writeup-icon"></i>
+                                    Firewall
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/secure-coding" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-code writeup-icon"></i>
+                                    Secure Coding
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/vpn" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-user-secret writeup-icon"></i>
+                                    VPN
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/auth" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-key writeup-icon"></i>
+                                    Authentication
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/zta" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-shield-virus writeup-icon"></i>
+                                    Zero Trust Architecture
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/ids" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-search writeup-icon"></i>
+                                    Intrusion Detection Systems
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/soc" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-building writeup-icon"></i>
+                                    Security Operations Center
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/arp-spoofing-and-detection" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-bug writeup-icon"></i>
+                                    ARP Spoofing and Detection
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/port-knocking-and-spa" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-door-open writeup-icon"></i>
+                                    Port Knocking and SPA
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/tcp-fragmentation" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-puzzle-piece writeup-icon"></i>
+                                    TCP Fragmentation
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="testing-qa">Testing and QA</a>
-            <div class="section-content" id="testing-qa-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /testing-qa/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/shift-left-strategy" target="_blank">$ Shift Left Strategy</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mocks" target="_blank">$ Mocks</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/integration-testing" target="_blank">$ Integration Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/e2e-testing" target="_blank">$ E2E Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ci-integration" target="_blank">$ CI Integration</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/microservices-testing" target="_blank">$ Microservices Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/test-data-management-integration-pipelines" target="_blank">$ Test Data Management in Integration Pipelines</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/pytest-fixtures-layered-test-abstractions" target="_blank">$ Layered Test Abstractions with Pytest Fixtures</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/visual-regression-testing-percy-playwright" target="_blank">$ Visual Regression Testing with Percy or Playwright</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/contract-testing-with-pact" target="_blank">$ Contract Testing with Pact (Consumer/Provider Flow)</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mutation-testing-test-suite-effectiveness" target="_blank">$ Mutation Testing for Test Suite Effectiveness</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd-testrail-jira-webhooks" target="_blank">$ CI/CD Integration with TestRail and JIRA using Webhooks</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/chaos-testing-apis-fault-network" target="_blank">$ Chaos Testing APIs with Fault Injection and Network Partitioning</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/test-sharding-parallel-monorepos" target="_blank">$ Test Sharding and Parallelization in Large Monorepos</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/flaky-test-detection-history-analysis" target="_blank">$ Flaky Test Detection with Historical Test Analysis</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/synthetic-monitoring-canary-tests" target="_blank">$ Synthetic Monitoring and Canary Tests in Production</a></li>
-                </ul>
+
+            <div class="section-card testing-qa">
+                <div class="section-header" data-section="testing-qa">
+                    <div class="section-title">
+                        <i class="fas fa-vial section-icon"></i>
+                        Testing & QA
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="testing-qa-content">
+                    <div class="section-meta">
+                        <i class="fas fa-check-double"></i>
+                        <span>Quality assurance, test automation, and testing methodologies</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/shift-left-strategy" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-arrow-left writeup-icon"></i>
+                                    Shift Left Strategy
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/mocks" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-mask writeup-icon"></i>
+                                    Mocks & Stubs
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/integration-testing" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-link writeup-icon"></i>
+                                    Integration Testing
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/e2e-testing" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-arrows-alt-h writeup-icon"></i>
+                                    End-to-End Testing
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/ci-integration" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-cogs writeup-icon"></i>
+                                    CI Integration
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/microservices-testing" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-cubes writeup-icon"></i>
+                                    Microservices Testing
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="os-kernel">Operating Systems and Kernel</a>
-            <div class="section-content" id="os-kernel-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /os-kernel/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/linux-boot-process" target="_blank">$ Linux Boot Process</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/process-vs-threads" target="_blank">$ Process vs Threads</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/virtual-memory" target="_blank">$ Virtual Memory</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/cgroups-and-namespaces" target="_blank">$ Cgroups And Namespaces</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/system-calls" target="_blank">$ System Calls</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/filesystem-internals" target="_blank">$ FileSystem Internals</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-handling" target="_blank">$ Interrupt Handling</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/simple-shell" target="_blank">$ Simple Shell</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/linux-process-lifecycle" target="_blank">$ Linux Process Lifecycle: fork-exec-wait</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/ipc-patterns-shared-memory-pipes-queues" target="_blank">$ IPC Patterns: Shared Memory, Pipes, and Queues</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mounting-filesystems-with-mount-and-loop-devices" target="_blank">$ Mounting File Systems with mount and Loop Devices</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/debugging-with-strace-lsof-gdb" target="_blank">$ System Debugging with strace, lsof, and gdb</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/multithreaded-scheduling-and-context-switches" target="_blank">$ Multi-threaded Scheduling and Context Switches</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/writing-linux-kernel-module" target="_blank">$ Writing a Kernel Module in C for Linux</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/user-vs-kernel-threads-performance" target="_blank">$ User-space vs Kernel-space Threads: Performance Implications</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/numa-and-memory-pinning" target="_blank">$ NUMA and Memory Pinning</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/kernel-bypass-networking-dpdk-netmap" target="_blank">$ Kernel Bypass Networking: DPDK and Netmap</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/custom-init-pid1-seccomp-filtering" target="_blank">$ Custom init System with PID 1 and seccomp Filtering</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/unix-domain-sockets" target="_blank">$ Unix Domain Sockets</a></li>
-                    <li><a href="https://code.tools/" target="_blank">$ Linux Man Pages</a></li>
-                </ul>
+
+            <div class="section-card os-kernel">
+                <div class="section-header" data-section="os-kernel">
+                    <div class="section-title">
+                        <i class="fab fa-linux section-icon"></i>
+                        Operating Systems & Kernel
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="os-kernel-content">
+                    <div class="section-meta">
+                        <i class="fas fa-microchip"></i>
+                        <span>System internals, kernel development, and OS concepts</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/linux-boot-process" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-power-off writeup-icon"></i>
+                                    Linux Boot Process
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/process-vs-threads" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-project-diagram writeup-icon"></i>
+                                    Process vs Threads
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/virtual-memory" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-memory writeup-icon"></i>
+                                    Virtual Memory
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/cgroups-and-namespaces" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-layer-group writeup-icon"></i>
+                                    Cgroups and Namespaces
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/system-calls" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-phone writeup-icon"></i>
+                                    System Calls
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/filesystem-internals" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-folder-tree writeup-icon"></i>
+                                    Filesystem Internals
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/interrupt-handling" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-bolt writeup-icon"></i>
+                                    Interrupt Handling
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/simple-shell" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-terminal writeup-icon"></i>
+                                    Simple Shell Implementation
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://code.tools/" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-book writeup-icon"></i>
+                                    Linux Man Pages
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="software-dev">Software Development</a>
-            <div class="section-content" id="software-dev-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /software-dev/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/rest-vs-graphql" target="_blank">$ REST vs GraphQL</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/multithreading-vs-asyncio" target="_blank">$ Multithreading vs AsyncIO</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/test-automation-pyramid" target="_blank">$ Test Automation Pyramid</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/api-contract-testing" target="_blank">$ API Contract Testing</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/clean-architecture" target="_blank">$ Clean Architecture</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/dependency-injection" target="_blank">$ Dependency Injection</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/design-patterns" target="_blank">$ Design Patterns</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/git-internals" target="_blank">$ Git Internals</a></li>
-                </ul>
+
+            <div class="section-card software-dev">
+                <div class="section-header" data-section="software-dev">
+                    <div class="section-title">
+                        <i class="fas fa-code section-icon"></i>
+                        Software Development
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="software-dev-content">
+                    <div class="section-meta">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>Programming concepts, architecture patterns, and development practices</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/rest-vs-graphql" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-exchange-alt writeup-icon"></i>
+                                    REST vs GraphQL
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/multithreading-vs-asyncio" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-stream writeup-icon"></i>
+                                    Multithreading vs AsyncIO
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/test-automation-pyramid" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-pyramid writeup-icon"></i>
+                                    Test Automation Pyramid
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/api-contract-testing" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-handshake writeup-icon"></i>
+                                    API Contract Testing
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/clean-architecture" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-building writeup-icon"></i>
+                                    Clean Architecture
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/dependency-injection" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-plug writeup-icon"></i>
+                                    Dependency Injection
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/design-patterns" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-puzzle-piece writeup-icon"></i>
+                                    Design Patterns
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/git-internals" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fab fa-git-alt writeup-icon"></i>
+                                    Git Internals
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="cloud-devops">Cloud and DevOps</a>
-            <div class="section-content" id="cloud-devops-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /cloud-devops/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/ci-cd" target="_blank">$ CI/CD</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/docker-internals" target="_blank">$ Docker Internals</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/elk-stack" target="_blank">$ ELK Stack</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/prometheus-and-grafana" target="_blank">$ Prometheus and Grafana</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/terraform-vs-ansible" target="_blank">$ Terraform vs Ansible</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/aws-vs-gcp-azure" target="_blank">$ AWS vs GCP vs Azure</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/kubernetes" target="_blank">$ Kubernetes</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/secrets-management" target="_blank">$ Secrets Management</a></li>
-                </ul>
+
+            <div class="section-card cloud-devops">
+                <div class="section-header" data-section="cloud-devops">
+                    <div class="section-title">
+                        <i class="fas fa-cloud section-icon"></i>
+                        Cloud & DevOps
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="cloud-devops-content">
+                    <div class="section-meta">
+                        <i class="fas fa-server"></i>
+                        <span>Cloud platforms, containerization, and infrastructure automation</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/ci-cd" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-sync-alt writeup-icon"></i>
+                                    CI/CD Pipelines
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/docker-internals" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fab fa-docker writeup-icon"></i>
+                                    Docker Internals
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/elk-stack" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-search writeup-icon"></i>
+                                    ELK Stack
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/prometheus-and-grafana" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-chart-line writeup-icon"></i>
+                                    Prometheus and Grafana
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/terraform-vs-ansible" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-tools writeup-icon"></i>
+                                    Terraform vs Ansible
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/aws-vs-gcp-azure" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-cloud-upload-alt writeup-icon"></i>
+                                    AWS vs GCP vs Azure
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/kubernetes" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-dharmachakra writeup-icon"></i>
+                                    Kubernetes
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/secrets-management" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-vault writeup-icon"></i>
+                                    Secrets Management
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="systems-embedded">Systems and Embedded</a>
-            <div class="section-content" id="systems-embedded-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /systems-embedded/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/embedded-protocols" target="_blank">$ Embedded Protocols</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/rtos-basics" target="_blank">$ RTOS Basics</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/device-drivers" target="_blank">$ Device Drivers</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/interrupt-driven-vs-polling" target="_blank">$ Interrupt Driven vs Polling</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/firmware-over-the-air" target="_blank">$ Firmware Over The Air</a></li>
-                </ul>
+
+            <div class="section-card systems-embedded">
+                <div class="section-header" data-section="systems-embedded">
+                    <div class="section-title">
+                        <i class="fas fa-microchip section-icon"></i>
+                        Systems & Embedded
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="systems-embedded-content">
+                    <div class="section-meta">
+                        <i class="fas fa-circuit-board"></i>
+                        <span>Embedded systems, firmware development, and hardware interfaces</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/embedded-protocols" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-broadcast-tower writeup-icon"></i>
+                                    Embedded Protocols
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/rtos-basics" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-clock writeup-icon"></i>
+                                    RTOS Basics
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/device-drivers" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-plug writeup-icon"></i>
+                                    Device Drivers
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/interrupt-driven-vs-polling" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-exchange-alt writeup-icon"></i>
+                                    Interrupt Driven vs Polling
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/firmware-over-the-air" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-satellite writeup-icon"></i>
+                                    Firmware Over The Air
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="frontend-uiux">Frontend and UI/UX</a>
-            <div class="section-content" id="frontend-uiux-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /frontend-uiux/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/web-performance" target="_blank">$ Web Performance</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/progressive-web-apps" target="_blank">$ Progressive Web Apps</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/react-redux-state-management" target="_blank">$ React Redux State Management</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/react-vs-svelte-vs-vue" target="_blank">$ React vs Svelte vs Vue</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/tailwind-vs-bootstrap" target="_blank">$ Tailwind vs Bootstrap</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/wcag" target="_blank">$ WCAG</a></li>
-                </ul>
+
+            <div class="section-card frontend-uiux">
+                <div class="section-header" data-section="frontend-uiux">
+                    <div class="section-title">
+                        <i class="fas fa-palette section-icon"></i>
+                        Frontend & UI/UX
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="frontend-uiux-content">
+                    <div class="section-meta">
+                        <i class="fas fa-desktop"></i>
+                        <span>Web development, user interfaces, and user experience design</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/web-performance" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-tachometer-alt writeup-icon"></i>
+                                    Web Performance
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/progressive-web-apps" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-mobile-alt writeup-icon"></i>
+                                    Progressive Web Apps
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/react-redux-state-management" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fab fa-react writeup-icon"></i>
+                                    React Redux State Management
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/react-vs-svelte-vs-vue" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-code-branch writeup-icon"></i>
+                                    React vs Svelte vs Vue
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/tailwind-vs-bootstrap" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-paint-brush writeup-icon"></i>
+                                    Tailwind vs Bootstrap
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/wcag" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-universal-access writeup-icon"></i>
+                                    Web Accessibility (WCAG)
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <a class="section-header" data-section="ml-data">Machine Learning and Data Engineering</a>
-            <div class="section-content" id="ml-data-content">
-                <div class="prompt">root@writeups:~$ <span class="command">ls -la /ml-data/</span></div>
-                <ul class="writeup-list">
-                    <li><a href="https://anish7600.github.io/tech-writeups/kafka" target="_blank">$ Kafka</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/feature-engineering" target="_blank">$ Feature Engineering</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/data-pipelines" target="_blank">$ Data Pipelines</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/mlops" target="_blank">$ MLOps</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/recommendation-engine" target="_blank">$ Recommendation Engine</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/vector-embeddings" target="_blank">$ Vector Embeddings</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/xai-techniques" target="_blank">$ XAI Techniques</a></li>
-                    <li><a href="https://anish7600.github.io/tech-writeups/xgboost-internals" target="_blank">$ XGBoost Internals</a></li>
-                </ul>
+
+            <div class="section-card ml-data">
+                <div class="section-header" data-section="ml-data">
+                    <div class="section-title">
+                        <i class="fas fa-brain section-icon"></i>
+                        Machine Learning & Data
+                    </div>
+                    <i class="fas fa-chevron-down section-arrow"></i>
+                </div>
+                <div class="section-content" id="ml-data-content">
+                    <div class="section-meta">
+                        <i class="fas fa-database"></i>
+                        <span>Machine learning, data engineering, and analytics platforms</span>
+                    </div>
+                    <ul class="writeup-list">
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/kafka" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-stream writeup-icon"></i>
+                                    Apache Kafka
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/feature-engineering" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-wrench writeup-icon"></i>
+                                    Feature Engineering
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/data-pipelines" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-pipe writeup-icon"></i>
+                                    Data Pipelines
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/mlops" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-robot writeup-icon"></i>
+                                    MLOps
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/recommendation-engine" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-thumbs-up writeup-icon"></i>
+                                    Recommendation Engine
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/vector-embeddings" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-vector-square writeup-icon"></i>
+                                    Vector Embeddings
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/xai-techniques" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-question-circle writeup-icon"></i>
+                                    Explainable AI Techniques
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://anish7610.github.io/tech-writeups/xgboost-internals" target="_blank">
+                                <div class="writeup-title">
+                                    <i class="fas fa-tree writeup-icon"></i>
+                                    XGBoost Internals
+                                </div>
+                                <i class="fas fa-external-link-alt writeup-arrow"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
 
         <div class="footer">
-            <div class="prompt">root@writeups:~$ <span class="command">echo "End of transmission"</span></div>
+            <div class="footer-meta">
+                <i class="fas fa-book-open"></i>
+                <span>In-depth technical documentation and guides</span>
+            </div>
             <p>&copy; 2025 Anish. All rights reserved.</p>
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const canvas = document.getElementById('matrixCanvas');
-            if (!canvas) {
-                console.error('Canvas element not found');
-                return;
-            }
-            const ctx = canvas.getContext('2d');
-            if (!ctx) {
-                console.error('Canvas context not available');
-                return;
-            }
-
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
-            const charArray = chars.split('');
-            const fontSize = 14;
-            const columns = Math.floor(canvas.width / fontSize);
-            const drops = Array(columns).fill(1);
-
-            function draw() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#00ff41';
-                ctx.font = `${fontSize}px monospace`;
-
-                for (let i = 0; i < drops.length; i++) {
-                    const text = charArray[Math.floor(Math.random() * charArray.length)];
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
-            }
-
-            setInterval(draw, 35);
-
+            // Section toggle functionality
             const headers = document.querySelectorAll('.section-header[data-section]');
+            
             headers.forEach(header => {
                 header.addEventListener('click', (e) => {
                     e.preventDefault();
                     const section = header.getAttribute('data-section');
                     const content = document.getElementById(`${section}-content`);
-                    if (!content) {
+                    const card = header.closest('.section-card');
+                    
+                    if (!content || !card) {
                         console.error(`Content element for section ${section} not found`);
                         return;
                     }
+                    
                     const isActive = content.classList.contains('active');
-
+                    
+                    // Close all other sections
                     document.querySelectorAll('.section-content.active').forEach(activeContent => {
                         activeContent.classList.remove('active');
+                        activeContent.closest('.section-card').classList.remove('active');
                     });
-
+                    
+                    // Toggle current section
                     if (!isActive) {
                         content.classList.add('active');
+                        card.classList.add('active');
+                        
                         setTimeout(() => {
                             header.scrollIntoView({
                                 behavior: 'smooth',
-                                block: 'start'
+                                block: 'start',
+                                inline: 'nearest'
                             });
                         }, 100);
                     }
                 });
             });
-
-            const title = document.querySelector('h1');
-            if (!title) {
-                console.error('Title element not found');
-                return;
-            }
-            const text = title.getAttribute('data-text') || '';
-            title.textContent = '';
-            title.classList.add('typing-animation');
-
-            let i = 0;
-            function typeWriter() {
-                if (i < text.length) {
-                    title.textContent += text.charAt(i);
-                    i++;
-                    setTimeout(typeWriter, 100);
-                } else {
-                    title.classList.remove('typing-animation');
-                }
-            }
-
-            setTimeout(typeWriter, 1000);
-            const defaultSection = document.getElementById('security-networking-content');
-            if (defaultSection) {
-                defaultSection.classList.add('inactive');
-            }
-
-            const prompts = document.querySelectorAll('.prompt');
-            prompts.forEach((prompt, index) => {
-                if (prompt) {
-                    setTimeout(() => {
-                        prompt.style.opacity = '0';
-                        prompt.style.animation = 'fadeIn 0.5s ease forwards';
-                    }, index * 200);
-                }
+            
+            // Add staggered animation to cards
+            const cards = document.querySelectorAll('.section-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease-out';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 + (index * 150));
+            });
+            
+            // Add click tracking for analytics (optional)
+            const writeupLinks = document.querySelectorAll('.writeup-list a');
+            writeupLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    const title = link.querySelector('.writeup-title').textContent.trim();
+                    console.log(`Clicked writeup: ${title}`);
+                });
             });
         });
-
-        window.addEventListener('resize', () => {
-            const canvas = document.getElementById('matrixCanvas');
-            if (canvas) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-        });
-
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

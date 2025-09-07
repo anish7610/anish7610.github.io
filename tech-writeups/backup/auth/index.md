@@ -3,7 +3,7 @@ layout: default
 title: Auth
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # OAuth 2.0 vs OpenID Connect: Authentication vs Authorization

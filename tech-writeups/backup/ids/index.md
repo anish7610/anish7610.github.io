@@ -3,7 +3,7 @@ layout: default
 title: IDS/IPS
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Intrusion Detection and Prevention Systems (IDS/IPS)

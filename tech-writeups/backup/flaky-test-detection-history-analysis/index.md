@@ -3,7 +3,7 @@ layout: default
 title: flaky-test-detection-history-analysis
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ##  Flaky Test Detection with Historical Test Analysis

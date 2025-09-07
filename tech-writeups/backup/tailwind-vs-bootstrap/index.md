@@ -3,7 +3,7 @@ layout: default
 title: tailwind-vs-bootstrap 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Tailwind vs Bootstrap vs CSS-in-JS: A Comparative Study

@@ -3,7 +3,7 @@ layout: default
 title: wcag 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Accessibility in Web Apps (WCAG Guidelines)

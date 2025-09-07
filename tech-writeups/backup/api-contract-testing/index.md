@@ -3,7 +3,7 @@ layout: default
 title: api-contract-testing 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # **API Contract Testing with Postman/Newman or Pact**

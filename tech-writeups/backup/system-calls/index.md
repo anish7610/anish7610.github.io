@@ -3,7 +3,7 @@ layout: default
 title: system-calls 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 #  System Calls in Linux and How They Work

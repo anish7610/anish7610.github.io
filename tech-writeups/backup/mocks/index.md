@@ -3,7 +3,7 @@ layout: default
 title: mocks 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # **Mocking, Stubbing, and Dependency Isolation in Tests**

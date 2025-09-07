@@ -3,7 +3,7 @@ layout: default
 title: mounting-filesystems-with-mount-and-loop-devices
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Mounting File Systems Manually with `mount` and Loop Devices

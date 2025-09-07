@@ -3,7 +3,7 @@ layout: default
 title: contract-testing-with-pact
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Automating Contract Testing with Pact (Consumer/Provider Flow)

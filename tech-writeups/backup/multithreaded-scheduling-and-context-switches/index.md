@@ -3,7 +3,7 @@ layout: default
 title: multithreaded-scheduling-and-context-switches
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## Multi-threaded Process Scheduling and Context Switch Metrics

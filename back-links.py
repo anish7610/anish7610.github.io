@@ -4,8 +4,8 @@ import os
 root_dir = 'tech-writeups'
 
 # Old and new back link URLs
-old_link = '<a href="https://anish7600.github.io/technical-writeups" class="back-link">← Back</a>'
-new_link = '<a href="https://anish7600.github.io/tech-writeups" class="back-link">← Back</a>'
+old_link = '<a href="https://anish7610.github.io/technical-writeups" class="back-link">← Back</a>'
+new_link = '<a href="https://anish7610.github.io/tech-writeups" class="back-link">← Back</a>'
 
 # Iterate through subdirectories
 for subdir in os.listdir(root_dir):

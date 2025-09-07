@@ -3,7 +3,7 @@ layout: default
 title: file-system-internals 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 #  Technical Writeup: File System Internals – ext4 vs NTFS vs ZFS

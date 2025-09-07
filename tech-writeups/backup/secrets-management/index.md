@@ -3,7 +3,7 @@ layout: default
 title: secrets-management 
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 # Secrets Management in DevOps (Vault, AWS Secrets Manager)

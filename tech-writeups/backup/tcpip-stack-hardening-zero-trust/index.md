@@ -3,7 +3,7 @@ layout: default
 title: tcpip-stack-hardening-zero-trust
 ---
 
-<a href="https://anish7600.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
+<a href="https://anish7610.github.io/technical-writeups" style="text-decoration: none;">← Back</a>
 
 
 ## TCP/IP Stack Hardening Techniques for Zero Trust Networks
