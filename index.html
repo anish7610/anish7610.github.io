@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anish - Portfolio</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -13,21 +14,21 @@
         }
 
         body {
-            background: #0a0a0a;
-            color: #00ff41;
-            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            color: #2d3748;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             line-height: 1.6;
             overflow-x: hidden;
         }
 
-        .matrix-bg {
+        .claude-bg {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            opacity: 0.1;
+            opacity: 0.03;
         }
 
         .container {
@@ -36,349 +37,479 @@
             padding: 20px;
         }
 
-        .terminal-window {
-            background: rgba(0, 0, 0, 0.9);
-            border: 2px solid #00ff41;
-            border-radius: 10px;
-            margin: 20px 0;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(217, 119, 73, 0.1);
+            border-radius: 16px;
+            margin: 24px 0;
+            box-shadow: 0 4px 24px rgba(217, 119, 73, 0.08);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            overflow: hidden;
         }
 
-        .terminal-header {
-            background: #1a1a1a;
-            padding: 10px;
-            border-bottom: 1px solid #00ff41;
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(217, 119, 73, 0.15);
+            border-color: rgba(217, 119, 73, 0.2);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #d97749 0%, #e8956f 100%);
+            padding: 20px 24px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1));
+            transform: skewX(-20deg);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        .terminal-dots {
-            display: flex;
-            gap: 5px;
+        .card-title i {
+            width: 20px;
+            text-align: center;
         }
 
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-
-        .dot.red { background: #ff5f56; }
-        .dot.yellow { background: #ffbd2e; }
-        .dot.green { background: #27ca3f; }
-
-        .terminal-title {
-            color: #888;
-            font-size: 14px;
-        }
-
-        .terminal-content {
-            padding: 20px;
-        }
-
-        .prompt {
-            color: #00ff41;
-            margin-bottom: 10px;
-        }
-
-        .command {
-            color: #ff6b6b;
-        }
-
-        h1, h2, h3 {
-            color: #00ff41;
-            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-            margin-bottom: 15px;
+        .card-content {
+            padding: 32px;
         }
 
         h1 {
-            font-size: 2.5em;
+            color: #d97749;
+            font-size: 3.5rem;
+            font-weight: 700;
             text-align: center;
-            margin-bottom: 30px;
-            animation: glow 2s ease-in-out infinite alternate;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #d97749, #e8956f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            position: relative;
         }
 
-        @keyframes glow {
-            from { text-shadow: 0 0 10px rgba(0, 255, 65, 0.5); }
-            to { text-shadow: 0 0 20px rgba(0, 255, 65, 0.8), 0 0 30px rgba(0, 255, 65, 0.6); }
-        }
-
-        .ascii-art {
-            color: #00ff41;
-            white-space: pre;
+        .subtitle {
             text-align: center;
-            margin: 20px 0;
-            font-size: 12px;
-            line-height: 1.2;
+            font-size: 1.25rem;
+            color: #64748b;
+            margin-bottom: 40px;
+            font-weight: 400;
         }
 
-        .section {
-            margin-bottom: 30px;
+        h2 {
+            color: #2d3748;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h3 {
+            color: #4a5568;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .nav-menu {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 16px 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(217, 119, 73, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(217, 119, 73, 0.1);
+        }
+
+        .nav-menu a {
+            color: #4a5568;
+            text-decoration: none;
+            margin: 0 24px;
+            padding: 12px 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .nav-menu a:hover {
+            color: #d97749;
+            background: rgba(217, 119, 73, 0.08);
+            transform: translateY(-1px);
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: #d97749;
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-menu a:hover::after {
+            width: 80%;
         }
 
         .job, .education-item, .cert-item {
-            background: rgba(0, 20, 0, 0.5);
-            border-left: 3px solid #00ff41;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 5px;
+            background: rgba(249, 250, 251, 0.8);
+            border-left: 4px solid #d97749;
+            padding: 24px;
+            margin: 16px 0;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            position: relative;
         }
 
         .job:hover, .education-item:hover, .cert-item:hover {
-            background: rgba(0, 30, 0, 0.8);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
-            transform: translateX(10px);
+            background: rgba(217, 119, 73, 0.04);
+            transform: translateX(8px);
+            box-shadow: 0 4px 20px rgba(217, 119, 73, 0.1);
         }
 
         .job-title, .degree, .cert-name {
-            color: #ff6b6b;
-            font-weight: bold;
-            font-size: 1.2em;
+            color: #d97749;
+            font-weight: 600;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
         }
 
         .company, .school, .cert-issuer {
-            color: #4ecdc4;
-            font-weight: bold;
+            color: #2d3748;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
         }
 
         .duration {
-            color: #888;
+            color: #64748b;
+            font-size: 0.9rem;
             float: right;
+            background: rgba(217, 119, 73, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+
+        .job ul, .education-item p {
+            color: #4a5568;
+            margin: 16px 0;
+            line-height: 1.7;
+        }
+
+        .job ul {
+            margin-left: 20px;
+        }
+
+        .job ul li {
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .job ul li::before {
+            content: '▸';
+            color: #d97749;
+            position: absolute;
+            left: -20px;
+            font-weight: bold;
         }
 
         .skills {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 20px;
         }
 
         .skill-tag {
-            background: linear-gradient(45deg, #001100, #003300);
-            border: 1px solid #00ff41;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8em;
-            color: #00ff41;
+            background: linear-gradient(135deg, rgba(217, 119, 73, 0.1), rgba(232, 149, 111, 0.05));
+            border: 1px solid rgba(217, 119, 73, 0.2);
+            padding: 8px 16px;
+            border-radius: 24px;
+            font-size: 0.875rem;
+            color: #d97749;
+            font-weight: 500;
             transition: all 0.3s ease;
+            cursor: default;
         }
 
         .skill-tag:hover {
-            background: linear-gradient(45deg, #003300, #005500);
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
-        }
-
-        .typing-animation {
-            border-right: 2px solid #00ff41;
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 50% { border-color: #00ff41; }
-            51%, 100% { border-color: transparent; }
-        }
-
-        .glitch {
-            color: #00ff41;
-            position: relative;
-            display: inline-block;
-        }
-
-        .glitch::before,
-        .glitch::after {
-            content: attr(data-text);
-            position: absolute;
-            top: 0;
-            left: 0;
-            opacity: 0.8;
-        }
-
-        .glitch::before {
-            animation: glitch1 0.5s infinite;
-            color: #ff00ff;
-            z-index: -1;
-        }
-
-        .glitch::after {
-            animation: glitch2 0.5s infinite;
-            color: #00ffff;
-            z-index: -2;
-        }
-
-        @keyframes glitch1 {
-            0%, 100% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-        }
-
-        @keyframes glitch2 {
-            0%, 100% { transform: translate(0); }
-            20% { transform: translate(2px, 2px); }
-            40% { transform: translate(2px, -2px); }
-            60% { transform: translate(-2px, 2px); }
-            80% { transform: translate(-2px, -2px); }
-        }
-
-        .nav-menu {
-            background: rgba(0, 0, 0, 0.9);
-            padding: 10px 0;
-            text-align: center;
-            border-bottom: 1px solid #00ff41;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .nav-menu a {
-            color: #00ff41;
-            text-decoration: none;
-            margin: 0 20px;
-            padding: 5px 10px;
-            border: 1px solid transparent;
-            transition: all 0.3s ease;
-        }
-
-        .nav-menu a:hover {
-            border: 1px solid #00ff41;
-            background: rgba(0, 255, 65, 0.1);
-            text-shadow: 0 0 5px rgba(0, 255, 65, 0.8);
+            background: linear-gradient(135deg, rgba(217, 119, 73, 0.15), rgba(232, 149, 111, 0.08));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(217, 119, 73, 0.2);
         }
 
         .contact-info {
             text-align: center;
-            margin: 20px 0;
+            margin: 32px 0;
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
         }
 
-        .contact-info a {
-            color: #4ecdc4;
+        .contact-link {
+            color: #4a5568;
             text-decoration: none;
-            margin: 0 15px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            background: rgba(249, 250, 251, 0.8);
+            border: 1px solid rgba(217, 119, 73, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
         }
 
-        .contact-info a:hover {
-            color: #ff6b6b;
-            text-shadow: 0 0 5px rgba(255, 107, 107, 0.8);
+        .contact-link:hover {
+            color: #d97749;
+            background: rgba(217, 119, 73, 0.08);
+            border-color: rgba(217, 119, 73, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(217, 119, 73, 0.15);
         }
 
         .progress-bar {
-            background: #333;
-            height: 8px;
-            border-radius: 4px;
-            margin: 5px 0;
+            background: rgba(217, 119, 73, 0.1);
+            height: 6px;
+            border-radius: 3px;
+            margin: 12px 0;
             overflow: hidden;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #00ff41, #4ecdc4);
+            background: linear-gradient(90deg, #d97749, #e8956f);
             transition: width 2s ease;
-            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .bio-text {
+            font-size: 1.125rem;
+            line-height: 1.8;
+            color: #4a5568;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 32px;
+        }
+
+        .section-icon {
+            color: #d97749;
+            margin-right: 8px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .skill-category {
+            background: rgba(249, 250, 251, 0.6);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(217, 119, 73, 0.1);
+        }
+
+        .skill-category h4 {
+            color: #2d3748;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .footer {
             text-align: center;
-            padding: 20px;
-            border-top: 1px solid #00ff41;
-            margin-top: 50px;
-            color: #666;
+            padding: 40px 24px;
+            margin-top: 60px;
+            border-top: 1px solid rgba(217, 119, 73, 0.1);
+            color: #64748b;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .claude-logo {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #d97749, #e8956f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
         }
 
         @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                padding: 12px;
             }
             
             h1 {
-                font-size: 2em;
+                font-size: 2.5rem;
+            }
+            
+            .card-content {
+                padding: 24px;
             }
             
             .nav-menu a {
                 display: block;
-                margin: 5px 0;
+                margin: 8px 0;
+            }
+            
+            .contact-info {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .skills-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
         }
 
-        .matrix-char {
-            position: absolute;
-            color: #00ff41;
-            font-family: monospace;
-            font-size: 14px;
-            animation: matrix-fall linear infinite;
+        /* Claude-inspired subtle animations */
+        .card {
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        @keyframes matrix-fall {
-            0% {
-                opacity: 1;
-                transform: translateY(-100vh);
-            }
-            100% {
+        .card:nth-child(even) {
+            animation-delay: 0.1s;
+        }
+
+        @keyframes fadeInUp {
+            from {
                 opacity: 0;
-                transform: translateY(100vh);
+                transform: translateY(30px);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Improved accessibility */
+        .card:focus-within {
+            outline: 2px solid #d97749;
+            outline-offset: 2px;
+        }
+
+        /* Professional hover states */
+        .cert-item a {
+            color: #d97749;
+            text-decoration: none;
+            font-weight: 500;
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s ease;
+        }
+
+        .cert-item a:hover {
+            border-bottom-color: #d97749;
         }
     </style>
 </head>
 <body>
-    <canvas class="matrix-bg" id="matrixCanvas"></canvas>
+    <canvas class="claude-bg" id="claudeCanvas"></canvas>
 
     <nav class="nav-menu">
-        <a href="#about">about</a>
-        <a href="#experience">experience</a>
-        <a href="#education">education</a>
-        <a href="#skills">skills</a>
-        <a href="#certifications">certifications</a>
-        <!-- <a href="https://anish7600.github.io/projects">projects</a> -->
-        <!-- <a href="https://anish7600.github.io/resources">resources</a> -->
-        <!-- <a href="https://anish7600.github.io/tech-writeups">writeups</a>
-        <a href="https://anish7600.github.io/news">news</a> -->
+        <a href="#about">About</a>
+        <a href="#experience">Experience</a>
+        <a href="#education">Education</a>
+        <a href="#skills">Skills</a>
+        <a href="#certifications">Certifications</a>
     </nav>
 
     <div class="container">
-        <div class="terminal-window" id="about">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
+        <div class="card" id="about">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-user-circle"></i>
+                    About Me
                 </div>
-                <div class="terminal-title">~/portfolio/about.sh</div>
             </div>
-            <div class="terminal-content">
+            <div class="card-content">
+                <h1>ANISH PARIKH</h1>
+                <p class="subtitle">Technical Professional - Security, Development & QA</p>
+                <p class="bio-text">
+Versatile technology professional with specialization in cybersecurity, software testing and automation. 
+Academic foundation in Network Security enhanced by practical experience to deliver high-quality, secure software solutions.
+Enthusiastic about leveraging both security knowledge and development skills to solve complex technical challenges.
 
-                <div class="prompt">root@portfolio:~$ <span class="command">whoami</span></div>
-                <h1 class="glitch" data-text="ANISH">ANISH</h1>
-                <div class="prompt">root@portfolio:~$ <span class="command">cat bio.txt</span></div>
-                <p>QA professional with expertise in quality assurance, automation testing, and network security. Skilled in creating testing frameworks to ensure quality software delivery. Keenly interested in building reliable and secure solutions.</p>
+
+                </p>
                 <div class="contact-info">
-                    <a href="mailto:anish.parikh50@gmail.com"><i class="fas fa-envelope"></i> Email</a>
-                    <a target="_blank" href="https://github.com/anish7600"><i class="fab fa-github"></i> GitHub</a>
-                    <a target="_blank" href="https://deepwiki.com/anish7600"><i class="fab fa-book"></i> DeepWiki</a>
+                    <a href="mailto:anish.parikh50@gmail.com" class="contact-link">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </a>
+                    <a target="_blank" href="https://github.com/anish7600" class="contact-link">
+                        <i class="fab fa-github"></i>
+                        GitHub
+                    </a>
+                    <a target="_blank" href="https://deepwiki.com/anish7600" class="contact-link">
+                        <i class="fas fa-book"></i>
+                        DeepWiki
+                    </a>
                 </div>
             </div>
         </div>
 
-        <div class="terminal-window" id="experience">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
+        <div class="card" id="experience">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-briefcase"></i>
+                    Professional Experience
                 </div>
-                <div class="terminal-title">~/portfolio/experience.log</div>
             </div>
-            <div class="terminal-content">
-                <div class="prompt">root@portfolio:~$ <span class="command">ls -la /var/log/experience/</span></div>
-                <h2>Work History</h2>
+            <div class="card-content">
                 
                 <div class="job">
                     <div class="job-title">Quality Assurance Engineer</div>
                     <div class="company">Quanata</div>
                     <div class="duration">July 2022 - June 2023</div>
-                    <ul style="color: #cccccc; margin-left: 20px;">
+                    <ul>
                         <li>Executed automated and manual testing for software quality assurance</li>
                         <li>Validated backend APIs using Pytest framework</li>
                         <li>Verified GraphQL endpoints and data integrity</li>
@@ -397,7 +528,7 @@
                     <div class="job-title">Software Developer in Test</div>
                     <div class="company">Amount</div>
                     <div class="duration">August 2021 - July 2022</div>
-                    <ul style="color: #cccccc; margin-left: 20px;">
+                    <ul>
                         <li>Developed TestCafe & JavaScript automation scripts</li>
                         <li>Contributed to BDD with Cucumber framework</li>
                         <li>Automated API testing using Postman/Newman</li>
@@ -415,7 +546,7 @@
                     <div class="job-title">Automation Engineer</div>
                     <div class="company">VMware</div>
                     <div class="duration">July 2019 - July 2020</div>
-                    <ul style="color: #cccccc; margin-left: 20px;">
+                    <ul>
                         <li>Performed E2E testing for VMware Workspace ONE UEM</li>
                         <li>Contributed to Ruby-based automation frameworks</li>
                         <li>Automated mobile/desktop apps with Appium and WinAppDriver</li>
@@ -433,7 +564,7 @@
                     <div class="job-title">Software Engineer in Test</div>
                     <div class="company">NetApp</div>
                     <div class="duration">June 2017 - May 2019</div>
-                    <ul style="color: #cccccc; margin-left: 20px;">
+                    <ul>
                         <li>Tested network APIs with Python/Bash automation</li>
                         <li>Integrated CI/CD pipelines with Jenkins</li>
                         <li>Managed Linux systems and Arista switches</li>
@@ -450,19 +581,14 @@
             </div>
         </div>
 
-        <div class="terminal-window" id="education">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
+        <div class="card" id="education">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-graduation-cap"></i>
+                    Education
                 </div>
-                <div class="terminal-title">~/portfolio/education.db</div>
             </div>
-            <div class="terminal-content">
-                <div class="prompt">root@portfolio:~$ <span class="command">SELECT * FROM education ORDER BY graduation_date DESC;</span></div>
-                <h2>Education</h2>
-                
+            <div class="card-content">
                 <div class="education-item">
                     <div class="degree">Master of Science in Network Security</div>
                     <div class="school">University of Colorado, Boulder</div>
@@ -479,89 +605,98 @@
             </div>
         </div>
 
-        <div class="terminal-window" id="skills">
-    <div class="terminal-header">
-        <div class="terminal-dots">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
-        </div>
-        <div class="terminal-title">~/portfolio/skills.yml</div>
-    </div>
-    <div class="terminal-content">
-        <div class="prompt">root@portfolio:~$ <span class="command">cat skills.yml</span></div>
-        <h2>Technical Skills</h2>
-        <div class="section">
-            <h3>Programming Languages</h3>
-            <div class="skills">
-                <span class="skill-tag">Python</span>
-                <span class="skill-tag">Bash</span>
-                <span class="skill-tag">Java</span>
-                <span class="skill-tag">C/C++</span>
-                <span class="skill-tag">JavaScript</span>
-            </div>
-        </div>
-        <div class="section">
-            <h3>Security Tools & Technologies</h3>
-            <div class="skills">
-                <span class="skill-tag">Linux</span>
-                <span class="skill-tag">Nmap</span>
-                <span class="skill-tag">Burp Suite</span>
-                <span class="skill-tag">Wireshark</span>
-                <span class="skill-tag">Nessus</span>
-                <span class="skill-tag">Metasploit</span>
-                <span class="skill-tag">Firewalls</span>
-                <span class="skill-tag">SIEM</span>
-                <span class="skill-tag">OWASP</span>
-            </div>
-        </div>
-        <div class="section">
-            <h3>Networking Protocols</h3>
-            <div class="skills">
-                <span class="skill-tag">TCP/IP</span>
-                <span class="skill-tag">ARP</span>
-                <span class="skill-tag">ICMP</span>
-                <span class="skill-tag">TCP</span>
-                <span class="skill-tag">UDP</span>
-                <span class="skill-tag">HTTP</span>
-                <span class="skill-tag">SSL/TLS</span>
-                <span class="skill-tag">SMTP</span>
-                <span class="skill-tag">POP3</span>
-                <span class="skill-tag">DNS</span>
-            </div>
-        </div>
-        <div class="section">
-            <h3>Testing & Automation</h3>
-            <div class="skills">
-                <span class="skill-tag">API Testing</span>
-                <span class="skill-tag">BDD</span>
-                <span class="skill-tag">TestRail</span>
-                <span class="skill-tag">JIRA</span>
-                <span class="skill-tag">Postman</span>
-                <span class="skill-tag">Gherkin</span>
-                <span class="skill-tag">Cucumber</span>
-                <span class="skill-tag">PyTest</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-        <div class="terminal-window" id="certifications">
-            <div class="terminal-header">
-                <div class="terminal-dots">
-                    <div class="dot red"></div>
-                    <div class="dot yellow"></div>
-                    <div class="dot green"></div>
+        <div class="card" id="skills">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-code"></i>
+                    Technical Skills
                 </div>
-                <div class="terminal-title">~/portfolio/certifications.xml</div>
             </div>
-            <div class="terminal-content">
-                <div class="prompt">root@portfolio:~$ <span class="command">ls -la /etc/certs/</span></div>
-                <h2>Certifications</h2>
+            <div class="card-content">
+                <div class="skills-grid">
+                    <div class="skill-category">
+                        <h4>
+                            <i class="fas fa-laptop-code section-icon"></i>
+                            Programming Languages
+                        </h4>
+                        <div class="skills">
+                            <span class="skill-tag">Python</span>
+                            <span class="skill-tag">Bash</span>
+                            <span class="skill-tag">Java</span>
+                            <span class="skill-tag">C/C++</span>
+                            <span class="skill-tag">JavaScript</span>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>
+                            <i class="fas fa-shield-alt section-icon"></i>
+                            Security Tools & Technologies
+                        </h4>
+                        <div class="skills">
+                            <span class="skill-tag">Linux</span>
+                            <span class="skill-tag">Nmap</span>
+                            <span class="skill-tag">Burp Suite</span>
+                            <span class="skill-tag">Wireshark</span>
+                            <span class="skill-tag">Nessus</span>
+                            <span class="skill-tag">Metasploit</span>
+                            <span class="skill-tag">Firewalls</span>
+                            <span class="skill-tag">SIEM</span>
+                            <span class="skill-tag">OWASP</span>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>
+                            <i class="fas fa-network-wired section-icon"></i>
+                            Networking Protocols
+                        </h4>
+                        <div class="skills">
+                            <span class="skill-tag">TCP/IP</span>
+                            <span class="skill-tag">ARP</span>
+                            <span class="skill-tag">ICMP</span>
+                            <span class="skill-tag">TCP</span>
+                            <span class="skill-tag">UDP</span>
+                            <span class="skill-tag">HTTP</span>
+                            <span class="skill-tag">SSL/TLS</span>
+                            <span class="skill-tag">SMTP</span>
+                            <span class="skill-tag">POP3</span>
+                            <span class="skill-tag">DNS</span>
+                        </div>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>
+                            <i class="fas fa-vial section-icon"></i>
+                            Testing & Automation
+                        </h4>
+                        <div class="skills">
+                            <span class="skill-tag">API Testing</span>
+                            <span class="skill-tag">BDD</span>
+                            <span class="skill-tag">TestRail</span>
+                            <span class="skill-tag">JIRA</span>
+                            <span class="skill-tag">Postman</span>
+                            <span class="skill-tag">Gherkin</span>
+                            <span class="skill-tag">Cucumber</span>
+                            <span class="skill-tag">PyTest</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card" id="certifications">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="fas fa-certificate"></i>
+                    Professional Certifications
+                </div>
+            </div>
+            <div class="card-content">
                 
                 <div class="cert-item">
                     <div class="cert-name">AWS Certified DevOps Engineer – Professional</div>
-                    <div class="cert-issuer">AWS</div>
+                    <div class="cert-issuer">Amazon Web Services</div>
                     <div class="duration">Expired</div>
                     <a href="https://www.credly.com/badges/dab1c854-081f-4831-84a8-b33c1c1ce1c8/public_url" target="_blank">View Credential</a>
                     <div class="progress-bar">
@@ -571,7 +706,7 @@
 
                 <div class="cert-item">
                     <div class="cert-name">AWS Certified SysOps Administrator – Associate</div>
-                    <div class="cert-issuer">AWS</div>
+                    <div class="cert-issuer">Amazon Web Services</div>
                     <div class="duration">Expired</div>
                     <a href="https://www.credly.com/badges/2153d465-57f8-484a-923a-f722300c8de6/public_url" target="_blank">View Credential</a>
                     <div class="progress-bar">
@@ -581,7 +716,7 @@
 
                 <div class="cert-item">
                     <div class="cert-name">AWS Certified Solutions Architect – Associate</div>
-                    <div class="cert-issuer">AWS</div>
+                    <div class="cert-issuer">Amazon Web Services</div>
                     <div class="duration">Expired</div>
                     <a href="https://www.credly.com/badges/2e6af729-161b-427c-93f9-9fa284a5ec9e/public_url" target="_blank">View Credential</a>
                     <div class="progress-bar">
@@ -600,7 +735,7 @@
 
                 <div class="cert-item">
                     <div class="cert-name">Splunk Core Certified User</div>
-                    <div class="cert-issuer">Splunk</div>
+                    <div class="cert-issuer">Splunk Inc.</div>
                     <div class="duration">Expired</div>
                     <a href="https://www.credly.com/badges/38ba054f-3d6b-4461-895a-f88b47e5d405" target="_blank">View Credential</a>
                     <div class="progress-bar">
@@ -609,50 +744,79 @@
                 </div>
             </div>
         </div>
-        <div class="footer">
-            <div class="prompt">root@portfolio:~$ <span class="command">echo "End of transmission"</span></div>
-            <p>&copy; 2025 Anish. All rights reserved.</p>
-        </div>
+    </div>
+
+    <div class="footer">
+        <div class="claude-logo">Claude</div>
+        <p>&copy; 2025 Anish Parikh. Professional portfolio powered by modern design principles.</p>
     </div>
 
     <script>
-        // Matrix rain effect
-        const canvas = document.getElementById('matrixCanvas');
+        // Professional Claude-themed background effect
+        const canvas = document.getElementById('claudeCanvas');
         const ctx = canvas.getContext('2d');
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
-        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!@#$%^&*()_+-=[]{}|;:,.<>?';
-        const charArray = chars.split('');
+        const nodes = [];
+        const nodeCount = 50;
 
-        const fontSize = 14;
-        const columns = canvas.width / fontSize;
-
-        const drops = [];
-        for (let x = 0; x < columns; x++) {
-            drops[x] = 1;
+        // Initialize nodes
+        for (let i = 0; i < nodeCount; i++) {
+            nodes.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                vx: (Math.random() - 0.5) * 0.5,
+                vy: (Math.random() - 0.5) * 0.5,
+                radius: Math.random() * 2 + 1
+            });
         }
 
-        function draw() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.04)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.fillStyle = '#00ff41';
-            ctx.font = fontSize + 'px monospace';
-
-            for (let i = 0; i < drops.length; i++) {
-                const text = charArray[Math.floor(Math.random() * charArray.length)];
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
+        function drawNetwork() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Update and draw nodes
+            nodes.forEach((node, index) => {
+                // Update position
+                node.x += node.vx;
+                node.y += node.vy;
+                
+                // Bounce off edges
+                if (node.x < 0 || node.x > canvas.width) node.vx *= -1;
+                if (node.y < 0 || node.y > canvas.height) node.vy *= -1;
+                
+                // Draw node
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(217, 119, 73, 0.3)';
+                ctx.fill();
+                
+                // Draw connections
+                nodes.slice(index + 1).forEach(otherNode => {
+                    const dx = node.x - otherNode.x;
+                    const dy = node.y - otherNode.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(node.x, node.y);
+                        ctx.lineTo(otherNode.x, otherNode.y);
+                        ctx.strokeStyle = `rgba(217, 119, 73, ${0.1 * (1 - distance / 100)})`;
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                });
+            });
         }
 
-        setInterval(draw, 35);
+        // Animate the network
+        function animate() {
+            drawNetwork();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
 
         // Smooth scrolling for navigation
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -668,31 +832,9 @@
             });
         });
 
-        // Typing animation for main title
-        const title = document.querySelector('h1');
-        const text = title.textContent;
-        title.textContent = '';
-        title.classList.add('typing-animation');
-
-        let i = 0;
-        function typeWriter() {
-            if (i < text.length) {
-                title.textContent += text.charAt(i);
-                i++;
-                setTimeout(typeWriter, 100);
-            } else {
-                title.classList.remove('typing-animation');
-            }
-        }
-
-        // Start typing animation when page loads
-        window.addEventListener('load', () => {
-            setTimeout(typeWriter, 1000);
-        });
-
-        // Progress bar animations
+        // Progress bar animations with intersection observer
         const observerOptions = {
-            threshold: 0.5,
+            threshold: 0.3,
             rootMargin: '0px 0px -50px 0px'
         };
 
@@ -700,47 +842,151 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const progressBars = entry.target.querySelectorAll('.progress-fill');
-                    progressBars.forEach(bar => {
+                    progressBars.forEach((bar, index) => {
                         const width = bar.style.width;
                         bar.style.width = '0%';
                         setTimeout(() => {
                             bar.style.width = width;
-                        }, 200);
+                        }, 300 + (index * 200));
                     });
                 }
             });
         }, observerOptions);
 
-        document.querySelectorAll('.terminal-window').forEach(window => {
-            observer.observe(window);
+        // Observe all cards for animations
+        document.querySelectorAll('.card').forEach(card => {
+            observer.observe(card);
         });
 
         // Resize canvas on window resize
         window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-        });
-
-        // Terminal prompt simulation
-        document.addEventListener('DOMContentLoaded', function() {
-            const prompts = document.querySelectorAll('.prompt');
-            prompts.forEach((prompt, index) => {
-                setTimeout(() => {
-                    prompt.style.opacity = '0';
-                    prompt.style.animation = 'fadeIn 0.5s ease forwards';
-                }, index * 200);
+            
+            // Reposition nodes within new bounds
+            nodes.forEach(node => {
+                if (node.x > canvas.width) node.x = canvas.width - 10;
+                if (node.y > canvas.height) node.y = canvas.height - 10;
             });
         });
 
-        // Add fadeIn animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes fadeIn {
-                from { opacity: 0; transform: translateY(20px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
+        // Professional hover effects for cards
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Enhanced skill tag interactions
+        document.querySelectorAll('.skill-tag').forEach(tag => {
+            tag.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.05)';
+            });
+            
+            tag.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Professional loading animation
+        window.addEventListener('load', function() {
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            // Stagger card animations
+            const cards = document.querySelectorAll('.card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 200 + (index * 100));
+            });
+        });
+
+        // Professional scroll indicator
+        let scrollIndicator = document.createElement('div');
+        scrollIndicator.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #d97749, #e8956f);
+            z-index: 1000;
+            transition: width 0.3s ease;
         `;
-        document.head.appendChild(style);
+        document.body.appendChild(scrollIndicator);
+
+        window.addEventListener('scroll', () => {
+            const scrollTop = document.documentElement.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            scrollIndicator.style.width = scrollPercent + '%';
+        });
+
+        // Professional navigation active state
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        const sections = document.querySelectorAll('.card[id]');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop - 100;
+                if (pageYOffset >= sectionTop) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === '#' + current) {
+                    link.classList.add('active');
+                    link.style.color = '#d97749';
+                    link.style.background = 'rgba(217, 119, 73, 0.1)';
+                } else {
+                    link.style.color = '';
+                    link.style.background = '';
+                }
+            });
+        });
+
+        // Professional typing effect for subtitle
+        const subtitle = document.querySelector('.subtitle');
+        const subtitleText = subtitle.textContent;
+        subtitle.textContent = '';
+
+        let charIndex = 0;
+        function typeSubtitle() {
+            if (charIndex < subtitleText.length) {
+                subtitle.textContent += subtitleText.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeSubtitle, 50);
+            }
+        }
+
+        // Start typing after page load
+        setTimeout(typeSubtitle, 1500);
+
+        // Professional parallax effect for header
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const aboutCard = document.getElementById('about');
+            if (aboutCard) {
+                aboutCard.style.transform = `translateY(${scrolled * 0.1}px)`;
+            }
+        });
     </script>
 </body>
 </html>
