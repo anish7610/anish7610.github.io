@@ -728,13 +728,13 @@ def scrape_tech_news(max_articles_per_site: int = 5):
     
     if total_articles > 0:
         # Save results in all formats
-        json_file = scraper.save_to_json(all_articles, file_prefix="tech_news")
-        csv_file = scraper.save_to_csv(all_articles, file_prefix="tech_news")
+        # json_file = scraper.save_to_json(all_articles, file_prefix="tech_news")
+        # csv_file = scraper.save_to_csv(all_articles, file_prefix="tech_news")
         html_file = scraper.save_to_html(all_articles, file_prefix="tech_news", site_type="tech")
         
         print(f"\nTech News - Files saved:")
-        print(f"- {json_file}")
-        print(f"- {csv_file}")
+        # print(f"- {json_file}")
+        # print(f"- {csv_file}")
         print(f"- {html_file}")
     
     return all_articles
@@ -750,14 +750,14 @@ def scrape_security_news(max_articles_per_site: int = 5):
     
     if total_articles > 0:
         # Save results in all formats with security prefix
-        json_file = scraper.save_to_json(all_articles, file_prefix="security_news")
-        csv_file = scraper.save_to_csv(all_articles, file_prefix="security_news")
+        # json_file = scraper.save_to_json(all_articles, file_prefix="security_news")
+        # csv_file = scraper.save_to_csv(all_articles, file_prefix="security_news")
         html_file = scraper.save_to_html(all_articles, file_prefix="security_news", 
                                        site_type="security")
         
         print(f"\nCybersecurity News - Files saved:")
-        print(f"- {json_file}")
-        print(f"- {csv_file}")
+        # print(f"- {json_file}")
+        # print(f"- {csv_file}")
         print(f"- {html_file}")
     
     return all_articles
@@ -773,14 +773,14 @@ def scrape_robotics_news(max_articles_per_site: int = 5):
     
     if total_articles > 0:
         # Save results in all formats with robotics prefix
-        json_file = scraper.save_to_json(all_articles, file_prefix="robotics_news")
-        csv_file = scraper.save_to_csv(all_articles, file_prefix="robotics_news")
+        # json_file = scraper.save_to_json(all_articles, file_prefix="robotics_news")
+        # csv_file = scraper.save_to_csv(all_articles, file_prefix="robotics_news")
         html_file = scraper.save_to_html(all_articles, file_prefix="robotics_news", 
                                        site_type="robotics")
         
         print(f"\nRobotics News - Files saved:")
-        print(f"- {json_file}")
-        print(f"- {csv_file}")
+        # print(f"- {json_file}")
+        # print(f"- {csv_file}")
         print(f"- {html_file}")
     
     return all_articles
@@ -796,14 +796,14 @@ def scrape_linux_news(max_articles_per_site: int = 5):
     
     if total_articles > 0:
         # Save results in all formats with Linux prefix
-        json_file = scraper.save_to_json(all_articles, file_prefix="linux_news")
-        csv_file = scraper.save_to_csv(all_articles, file_prefix="linux_news")
+        # json_file = scraper.save_to_json(all_articles, file_prefix="linux_news")
+        # csv_file = scraper.save_to_csv(all_articles, file_prefix="linux_news")
         html_file = scraper.save_to_html(all_articles, file_prefix="linux_news", 
                                        site_type="linux")
         
         print(f"\nLinux News - Files saved:")
-        print(f"- {json_file}")
-        print(f"- {csv_file}")
+        # print(f"- {json_file}")
+        # print(f"- {csv_file}")
         print(f"- {html_file}")
     
     return all_articles

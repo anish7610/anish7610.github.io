@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Script to update tech news index.html with new HTML files
-# Usage: ./update_tech_index.sh [directory]
+# Usage: ./update_news.sh [directory]
 
-cp html/*html news/
+mv html/*html news/
 
 # Set default directory to current working directory if not provided
 TECH_DIR="${1:-$(pwd)}"
@@ -12,7 +12,7 @@ TECH_DIR="${1:-$(pwd)}"
 if [[ ! -d "$TECH_DIR/news" ]]; then
     echo "❌ Error: news directory not found in $TECH_DIR"
     echo "Usage: $0 [path_to_github_pages_directory]"
-    echo "Example: $0 /path/to/anish7605.github.io"
+    echo "Example: $0 /path/to/anish7610.github.io"
     exit 1
 fi
 
@@ -25,7 +25,7 @@ if [[ ! -f "$INDEX_FILE" ]]; then
     exit 1
 fi
 
-echo "🔍 Scanning for new tech news HTML files in $TECH_NEWS_DIR..."
+echo "📁 Scanning for new tech news HTML files in $TECH_NEWS_DIR..."
 
 # Find all HTML files that match news patterns
 html_files=($(find "$TECH_NEWS_DIR" -name "tech_news_*.html" -o -name "tech_news_security_*.html" -o -name "linux_news_*.html" -o -name "robotics_news_*.html" -o -name "security_news_*.html" -o -name "combined_news_*.html" | sort -r))
@@ -42,10 +42,15 @@ backup_file="$INDEX_FILE.backup.$(date +%Y%m%d_%H%M%S)"
 cp "$INDEX_FILE" "$backup_file"
 echo "💾 Created backup: $backup_file"
 
-# Create Python script to handle HTML parsing and updating
+# Set environment variables for Python script
+export INDEX_FILE="$INDEX_FILE"
+export HTML_FILES=$(printf '%s\n' "${html_files[@]}")
+
+# Run the Python script with the new format
 python3 << 'EOF'
 import re
 import sys
+import os
 from datetime import datetime
 
 def get_section_info(filename):
@@ -54,10 +59,10 @@ def get_section_info(filename):
         return None  # Skip combined files
     
     patterns = {
-        r'^tech_news_(\d{8})_\d{6}\.html$': ('tech', 'Tech'),
-        r'^(security_news_|tech_news_security_)(\d{8})_\d{6}\.html$': ('security', 'Security'),
-        r'^robotics_news_(\d{8})_\d{6}\.html$': ('robotics', 'Robotics'),
-        r'^linux_news_(\d{8})_\d{6}\.html$': ('linux', 'Linux'),
+        r'^tech_news_(\d{8})_\d{6}\.html$': ('tech', 'Technology Updates'),
+        r'^(security_news_|tech_news_security_)(\d{8})_\d{6}\.html$': ('security', 'Security Updates'),
+        r'^robotics_news_(\d{8})_\d{6}\.html$': ('robotics', 'Robotics Updates'),
+        r'^linux_news_(\d{8})_\d{6}\.html$': ('linux', 'Linux Updates'),
     }
     
     for pattern, (section, display_name) in patterns.items():
@@ -65,16 +70,17 @@ def get_section_info(filename):
         if match:
             # Extract date from the appropriate group
             date_str = match.group(2) if len(match.groups()) > 1 else match.group(1)
-            # Convert YYYYMMDD to MM/DD/YYYY
+            # Convert YYYYMMDD to "Month DD, YYYY" format
             date_obj = datetime.strptime(date_str, '%Y%m%d')
-            formatted_date = date_obj.strftime('%m/%d/%Y')
+            formatted_date = date_obj.strftime('%B %d, %Y')
             return section, display_name, formatted_date
     
     return None
 
 def extract_existing_entries(content, section):
     """Extract existing filenames from a section"""
-    pattern = rf'<div class="section-content" id="{section}-content">(.*?)</div>\s*</div>'
+    # Find the section's ul content
+    pattern = rf'<div class="section-content" id="{section}-content">.*?<ul class="news-list">(.*?)</ul>'
     match = re.search(pattern, content, re.DOTALL)
     if not match:
         return set()
@@ -92,141 +98,6 @@ def insert_entries_in_section(content, section, new_entries):
     
     # Find the ul tag within the specific section
     section_pattern = rf'(<div class="section-content" id="{section}-content">.*?<ul class="news-list">)'
-    
-    def replace_func(match):
-        return match.group(1) + '\n' + '\n'.join(new_entries)
-    
-    updated_content = re.sub(section_pattern, replace_func, content, flags=re.DOTALL)
-    return updated_content
-
-# Read environment variables passed from bash
-import os
-index_file = os.environ.get('INDEX_FILE')
-html_files_str = os.environ.get('HTML_FILES')
-
-if not index_file or not html_files_str:
-    print("Error: Missing environment variables")
-    sys.exit(1)
-
-html_files = html_files_str.strip().split('\n') if html_files_str.strip() else []
-
-# Read the current HTML content
-try:
-    with open(index_file, 'r', encoding='utf-8') as f:
-        html_content = f.read()
-except Exception as e:
-    print(f"Error reading {index_file}: {e}")
-    sys.exit(1)
-
-# Process files and organize by section
-new_entries_by_section = {'tech': [], 'security': [], 'robotics': [], 'linux': []}
-existing_entries_by_section = {}
-
-# Extract existing entries for each section
-for section in new_entries_by_section.keys():
-    existing_entries_by_section[section] = extract_existing_entries(html_content, section)
-
-new_entries_added = 0
-processed_files = []
-
-for html_file in html_files:
-    if not html_file.strip():
-        continue
-        
-    filename = os.path.basename(html_file.strip())
-    section_info = get_section_info(filename)
-    
-    if not section_info:
-        print(f"⏭️  Skipping {filename} (combined file or unknown format)")
-        continue
-    
-    section, display_name, formatted_date = section_info
-    
-    # Check if already exists
-    if filename in existing_entries_by_section[section]:
-        print(f"⏭️  Skipping {filename} (already in {section} section)")
-        continue
-    
-    # Create new entry
-    entry = f'                    <li><a href="https://anish7610.github.io/news/{filename}" target="_blank">{display_name} {formatted_date}</a></li>'
-    new_entries_by_section[section].insert(0, entry)  # Insert at beginning for newest first
-    
-    processed_files.append(f"{display_name} {formatted_date} -> {section}")
-    new_entries_added += 1
-
-# Update HTML content for each section with new entries
-updated_content = html_content
-for section, entries in new_entries_by_section.items():
-    if entries:
-        print(f"🔄 Updating {section} section with {len(entries)} new entries...")
-        updated_content = insert_entries_in_section(updated_content, section, entries)
-
-# Write updated content back to file
-if new_entries_added > 0:
-    try:
-        with open(index_file, 'w', encoding='utf-8') as f:
-            f.write(updated_content)
-        print(f"✅ Successfully updated {index_file}")
-    except Exception as e:
-        print(f"Error writing to {index_file}: {e}")
-        sys.exit(1)
-        
-    print("🆕 New entries added:")
-    for entry in processed_files:
-        print(f"   • {entry}")
-else:
-    print("ℹ️  No new entries to add")
-
-print(f"📊 Total new entries added: {new_entries_added}")
-EOF
-
-# Set environment variables for Python script
-export INDEX_FILE="$INDEX_FILE"
-export HTML_FILES=$(printf '%s\n' "${html_files[@]}")
-
-# Run the Python script
-if python3 -c "
-import re
-import sys
-import os
-from datetime import datetime
-
-def get_section_info(filename):
-    if filename.startswith('combined_news_'):
-        return None
-    
-    patterns = {
-        r'^tech_news_(\d{8})_\d{6}\.html$': ('tech', 'Tech'),
-        r'^(security_news_|tech_news_security_)(\d{8})_\d{6}\.html$': ('security', 'Security'),
-        r'^robotics_news_(\d{8})_\d{6}\.html$': ('robotics', 'Robotics'),
-        r'^linux_news_(\d{8})_\d{6}\.html$': ('linux', 'Linux'),
-    }
-    
-    for pattern, (section, display_name) in patterns.items():
-        match = re.match(pattern, filename)
-        if match:
-            date_str = match.group(2) if len(match.groups()) > 1 else match.group(1)
-            date_obj = datetime.strptime(date_str, '%Y%m%d')
-            formatted_date = date_obj.strftime('%m/%d/%Y')
-            return section, display_name, formatted_date
-    return None
-
-def extract_existing_entries(content, section):
-    pattern = rf'<div class=\"section-content\" id=\"{section}-content\">(.*?)</div>\s*</div>'
-    match = re.search(pattern, content, re.DOTALL)
-    if not match:
-        return set()
-    
-    section_content = match.group(1)
-    href_pattern = r'href=\"[^\"]*/([\w_]+\.html)\"'
-    existing_files = set(re.findall(href_pattern, section_content))
-    return existing_files
-
-def insert_entries_in_section(content, section, new_entries):
-    if not new_entries:
-        return content
-    
-    section_pattern = rf'(<div class=\"section-content\" id=\"{section}-content\">.*?<ul class=\"news-list\">)'
     
     def replace_func(match):
         return match.group(1) + '\n' + '\n'.join(new_entries)
@@ -268,25 +139,36 @@ for html_file in html_files:
     section_info = get_section_info(filename)
     
     if not section_info:
-        print(f'⏭️  Skipping {filename} (combined file or unknown format)')
+        print(f'⭐️ Skipping {filename} (combined file or unknown format)')
         continue
     
     section, display_name, formatted_date = section_info
     
     if filename in existing_entries_by_section[section]:
-        print(f'⏭️  Skipping {filename} (already in {section} section)')
+        print(f'⭐️ Skipping {filename} (already in {section} section)')
         continue
     
-    entry = f'                    <li><a href=\"https://anish7610.github.io/news/{filename}\" target=\"_blank\">{display_name} {formatted_date}</a></li>'
-    new_entries_by_section[section].insert(0, entry)
+    # Create new entry matching the current HTML format
+    entry = f'''                        <li>
+                            <a href="https://anish7610.github.io/news/{filename}" target="_blank">
+                                <span>{display_name}</span>
+                                <div>
+                                    <span class="news-date">{formatted_date}</span>
+                                    <i class="fas fa-external-link-alt news-arrow"></i>
+                                </div>
+                            </a>
+                        </li>'''
     
-    processed_files.append(f'{display_name} {formatted_date} -> {section}')
+    new_entries_by_section[section].insert(0, entry)  # Insert at beginning for newest first
+    
+    processed_files.append(f'{display_name} ({formatted_date}) -> {section}')
     new_entries_added += 1
 
+# Update HTML content for each section with new entries
 updated_content = html_content
 for section, entries in new_entries_by_section.items():
     if entries:
-        print(f'🔄 Updating {section} section with {len(entries)} new entries...')
+        print(f'📄 Updating {section} section with {len(entries)} new entries...')
         updated_content = insert_entries_in_section(updated_content, section, entries)
 
 if new_entries_added > 0:
@@ -305,7 +187,10 @@ else:
     print('ℹ️  No new entries to add')
 
 print(f'📊 Total new entries added: {new_entries_added}')
-"; then
+EOF
+
+# Check if the Python script succeeded
+if [ $? -eq 0 ]; then
     echo ""
     echo "📊 Summary:"
     echo "   • Processed HTML files: ${#html_files[@]}"
