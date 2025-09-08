@@ -27,7 +27,6 @@ jobs:
         # Add your Python packages here
         pip install requests bs4
 
-      
     - name: Run news harvester
       run: |
         echo "Running news_harvester.py..."
@@ -37,10 +36,16 @@ jobs:
       run: |
         echo "Running update_news.sh..."
         ./update_news.sh
-        
-    - name: Upload HTML artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: news-html
-        path: html/
-        retention-days: 7
+
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add news/
+        git add . # Add any other files that might have been updated
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Update news content - $(date)"
+          git push
+        fi
