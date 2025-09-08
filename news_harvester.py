@@ -822,7 +822,7 @@ def main():
     print("6. Custom selection")
     
     # choice = input("\nEnter choice (1/2/3/4/5/6): ").strip()
-    choice = 5 # choice hardcoded for CI runs
+    choice = '5' # choice hardcoded for CI runs
     
     if choice == "1":
         tech_articles = scrape_tech_news()
