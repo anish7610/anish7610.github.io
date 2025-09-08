@@ -3,7 +3,7 @@
 # Script to update tech news index.html with new HTML files
 # Usage: ./update_tech_index.sh [directory]
 
-cp ../news-harvester/html/*html news/
+cp html/*html news/
 
 # Set default directory to current working directory if not provided
 TECH_DIR="${1:-$(pwd)}"
