@@ -243,7 +243,46 @@
             .section-title {
                 font-size: 1.1rem;
             }
-            
+
+            .section-content {
+                max-height: 0;
+                overflow: hidden;
+                transition: all 0.4s ease;
+                background: #fff9f5;
+                border-top: 1px solid #f4a460;
+            }
+
+            .section-content.active {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+
+            /* Custom scrollbar styling */
+            .section-content::-webkit-scrollbar {
+                width: 8px;
+            }
+
+            .section-content::-webkit-scrollbar-track {
+                background: #fef7f0;
+                border-radius: 4px;
+            }
+
+            .section-content::-webkit-scrollbar-thumb {
+                background: #cc6a00;
+                border-radius: 4px;
+                transition: background 0.3s ease;
+            }
+
+            .section-content::-webkit-scrollbar-thumb:hover {
+                background: #b85a00;
+            }
+
+            /* Firefox scrollbar styling */
+            .section-content {
+                scrollbar-width: thin;
+                scrollbar-color: #cc6a00 #fef7f0;
+            }
+
             .section-meta {
                 padding: 12px 20px;
                 font-size: 0.85rem;
