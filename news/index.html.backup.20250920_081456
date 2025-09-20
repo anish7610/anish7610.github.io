@@ -371,15 +371,6 @@
                     </div>
                     <ul class="news-list">
                         <li>
-                            <a href="https://anish7610.github.io/news/tech_news_20250920_081155.html" target="_blank">
-                                <span>Technology Updates</span>
-                                <div>
-                                    <span class="news-date">September 20, 2025</span>
-                                    <i class="fas fa-external-link-alt news-arrow"></i>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
                             <a href="https://anish7610.github.io/news/tech_news_20250919_081401.html" target="_blank">
                                 <span>Technology Updates</span>
                                 <div>
@@ -542,15 +533,6 @@
                     </div>
                     <ul class="news-list">
                         <li>
-                            <a href="https://anish7610.github.io/news/security_news_20250920_081309.html" target="_blank">
-                                <span>Security Updates</span>
-                                <div>
-                                    <span class="news-date">September 20, 2025</span>
-                                    <i class="fas fa-external-link-alt news-arrow"></i>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
                             <a href="https://anish7610.github.io/news/security_news_20250919_081518.html" target="_blank">
                                 <span>Security Updates</span>
                                 <div>
@@ -704,15 +686,6 @@
                     </div>
                     <ul class="news-list">
                         <li>
-                            <a href="https://anish7610.github.io/news/robotics_news_20250920_081401.html" target="_blank">
-                                <span>Robotics Updates</span>
-                                <div>
-                                    <span class="news-date">September 20, 2025</span>
-                                    <i class="fas fa-external-link-alt news-arrow"></i>
-                                </div>
-                            </a>
-                        </li>
-                        <li>
                             <a href="https://anish7610.github.io/news/robotics_news_20250919_081610.html" target="_blank">
                                 <span>Robotics Updates</span>
                                 <div>
@@ -865,15 +838,6 @@
                         <span>Linux distributions and open source news</span>
                     </div>
                     <ul class="news-list">
-                        <li>
-                            <a href="https://anish7610.github.io/news/linux_news_20250920_081456.html" target="_blank">
-                                <span>Linux Updates</span>
-                                <div>
-                                    <span class="news-date">September 20, 2025</span>
-                                    <i class="fas fa-external-link-alt news-arrow"></i>
-                                </div>
-                            </a>
-                        </li>
                         <li>
                             <a href="https://anish7610.github.io/news/linux_news_20250919_081705.html" target="_blank">
                                 <span>Linux Updates</span>
